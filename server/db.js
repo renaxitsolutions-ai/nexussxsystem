@@ -485,7 +485,7 @@ if (taskCatCount === 0) {
   const c4 = icat.run('Seguridad',         '#ef4444', '🔒').lastInsertRowid;
   const c5 = icat.run('Documentación',     '#f59e0b', '📝').lastInsertRowid;
 
-  const itask = db.prepare(`INSERT INTO tasks (tenant_id, category_id, title, description, status, priority, assigned_email, progress, due_date, created_by) VALUES (1,?,?,?,?,?,?,?,?,1)`);
+  const itask = db.prepare(`INSERT INTO tasks (tenant_id, category_id, title, description, status, priority, assigned_email, progress, due_date) VALUES (1,?,?,?,?,?,?,?,?)`);
   itask.run(c1,'Crear página de inicio (index.html)','Diseñar y codificar la página principal del proyecto usando HTML5 y CSS3.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-10');
   itask.run(c1,'Implementar sistema de autenticación','Desarrollar login, registro y verificación por correo electrónico.','completada','urgente','nexussxsistem@gmail.com',100,'2026-04-12');
   itask.run(c1,'Desarrollar API REST con Express','Crear endpoints para usuarios, tareas, tickets y reportes.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-15');
