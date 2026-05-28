@@ -1,4 +1,4 @@
-# Sistema de Autenticación Completo - Nexuss X Systems
+# Sistema de Autenticación Completo - Nexuss X Sistems
 
 ## 📋 Resumen
 
@@ -371,5 +371,5 @@ Los campos se validan a medida que escribes
 ---
 
 **Última actualización:** 13/05/2026  
-**Autor:** Nexuss X Systems  
+**Autor:** Nexuss X Sistems  
 **Versión:** 1.0 Completa

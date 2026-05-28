@@ -1,5 +1,5 @@
 @echo off
-title NexussXSystems - Servidor v2.0
+title NexussXsistems - Servidor v2.0
 color 0B
 
 echo.

@@ -430,7 +430,7 @@ CREATE TABLE IF NOT EXISTS task_comments (
 // ─── SEED DEFAULT TENANT ──────────────────────────────────────────────────────
 const tenantCount = db.prepare('SELECT COUNT(*) as c FROM tenants').get().c;
 if (tenantCount === 0) {
-  db.prepare(`INSERT INTO tenants (name, slug, plan) VALUES (?, ?, ?)`).run('Nexuss X Systems', 'nexuss', 'agency');
+  db.prepare(`INSERT INTO tenants (name, slug, plan) VALUES (?, ?, ?)`).run('Nexuss X Sistems', 'nexuss', 'agency');
 }
 
 // ─── SEED DEFAULT PLANS ───────────────────────────────────────────────────────
@@ -461,9 +461,9 @@ if (kbCount === 0) {
 const tmplCount = db.prepare('SELECT COUNT(*) as c FROM ticket_templates').get().c;
 if (tmplCount === 0) {
   const tmpl = db.prepare(`INSERT INTO ticket_templates (tenant_id, name, body, category) VALUES (1,?,?,?)`);
-  tmpl.run('Agradecimiento por contactar', 'Hola {{name}},\n\nGracias por contactarnos. Hemos recibido tu ticket #{{number}} y lo estamos revisando.\n\nNuestro tiempo de respuesta estimado es de {{sla_hours}} horas.\n\n¡Estamos para ayudarte!\n\nEquipo Nexuss X Systems', 'general');
+  tmpl.run('Agradecimiento por contactar', 'Hola {{name}},\n\nGracias por contactarnos. Hemos recibido tu ticket #{{number}} y lo estamos revisando.\n\nNuestro tiempo de respuesta estimado es de {{sla_hours}} horas.\n\n¡Estamos para ayudarte!\n\nEquipo Nexuss X Sistems', 'general');
   tmpl.run('Solicitar más información', 'Hola {{name}},\n\nGracias por tu mensaje. Para poder ayudarte mejor, ¿podrías proporcionarnos los siguientes detalles?\n\n- [Detalle específico 1]\n- [Detalle específico 2]\n\nEsperamos tu respuesta.\n\nSaludos,\nEquipo de soporte', 'general');
-  tmpl.run('Problema resuelto', 'Hola {{name}},\n\nTe confirmamos que tu solicitud ha sido resuelta.\n\n**Solución aplicada:** [Descripción de la solución]\n\nSi tienes alguna duda adicional, no dudes en contactarnos.\n\n¡Que tengas un excelente día!\n\nEquipo Nexuss X Systems', 'general');
+  tmpl.run('Problema resuelto', 'Hola {{name}},\n\nTe confirmamos que tu solicitud ha sido resuelta.\n\n**Solución aplicada:** [Descripción de la solución]\n\nSi tienes alguna duda adicional, no dudes en contactarnos.\n\n¡Que tengas un excelente día!\n\nEquipo Nexuss X Sistems', 'general');
 }
 
 // ─── SEED DEFAULT AUTOMATION RULES ───────────────────────────────────────────

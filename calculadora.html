@@ -4,7 +4,7 @@
   <link rel="icon" type="image/jpeg" href="favicon.ico" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Calculadora de Precios — Nexuss X Systems</title>
+  <title>Calculadora de Precios — Nexuss X Sistems</title>
   <meta name="description" content="Calcula el precio de tu proyecto web con nuestra calculadora interactiva. Obtén una cotización instantánea sin compromiso." />
   <link rel="stylesheet" href="nexus.css" />
 </head>
@@ -13,8 +13,8 @@
     <div class="container">
       <nav>
         <div class="brand">
-          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
-          Nexuss X Systems
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Sistems logo" />
+          Nexuss X Sistems
         </div>
         <button class="nav-toggle" id="navToggle">Menú</button>
         <div class="nav-links" id="navLinks">
@@ -308,7 +308,7 @@
         </div>
         <div class="card reveal" style="padding:24px;border:1px solid rgba(0,212,255,0.3);background:linear-gradient(135deg,rgba(0,212,255,0.05),transparent)">
           <div style="font-size:1.5rem;margin-bottom:10px">🚀</div>
-          <h4 style="margin:0 0 8px;color:#00d4ff">Nexuss X Systems</h4>
+          <h4 style="margin:0 0 8px;color:#00d4ff">Nexuss X Sistems</h4>
           <div style="font-size:1.4rem;font-weight:700;color:#00d4ff;margin-bottom:8px">DOP 2,500–12,000</div>
           <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:.85rem">
             <li style="color:#65f0b1">✅ 7–30 días de entrega</li>
@@ -332,9 +332,9 @@
     </section>
 
     <footer>
-      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Systems</span></div>
+      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Sistems</span></div>
       <div class="muted" style="font-size:.82rem">Soluciones digitales de alto impacto · LATAM</div>
-      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Systems</div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Sistems</div>
     </footer>
   </main>
 
@@ -467,20 +467,20 @@
       const { lines, total } = calcTotal();
       const w = window.open('', '_blank');
       w.document.write(`
-        <html><head><title>Cotización Nexuss X Systems</title>
+        <html><head><title>Cotización Nexuss X Sistems</title>
         <style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;color:#111}
         h1{color:#0070d8}table{width:100%;border-collapse:collapse;margin:20px 0}
         td,th{padding:10px;border:1px solid #ddd;text-align:left}th{background:#f0f4ff}
         .total{font-size:1.4rem;color:#0070d8;font-weight:700}.footer{color:#888;font-size:.82rem;margin-top:30px}</style>
         </head><body>
-        <h1>Nexuss X Systems</h1>
+        <h1>Nexuss X Sistems</h1>
         <p>Cotización generada: ${new Date().toLocaleDateString('es-DO', {day:'2-digit',month:'long',year:'numeric'})}</p>
         <table><tr><th>Concepto</th><th>Precio</th></tr>
         ${lines.map(l => `<tr><td>${l.label}</td><td>${l.price < 0 ? '-' : ''}DOP ${Math.abs(l.price).toLocaleString('es-DO')}</td></tr>`).join('')}
         <tr><td><b>TOTAL ESTIMADO</b></td><td class="total">DOP ${total.toLocaleString('es-DO')}</td></tr>
         </table>
         <p>📧 Contacto: nexussxsistem@gmail.com<br>💬 WhatsApp: +1 829 368 9630</p>
-        <p class="footer">Esta cotización es un estimado. El precio final se confirma tras reunión de requerimientos.<br>© 2026 Nexuss X Systems — Todos los derechos reservados.</p>
+        <p class="footer">Esta cotización es un estimado. El precio final se confirma tras reunión de requerimientos.<br>© 2026 Nexuss X Sistems — Todos los derechos reservados.</p>
         </body></html>
       `);
       w.document.close();

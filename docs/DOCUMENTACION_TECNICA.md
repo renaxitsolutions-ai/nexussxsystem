@@ -232,7 +232,7 @@ Haiku para respuestas rápidas y operacionales; Sonnet para contenido largo y cr
 ### 5.2 System prompts
 
 Cada endpoint de IA tiene un system prompt especializado:
-- **Jarvis:** Asistente de ventas de Nexuss X Systems, máximo 3 oraciones, siempre en español
+- **Jarvis:** Asistente de ventas de Nexuss X Sistems, máximo 3 oraciones, siempre en español
 - **Ticket suggest:** Agente de soporte empático, respuestas con pasos claros
 - **Content generator:** Copywriter experto, optimizado para SEO
 

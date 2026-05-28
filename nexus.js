@@ -1,4 +1,4 @@
-﻿// Nexuss X Systems UI
+﻿// Nexuss X Sistems UI
 const NXS = {
   API_BASE: window.location.origin,
   CONTACT_ENDPOINT: 'https://formspree.io/f/mkozkvkz',
@@ -28,12 +28,12 @@ const I18N = {
     index_trust_sub: 'Estrategia, diseño y desarrollo listos para crecimiento, ventas y automatización.',
 
     home_tag: 'Empresa de tecnología',
-    home_title: 'Nexuss X Systems — soluciones digitales de alto impacto.',
+    home_title: 'Nexuss X Sistems — soluciones digitales de alto impacto.',
     home_sub: 'Desarrollamos aplicaciones, landing pages, paneles de gestión, páginas de ventas y chatbots con IA para empresas que buscan crecer.',
     home_cta_primary: 'Ver servicios',
     home_cta_secondary: 'Solicitar propuesta',
     home_about_title: 'Nosotros',
-    home_about_sub: 'Nexuss X Systems es una marca enfocada en innovación, confianza y modernidad. Creamos productos digitales con calidad y una experiencia sencilla.',
+    home_about_sub: 'Nexuss X Sistems es una marca enfocada en innovación, confianza y modernidad. Creamos productos digitales con calidad y una experiencia sencilla.',
     home_mission: 'Misión',
     home_vision: 'Visión',
     home_values: 'Valores',
@@ -84,7 +84,7 @@ const I18N = {
 
     about_tag: 'Sobre nosotros',
     about_title: 'Innovación, confianza y modernidad.',
-    about_sub: 'Nexuss X Systems ofrece productos y servicios de alta calidad con una experiencia sencilla y accesible.',
+    about_sub: 'Nexuss X Sistems ofrece productos y servicios de alta calidad con una experiencia sencilla y accesible.',
     about_objective: 'Objetivo',
     about_mission: 'Misión',
     about_vision: 'Visión',
@@ -159,12 +159,12 @@ const I18N = {
     index_trust_sub: 'Strategy, design and development built for growth, sales and automation.',
 
     home_tag: 'Technology company',
-    home_title: 'Nexuss X Systems — high‑impact digital solutions.',
+    home_title: 'Nexuss X Sistems — high‑impact digital solutions.',
     home_sub: 'We build applications, landing pages, management dashboards, sales pages and AI chatbots for growing businesses.',
     home_cta_primary: 'View services',
     home_cta_secondary: 'Request proposal',
     home_about_title: 'About us',
-    home_about_sub: 'Nexuss X Systems focuses on innovation, trust and modernity. We build digital products with quality and a simple experience.',
+    home_about_sub: 'Nexuss X Sistems focuses on innovation, trust and modernity. We build digital products with quality and a simple experience.',
     home_mission: 'Mission',
     home_vision: 'Vision',
     home_values: 'Values',
@@ -215,7 +215,7 @@ const I18N = {
 
     about_tag: 'About us',
     about_title: 'Innovation, trust and modernity.',
-    about_sub: 'Nexuss X Systems delivers high-quality products and services with a simple, accessible experience.',
+    about_sub: 'Nexuss X Sistems delivers high-quality products and services with a simple, accessible experience.',
     about_objective: 'Objective',
     about_mission: 'Mission',
     about_vision: 'Vision',
@@ -295,7 +295,7 @@ const I18N = {
     index_status: 'Serveur : Vérification...', index_login: 'Se connecter', index_register: 'Créer un compte',
     index_trust_title: 'Confiance et résultats',
     index_trust_sub: 'Stratégie, design et développement pour croissance, ventes et automatisation.',
-    home_tag: 'Entreprise technologique', home_title: 'Nexuss X Systems — solutions numériques à fort impact.',
+    home_tag: 'Entreprise technologique', home_title: 'Nexuss X Sistems — solutions numériques à fort impact.',
     home_cta_primary: 'Voir les services', home_cta_secondary: 'Demander un devis',
     home_slogan: 'Notre travail dépasse les limites et va au-delà de cette planète.',
     home_services_title: 'Services principaux', home_industries_title: 'Industries servies',
@@ -329,7 +329,7 @@ const I18N = {
     index_status: 'Server: Verifica...', index_login: 'Accedi', index_register: 'Crea account',
     index_trust_title: 'Fiducia e risultati',
     index_trust_sub: 'Strategia, design e sviluppo per crescita, vendite e automazione.',
-    home_tag: 'Azienda tecnologica', home_title: 'Nexuss X Systems — soluzioni digitali ad alto impatto.',
+    home_tag: 'Azienda tecnologica', home_title: 'Nexuss X Sistems — soluzioni digitali ad alto impatto.',
     home_cta_primary: 'Vedi servizi', home_cta_secondary: 'Richiedi proposta',
     home_slogan: 'Il nostro lavoro supera i limiti e va oltre questo pianeta.',
     home_services_title: 'Servizi principali', home_industries_title: 'Settori serviti',
@@ -1419,7 +1419,7 @@ function bindCinematicIntro() {
       <div>STATUS: <span class="hl">SCANNING</span></div>
     </div>
     <div class="intro-hud intro-hud-br">
-      <div>NEXUSS X SYSTEMS</div>
+      <div>NEXUSS X SISTEMS</div>
       <div>LATAM · GLOBAL</div>
       <div>© 2026</div>
     </div>
@@ -1440,7 +1440,7 @@ function bindCinematicIntro() {
     <div class="intro-waveform">${waveHtml}</div>
 
     <div class="intro-content">
-      <div class="intro-badge">Portal de acceso · Nexuss X Systems</div>
+      <div class="intro-badge">Portal de acceso · Nexuss X Sistems</div>
       <div class="intro-logo-wrap">
         <div class="intro-ring-3"></div>
         <div class="intro-ring-2"></div>
@@ -2176,7 +2176,7 @@ async function jarvisAskAI(message, history) {
 function jarvisAgentSpeak(text) {
   const clean = text.replace(/\[link:[^\]]+\]/g, '').replace(/\n+/g, '. ').trim();
   const phonetic = clean
-    .replace(/Nexuss X Systems/gi, 'Nexuss eks Systems')
+    .replace(/Nexuss X Sistems/gi, 'Nexuss eks Systems')
     .replace(/\bX\b/g, 'eks');
 
   if (!phonetic) return;

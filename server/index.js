@@ -1,4 +1,4 @@
-// ─── NEXUSS X SYSTEMS SERVER v2.0 ─────────────────────────────────────────────
+// ─── NEXUSS X SISTEMS SERVER v2.0 ─────────────────────────────────────────────
 import { config as loadEnv } from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join, extname } from 'path';
@@ -159,14 +159,14 @@ app.post('/api/register', async (req, res) => {
     createAuditLog(1, userId, email, 'user.register', 'user', userId, { name, email, role }, ip(req));
 
     // Email de verificación al usuario que se registró
-    await sendEmail(email, 'Verifica tu cuenta — Nexuss X Systems',
+    await sendEmail(email, 'Verifica tu cuenta — Nexuss X Sistems',
       `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;border-radius:12px">
-        <h2 style="color:#7926ff">Nexuss X Systems</h2>
+        <h2 style="color:#7926ff">Nexuss X Sistems</h2>
         <h3>Hola ${name}, bienvenido/a 👋</h3>
         <p>Tu código de verificación es:</p>
         <div style="font-size:32px;font-weight:700;letter-spacing:8px;color:#7926ff;text-align:center;padding:16px;background:#fff;border-radius:8px;margin:16px 0">${code}</div>
         <p style="color:#666">Válido por 24 horas.</p>
-        <p style="color:#aaa;font-size:12px">Nexuss X Systems — Sistema de Gestión Empresarial</p>
+        <p style="color:#aaa;font-size:12px">Nexuss X Sistems — Sistema de Gestión Empresarial</p>
       </div>`);
 
     // Notificación al admin de nuevo registro
@@ -174,7 +174,7 @@ app.post('/api/register', async (req, res) => {
     if (adminNotif) {
       await sendEmail(adminNotif, `👤 Nuevo registro — ${name}`,
         `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;border-radius:12px">
-          <h2 style="color:#7926ff">Nexuss X Systems</h2>
+          <h2 style="color:#7926ff">Nexuss X Sistems</h2>
           <h3>Nuevo usuario registrado</h3>
           <table style="width:100%;border-collapse:collapse;font-size:14px">
             <tr style="background:#f0f0f0"><td style="padding:8px 12px"><strong>Nombre</strong></td><td style="padding:8px 12px">${name}</td></tr>
@@ -184,7 +184,7 @@ app.post('/api/register', async (req, res) => {
             <tr style="background:#f0f0f0"><td style="padding:8px 12px"><strong>IP</strong></td><td style="padding:8px 12px">${ip(req)}</td></tr>
           </table>
           <a href="${process.env.APP_URL||'http://localhost:3002'}/admin.html" style="display:inline-block;margin-top:16px;background:#7926ff;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none">Ver en Admin →</a>
-          <p style="color:#aaa;font-size:12px;margin-top:16px">Nexuss X Systems — Alertas automáticas</p>
+          <p style="color:#aaa;font-size:12px;margin-top:16px">Nexuss X Sistems — Alertas automáticas</p>
         </div>`);
     }
 
@@ -251,7 +251,7 @@ app.post('/api/me/2fa/setup', auth, async (req, res) => {
   const secret = otplib.authenticator.generateSecret();
   db.prepare('UPDATE users SET totp_secret=? WHERE id=?').run(secret, req.user.id);
   const user = db.prepare('SELECT email FROM users WHERE id=?').get(req.user.id);
-  const otpauth = otplib.authenticator.keyuri(user.email, 'NexussXSystems', secret);
+  const otpauth = otplib.authenticator.keyuri(user.email, 'NexussXsistems', secret);
   const qr = await qrcode.toDataURL(otpauth);
   res.json({ secret, qr });
 });
@@ -286,7 +286,7 @@ app.post('/auth/forgot-password', authLimiter, async (req, res) => {
   if (!user) return res.json({ ok: true }); // security: don't reveal
   const token = randomCode(32);
   db.prepare('UPDATE users SET reset_token=?, reset_expires=? WHERE id=?').run(token, Date.now() + 86400000, user.id);
-  await sendEmail(email, 'Recuperar contraseña — Nexuss X Systems',
+  await sendEmail(email, 'Recuperar contraseña — Nexuss X Sistems',
     `<p>Hola ${user.name || ''},</p><p>Tu enlace para restablecer la contraseña:</p><p><a href="${process.env.APP_URL||'http://localhost:3002'}/reset-password.html?token=${token}">Restablecer contraseña</a></p><p>Válido por 24 horas.</p>`);
   console.log(`[MOCK RESET] token for ${email}: ${token}`);
   res.json({ ok: true, token }); // token returned for dev/demo only
@@ -321,7 +321,7 @@ app.post('/auth/resend-code', authLimiter, async (req, res) => {
   if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
   const code = String(Math.floor(100000 + Math.random()*900000));
   db.prepare('UPDATE users SET verification_code=? WHERE id=?').run(code, user.id);
-  await sendEmail(email, 'Código de verificación — Nexuss X Systems', `<p>Tu código: <strong style="font-size:24px">${code}</strong></p>`);
+  await sendEmail(email, 'Código de verificación — Nexuss X Sistems', `<p>Tu código: <strong style="font-size:24px">${code}</strong></p>`);
   console.log(`[MOCK CODE] ${email}: ${code}`);
   res.json({ ok: true });
 });
@@ -396,9 +396,9 @@ app.post('/api/contact', async (req, res) => {
   admins.forEach(a => createNotification(1, a.id, a.email, 'info', 'Nuevo mensaje de contacto', `${name} (${email}) envió un mensaje.`, '/admin.html'));
 
   // Auto-respuesta al usuario que envió el formulario
-  await sendEmail(email, '¡Recibimos tu mensaje! — Nexuss X Systems',
+  await sendEmail(email, '¡Recibimos tu mensaje! — Nexuss X Sistems',
     `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;border-radius:12px">
-      <h2 style="color:#7926ff">Nexuss X Systems</h2>
+      <h2 style="color:#7926ff">Nexuss X Sistems</h2>
       <h3>Hola ${name}, recibimos tu mensaje 👋</h3>
       <p>Gracias por contactarnos. Nuestro equipo revisará tu mensaje y te responderá en menos de 24 horas.</p>
       <div style="background:#fff;border-left:4px solid #7926ff;padding:14px;border-radius:0 8px 8px 0;margin:16px 0">
@@ -406,7 +406,7 @@ app.post('/api/contact', async (req, res) => {
         <p style="color:#555;margin-top:8px">${message}</p>
       </div>
       <a href="${process.env.APP_URL||'http://localhost:3002'}/servicios.html" style="display:inline-block;background:#7926ff;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none">Ver nuestros servicios →</a>
-      <p style="color:#aaa;font-size:12px;margin-top:16px">Nexuss X Systems — Más allá de los límites del planeta</p>
+      <p style="color:#aaa;font-size:12px;margin-top:16px">Nexuss X Sistems — Más allá de los límites del planeta</p>
     </div>`);
 
   // Notificación completa al administrador con todos los datos del formulario
@@ -414,7 +414,7 @@ app.post('/api/contact', async (req, res) => {
   if (adminDest) {
     await sendEmail(adminDest, `📬 Nuevo mensaje de contacto — ${name}`,
       `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;border-radius:12px">
-        <h2 style="color:#7926ff">Nexuss X Systems</h2>
+        <h2 style="color:#7926ff">Nexuss X Sistems</h2>
         <h3>Nuevo mensaje del formulario de contacto</h3>
         <table style="width:100%;border-collapse:collapse;font-size:14px">
           <tr style="background:#f0f0f0"><td style="padding:8px 12px"><strong>Nombre</strong></td><td style="padding:8px 12px">${name}</td></tr>
@@ -428,7 +428,7 @@ app.post('/api/contact', async (req, res) => {
           <p style="color:#555;margin-top:8px">${message}</p>
         </div>
         <a href="${process.env.APP_URL||'http://localhost:3002'}/admin.html" style="display:inline-block;background:#7926ff;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none">Ver en Admin →</a>
-        <p style="color:#aaa;font-size:12px;margin-top:16px">Nexuss X Systems — Alertas automáticas del sistema</p>
+        <p style="color:#aaa;font-size:12px;margin-top:16px">Nexuss X Sistems — Alertas automáticas del sistema</p>
       </div>`);
   }
 
@@ -1222,7 +1222,7 @@ REGLAS:
 1. Responde cualquier pregunta de forma clara y útil, no solo las de la empresa.
 2. Para preguntas de la empresa: sé directo y conciso (2-4 oraciones).
 3. Para preguntas generales (tecnología, programación, etc.): responde con claridad y detalle apropiado.
-4. Siempre escribe "Nexuss eks Systems" (nunca "Nexuss X Systems")
+4. Siempre escribe "Nexuss eks Systems" (nunca "Nexuss X Sistems")
 5. Cuando haya una página relevante: [link:pagina.html:Texto →]
 6. Para ÉNFASIS usa MAYÚSCULAS (máximo 2 por respuesta)
 7. Para preguntas de precios exactos, envía a [link:calculadora.html:Calculadora de precios →]
@@ -1632,7 +1632,7 @@ app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
     const subject = `⚠️ Tarea vencida — ${task.title}`;
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:24px;border-radius:12px">
-        <h2 style="color:#7926ff;margin-bottom:4px">Nexuss X Systems</h2>
+        <h2 style="color:#7926ff;margin-bottom:4px">Nexuss X Sistems</h2>
         <p style="color:#666;font-size:13px">Sistema de alertas automáticas</p>
         <hr style="border:1px solid #eee;margin:16px 0">
         <h3 style="color:#ef4444">⚠️ Tarea vencida</h3>
@@ -1643,7 +1643,7 @@ app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
           <tr style="background:#f0f0f0"><td style="padding:8px"><strong>Estado</strong></td><td style="padding:8px">${task.status}</td></tr>
         </table>
         <a href="${process.env.APP_URL || 'http://localhost:3002'}/tareas.html" style="display:inline-block;background:#7926ff;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Ver tareas →</a>
-        <p style="color:#aaa;font-size:11px;margin-top:24px">Nexuss X Systems — Alertas automáticas de base de datos</p>
+        <p style="color:#aaa;font-size:11px;margin-top:24px">Nexuss X Sistems — Alertas automáticas de base de datos</p>
       </div>`;
     await sendEmail(task.assigned_email, subject, html);
     alerts.push({ type: 'task_overdue', id: task.id, to: task.assigned_email, subject, sent: smtpActive });
@@ -1655,7 +1655,7 @@ app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
     const subject = `🚨 SLA incumplido — Ticket ${ticket.number}`;
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:24px;border-radius:12px">
-        <h2 style="color:#7926ff;margin-bottom:4px">Nexuss X Systems</h2>
+        <h2 style="color:#7926ff;margin-bottom:4px">Nexuss X Sistems</h2>
         <p style="color:#666;font-size:13px">Sistema de alertas automáticas</p>
         <hr style="border:1px solid #eee;margin:16px 0">
         <h3 style="color:#ef4444">🚨 SLA Incumplido</h3>
@@ -1666,7 +1666,7 @@ app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
           <tr style="background:#f0f0f0"><td style="padding:8px"><strong>Estado actual</strong></td><td style="padding:8px">${ticket.status}</td></tr>
         </table>
         <a href="${process.env.APP_URL || 'http://localhost:3002'}/tickets.html" style="display:inline-block;background:#ef4444;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Ver ticket →</a>
-        <p style="color:#aaa;font-size:11px;margin-top:24px">Nexuss X Systems — Alertas automáticas de base de datos</p>
+        <p style="color:#aaa;font-size:11px;margin-top:24px">Nexuss X Sistems — Alertas automáticas de base de datos</p>
       </div>`;
     await sendEmail(ticket.user_email, subject, html);
     alerts.push({ type: 'sla_breach', id: ticket.id, to: ticket.user_email, subject, sent: smtpActive });
@@ -1695,14 +1695,14 @@ app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
 app.post('/api/admin/test-email', auth, requireAdmin, async (req, res) => {
   const to = req.user.email;
   const smtpActive = !!(process.env.SMTP_PASS && process.env.SMTP_PASS !== 'PEGAR_AQUI_TU_APP_PASSWORD_DE_16_LETRAS');
-  const subject = '✅ Test SMTP — Nexuss X Systems';
+  const subject = '✅ Test SMTP — Nexuss X Sistems';
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:24px;border-radius:12px">
-      <h2 style="color:#7926ff;margin-bottom:4px">Nexuss X Systems</h2>
+      <h2 style="color:#7926ff;margin-bottom:4px">Nexuss X Sistems</h2>
       <p style="color:#666;font-size:13px">Sistema de alertas automáticas</p>
       <hr style="border:1px solid #eee;margin:16px 0">
       <h3 style="color:#22c55e">✅ Email de prueba exitoso</h3>
-      <p>El sistema de alertas automáticas de Nexuss X Systems está correctamente configurado.</p>
+      <p>El sistema de alertas automáticas de Nexuss X Sistems está correctamente configurado.</p>
       <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">
         <tr style="background:#f0f0f0"><td style="padding:8px"><strong>Enviado a</strong></td><td style="padding:8px">${to}</td></tr>
         <tr><td style="padding:8px"><strong>Fecha</strong></td><td style="padding:8px">${new Date().toLocaleString('es-DO')}</td></tr>
@@ -1714,7 +1714,7 @@ app.post('/api/admin/test-email', auth, requireAdmin, async (req, res) => {
         <li>Un ticket supera el tiempo de SLA establecido</li>
         <li>Se registran nuevos eventos críticos en el sistema</li>
       </ul>
-      <p style="color:#aaa;font-size:11px;margin-top:24px">Nexuss X Systems — Sistema de Gestión de Tareas · 5to B</p>
+      <p style="color:#aaa;font-size:11px;margin-top:24px">Nexuss X Sistems — Sistema de Gestión de Tareas · 5to B</p>
     </div>`;
 
   if (smtpActive) {
@@ -1920,7 +1920,7 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 Nexuss X Systems Server v2.0`);
+  console.log(`\n🚀 Nexuss X Sistems Server v2.0`);
   console.log(`   URL:    http://localhost:${PORT}`);
   console.log(`   AI:     ${_ai ? '✅ Anthropic connected' : '❌ No API key'}`);
   console.log(`   DB:     SQLite @ server/data/nexus.db`);

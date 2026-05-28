@@ -285,4 +285,4 @@ Proyecto Final de Grado — 5to B
 
 ---
 
-*"Nuestro trabajo supera los límites... va más allá de este planeta." — Nexuss X Systems*
+*"Nuestro trabajo supera los límites... va más allá de este planeta." — Nexuss X Sistems*
