@@ -1,6 +1,6 @@
 ﻿// Nexuss X Systems UI
 const NXS = {
-  API_BASE: 'http://localhost:3002',
+  API_BASE: window.location.origin,
   CONTACT_ENDPOINT: 'https://formspree.io/f/mkozkvkz',
   requireAuth: true,
   // ── ElevenLabs API key (get free key at elevenlabs.io) ──

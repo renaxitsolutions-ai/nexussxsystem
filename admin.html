@@ -637,7 +637,7 @@ document.getElementById('btnDownloadBackup').addEventListener('click', () => {
   const token = NXS.getToken();
   if (!token) return showToast('No autenticado');
   const link = document.createElement('a');
-  link.href = `http://localhost:3002/api/backup/download`;
+  link.href = `${NXS.API_BASE}/api/backup/download`;
   link.click();
   showToast('📥 Descargando base de datos...');
 });
