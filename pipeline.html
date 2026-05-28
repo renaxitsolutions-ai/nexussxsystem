@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pipeline de Ventas — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .pipeline-wrap{overflow-x:auto;padding-bottom:20px}
+    .pipeline-board{display:flex;gap:16px;min-width:max-content;padding:4px 0 8px}
+    .pipeline-col{width:280px;flex-shrink:0;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);overflow:hidden}
+    .col-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center}
+    .col-title{font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px}
+    .col-badge{font-size:.75rem;background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:20px}
+    .col-value{font-size:.78rem;color:var(--muted);margin-top:2px}
+    .col-cards{padding:10px;min-height:200px;max-height:calc(100vh - 280px);overflow-y:auto}
+    .deal-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;margin-bottom:10px;cursor:grab;transition:.2s;position:relative}
+    .deal-card:hover{border-color:rgba(0,212,255,0.4);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+    .deal-card.dragging{opacity:.4;cursor:grabbing}
+    .deal-card.drag-over{border-color:#00d4ff;box-shadow:0 0 0 2px rgba(0,212,255,0.3)}
+    .deal-name{font-weight:600;font-size:.9rem;margin-bottom:4px}
+    .deal-company{color:var(--muted);font-size:.8rem;margin-bottom:8px}
+    .deal-meta{display:flex;justify-content:space-between;align-items:center}
+    .deal-value{font-size:.95rem;font-weight:700;color:#00d4ff}
+    .deal-prob{font-size:.75rem;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,0.08)}
+    .deal-days{font-size:.72rem;color:var(--muted);margin-top:6px}
+    .deal-assigned{font-size:.72rem;color:var(--muted)}
+    .col-add{width:100%;background:none;border:1px dashed rgba(255,255,255,0.15);color:var(--muted);padding:8px;border-radius:8px;cursor:pointer;margin-top:6px;font-size:.82rem;transition:.2s}
+    .col-add:hover{border-color:rgba(0,212,255,0.4);color:#00d4ff}
+    .pipeline-col.drag-target .col-cards{background:rgba(0,212,255,0.05);border-radius:8px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center}
+    .modal{background:#161626;border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+    .modal h3{margin-bottom:20px}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;margin-bottom:6px;font-size:.85rem;color:var(--muted)}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;font-size:.9rem}
+    .form-group input:focus,.form-group select:focus{outline:none;border-color:#00d4ff}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .deal-menu{position:absolute;top:8px;right:8px;opacity:0;transition:.2s}
+    .deal-card:hover .deal-menu{opacity:1}
+    .deal-menu button{background:rgba(255,255,255,0.1);border:none;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:.8rem}
+    .summary-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+    .summary-pill{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 16px;font-size:.85rem}
+    .summary-pill strong{color:#00d4ff;font-size:1rem}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <a href="servicios.html">Servicios</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a><a href="crm.html">CRM</a>
+          <a href="pipeline.html" style="color:#00d4ff">Pipeline</a>
+          <a href="tickets.html">Soporte</a><a href="timeline.html">Proyectos</a>
+          <a href="referidos.html">Referidos</a>
+        </div>
+      </div>
+      <a href="contacto.html">Contacto</a>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head" style="margin-bottom:16px">
+    <div>
+      <span class="tag">💼 Pipeline</span>
+      <h2 class="reveal">Pipeline de <span class="gradient-label">Ventas</span></h2>
+      <p class="muted">Arrastra los deals entre columnas para actualizar su estado.</p>
+    </div>
+    <button class="btn primary" id="newDealBtn">+ Nuevo Deal</button>
+  </div>
+
+  <div class="summary-bar" id="summaryBar">
+    <div class="summary-pill">Total Pipeline: <strong id="sumPipeline">$0</strong></div>
+    <div class="summary-pill">Deals activos: <strong id="sumDeals">0</strong></div>
+    <div class="summary-pill">Ganados: <strong id="sumWon">0</strong> — <strong id="sumWonVal" style="color:#22c55e">$0</strong></div>
+    <div class="summary-pill">Perdidos: <strong id="sumLost">0</strong></div>
+    <div class="summary-pill">Tasa de cierre: <strong id="sumRate">0%</strong></div>
+  </div>
+
+  <div class="pipeline-wrap">
+    <div class="pipeline-board" id="board">
+      <div class="pipeline-col" id="loading-col" style="width:100%;text-align:center;padding:40px;background:none;border:none"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Deal Detail Modal -->
+<div class="modal-backdrop" id="dealModal" style="display:none">
+  <div class="modal">
+    <h3 id="modalTitle">Nuevo Deal</h3>
+    <form id="dealForm">
+      <div class="form-group"><label>Título del deal *</label><input type="text" id="fTitle" placeholder="Ej: Proyecto web para Empresa X" required /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Valor (DOP)</label><input type="number" id="fValue" placeholder="0" min="0" /></div>
+        <div class="form-group"><label>Probabilidad (%)</label><input type="number" id="fProb" placeholder="50" min="0" max="100" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Etapa</label>
+          <select id="fStage">
+            <option value="prospecting">Prospectando</option>
+            <option value="qualified">Calificado</option>
+            <option value="proposal">Propuesta enviada</option>
+            <option value="negotiation">Negociación</option>
+            <option value="won">Ganado ✅</option>
+            <option value="lost">Perdido ❌</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Fecha de cierre</label><input type="date" id="fClose" /></div>
+      </div>
+      <div class="form-group"><label>Contacto (email)</label><input type="text" id="fContact" placeholder="Buscar contacto..." /></div>
+      <div class="form-group"><label>Notas</label><textarea id="fNotes" rows="3" placeholder="Detalles adicionales..."></textarea></div>
+      <div id="lostReasonGroup" style="display:none" class="form-group"><label>Razón de pérdida</label><input type="text" id="fLostReason" placeholder="¿Por qué se perdió?" /></div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button type="submit" class="btn primary" style="flex:1" id="submitDeal">Guardar</button>
+        <button type="button" class="btn ghost" id="cancelDeal">Cancelar</button>
+        <button type="button" class="btn" id="deleteDeal" style="display:none;background:rgba(255,71,87,0.2);border-color:rgba(255,71,87,0.4);color:#ff4757">Eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+const STAGES = {
+  prospecting: { label:'Prospectando', icon:'🎯', color:'#6366f1' },
+  qualified:   { label:'Calificado',   icon:'✅', color:'#3b82f6' },
+  proposal:    { label:'Propuesta',    icon:'📄', color:'#f59e0b' },
+  negotiation: { label:'Negociación',  icon:'🤝', color:'#f97316' },
+  won:         { label:'Ganado',       icon:'🏆', color:'#22c55e' },
+  lost:        { label:'Perdido',      icon:'❌', color:'#ef4444' }
+};
+
+let allDeals = [], contacts = [], editingId = null;
+let draggedDeal = null;
+
+async function load() {
+  try {
+    const [d, c] = await Promise.all([NXS.apiGet('/api/crm/deals'), NXS.apiGet('/api/crm/contacts')]);
+    allDeals = d.items || [];
+    contacts = c.items || [];
+    renderBoard();
+    renderSummary();
+  } catch(e) { document.getElementById('board').innerHTML = `<p style="color:#ff6b91">Error cargando pipeline. ¿Estás autenticado?</p>`; }
+}
+
+function renderSummary() {
+  const active = allDeals.filter(d=>!['won','lost'].includes(d.stage));
+  const won = allDeals.filter(d=>d.stage==='won');
+  const lost = allDeals.filter(d=>d.stage==='lost');
+  const rate = (won.length+lost.length) ? Math.round(won.length/(won.length+lost.length)*100) : 0;
+  document.getElementById('sumPipeline').textContent = '$'+active.reduce((s,d)=>s+(d.value||0),0).toLocaleString('es-DO');
+  document.getElementById('sumDeals').textContent = active.length;
+  document.getElementById('sumWon').textContent = won.length;
+  document.getElementById('sumWonVal').textContent = '$'+won.reduce((s,d)=>s+(d.value||0),0).toLocaleString('es-DO');
+  document.getElementById('sumLost').textContent = lost.length;
+  document.getElementById('sumRate').textContent = rate+'%';
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  Object.entries(STAGES).forEach(([stage, info]) => {
+    const deals = allDeals.filter(d=>d.stage===stage);
+    const total = deals.reduce((s,d)=>s+(d.value||0),0);
+    const col = document.createElement('div');
+    col.className = 'pipeline-col';
+    col.dataset.stage = stage;
+    col.innerHTML = `
+      <div class="col-header">
+        <div><div class="col-title" style="color:${info.color}">${info.icon} ${info.label} <span class="col-badge">${deals.length}</span></div>
+        <div class="col-value">$${total.toLocaleString('es-DO')}</div></div>
+      </div>
+      <div class="col-cards" id="col-${stage}">${deals.map(dealCard).join('')}</div>
+      <div style="padding:8px"><button class="col-add" data-stage="${stage}">+ Agregar deal</button></div>`;
+    board.appendChild(col);
+    setupColDrop(col);
+  });
+  document.querySelectorAll('.col-add').forEach(btn => {
+    btn.addEventListener('click', () => openModal(null, btn.dataset.stage));
+  });
+  document.querySelectorAll('.deal-card').forEach(el => setupDrag(el));
+  document.querySelectorAll('.deal-edit').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); openModal(Number(el.dataset.id)); });
+  });
+}
+
+function dealCard(d) {
+  const days = Math.round((Date.now()-new Date(d.created_at).getTime())/86400000);
+  const probColor = d.probability>70?'#22c55e':d.probability>40?'#f59e0b':'#ef4444';
+  return `<div class="deal-card" draggable="true" data-id="${d.id}">
+    <div class="deal-menu"><button class="deal-edit" data-id="${d.id}" title="Editar">✏️</button></div>
+    <div class="deal-name">${d.title}</div>
+    <div class="deal-company">${d.contact_company||d.contact_name||'Sin contacto'}</div>
+    <div class="deal-meta">
+      <div class="deal-value">$${(d.value||0).toLocaleString('es-DO')}</div>
+      <div class="deal-prob" style="background:${probColor}22;color:${probColor}">${d.probability||0}%</div>
+    </div>
+    <div class="deal-days">${d.close_date?'Cierre: '+d.close_date:'Sin fecha'} · ${days}d en pipeline</div>
+  </div>`;
+}
+
+function setupDrag(el) {
+  el.addEventListener('dragstart', e => { draggedDeal = Number(el.dataset.id); el.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+  el.addEventListener('dragend', () => { el.classList.remove('dragging'); draggedDeal=null; document.querySelectorAll('.pipeline-col').forEach(c=>c.classList.remove('drag-target')); });
+}
+
+function setupColDrop(col) {
+  col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-target'); });
+  col.addEventListener('dragleave', () => col.classList.remove('drag-target'));
+  col.addEventListener('drop', async e => {
+    e.preventDefault(); col.classList.remove('drag-target');
+    if (!draggedDeal) return;
+    const newStage = col.dataset.stage;
+    const deal = allDeals.find(d=>d.id===draggedDeal);
+    if (!deal || deal.stage===newStage) return;
+    deal.stage = newStage;
+    if (newStage==='won') deal.probability=100;
+    if (newStage==='lost') deal.probability=0;
+    await NXS.apiPatch(`/api/crm/deals/${draggedDeal}`, { stage:newStage, probability:deal.probability });
+    renderBoard(); renderSummary();
+    showToast(`Deal movido a ${STAGES[newStage].label}`);
+  });
+}
+
+function openModal(id=null, defaultStage='prospecting') {
+  editingId = id;
+  const deal = id ? allDeals.find(d=>d.id===id) : null;
+  document.getElementById('modalTitle').textContent = deal ? 'Editar Deal' : 'Nuevo Deal';
+  document.getElementById('fTitle').value   = deal?.title || '';
+  document.getElementById('fValue').value   = deal?.value || '';
+  document.getElementById('fProb').value    = deal?.probability ?? 20;
+  document.getElementById('fStage').value   = deal?.stage || defaultStage;
+  document.getElementById('fClose').value   = deal?.close_date || '';
+  document.getElementById('fNotes').value   = deal?.notes || '';
+  document.getElementById('fLostReason').value = deal?.lost_reason || '';
+  document.getElementById('fContact').value = deal?.contact_name || '';
+  document.getElementById('deleteDeal').style.display = deal ? '' : 'none';
+  toggleLostReason(deal?.stage||defaultStage);
+  document.getElementById('dealModal').style.display = 'flex';
+}
+
+function toggleLostReason(stage) {
+  document.getElementById('lostReasonGroup').style.display = stage==='lost' ? '' : 'none';
+}
+document.getElementById('fStage').addEventListener('change', e => toggleLostReason(e.target.value));
+
+document.getElementById('newDealBtn').addEventListener('click', () => openModal());
+document.getElementById('cancelDeal').addEventListener('click', () => document.getElementById('dealModal').style.display='none');
+document.getElementById('dealModal').addEventListener('click', e => { if(e.target===document.getElementById('dealModal')) document.getElementById('dealModal').style.display='none'; });
+
+document.getElementById('deleteDeal').addEventListener('click', async () => {
+  if (!confirm('¿Eliminar este deal?')) return;
+  await NXS.apiDelete(`/api/crm/deals/${editingId}`);
+  document.getElementById('dealModal').style.display='none';
+  showToast('Deal eliminado'); load();
+});
+
+document.getElementById('dealForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = {
+    title: document.getElementById('fTitle').value.trim(),
+    value: Number(document.getElementById('fValue').value)||0,
+    probability: Number(document.getElementById('fProb').value)||20,
+    stage: document.getElementById('fStage').value,
+    close_date: document.getElementById('fClose').value||null,
+    notes: document.getElementById('fNotes').value.trim(),
+    lost_reason: document.getElementById('fLostReason').value.trim()||null
+  };
+  if (!data.title) return showToast('El título es requerido');
+  try {
+    if (editingId) await NXS.apiPatch(`/api/crm/deals/${editingId}`, data);
+    else await NXS.apiPost('/api/crm/deals', data);
+    document.getElementById('dealModal').style.display='none';
+    showToast(editingId?'Deal actualizado':'Deal creado'); load();
+  } catch(err) { showToast('Error guardando deal'); }
+});
+
+// Token check
+const token = NXS.getToken();
+if (!token) { window.location.href='login.html'; }
+else { load(); }
+</script>
+</body>
+</html>

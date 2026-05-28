@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CRM — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .contact-table{width:100%;border-collapse:collapse;font-size:.83rem}
+    .contact-table th{padding:10px 14px;background:rgba(255,255,255,.05);text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
+    .contact-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+    .contact-table tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
+    .crm-layout{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+    @media(max-width:900px){.crm-layout{grid-template-columns:1fr}}
+    .stage-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600}
+    .stage-new{background:rgba(255,255,255,.1);color:#aaa}
+    .stage-contacted{background:rgba(0,212,255,.12);color:#00d4ff}
+    .stage-qualified{background:rgba(121,38,255,.15);color:#9b5bff}
+    .stage-proposal{background:rgba(245,158,11,.15);color:#f59e0b}
+    .stage-customer{background:rgba(34,197,94,.15);color:#22c55e}
+    .stage-lost{background:rgba(239,68,68,.12);color:#ef4444}
+    .source-tag{font-size:.72rem;color:var(--muted);background:rgba(255,255,255,.06);padding:2px 7px;border-radius:10px}
+    .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end}
+    .filter-row input,.filter-row select{padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.82rem}
+    .filter-row input:focus,.filter-row select:focus{outline:none;border-color:#00d4ff}
+    .detail-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;position:sticky;top:20px}
+    .detail-section{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07)}
+    .detail-section h5{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .meta-row{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px}
+    .meta-row .lbl{color:var(--muted)}
+    .note-item{background:rgba(255,255,255,.04);border-radius:8px;padding:10px;margin-bottom:8px;font-size:.82rem}
+    .note-date{color:var(--muted);font-size:.72rem;margin-top:4px}
+    .avatar-circle{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#7926ff);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;color:#000;flex-shrink:0}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center}
+    .modal{background:#161626;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;margin-bottom:5px;font-size:.82rem;color:var(--muted)}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.88rem;box-sizing:border-box}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .pagination{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.82rem}
+    .page-btn{padding:5px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;cursor:pointer}
+    .page-btn:hover:not(:disabled){background:rgba(0,212,255,.1);border-color:#00d4ff}
+    .page-btn:disabled{opacity:.3;cursor:default}
+    .ai-insights-box{background:linear-gradient(135deg,rgba(121,38,255,.08),rgba(0,212,255,.08));border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:12px;margin-top:8px;font-size:.82rem;line-height:1.6}
+    .table-wrap{overflow-x:auto}
+    .stat-pill{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 14px;font-size:.8rem}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">CRM ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="crm.html" style="color:#00d4ff">Contactos</a>
+          <a href="pipeline.html">Pipeline de ventas</a>
+          <a href="reports.html">Reportes</a>
+        </div>
+      </div>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a><a href="tickets.html">Soporte</a>
+          <a href="timeline.html">Proyectos</a><a href="referidos.html">Referidos</a>
+        </div>
+      </div>
+      <a href="contacto.html">Contacto</a>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="tag">👥 CRM</span>
+      <h2 class="reveal">Gestión de <span class="gradient-label">Contactos</span></h2>
+      <p class="muted">Todos tus leads y clientes en un solo lugar.</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="pipeline.html" class="btn ghost">📊 Pipeline</a>
+      <button class="btn ghost" id="importBtn">⬆ CSV</button>
+      <button class="btn ghost" id="exportBtn">⬇ Exportar</button>
+      <button class="btn primary" id="newContactBtn">+ Nuevo</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px" id="crmStats"></div>
+
+  <div class="filter-row">
+    <input type="text" id="fSearch" placeholder="🔍 Nombre, email, empresa..." style="min-width:200px" />
+    <select id="fStage">
+      <option value="">Todas las etapas</option>
+      <option value="new">Nuevo</option><option value="contacted">Contactado</option>
+      <option value="qualified">Calificado</option><option value="proposal">Propuesta</option>
+      <option value="customer">Cliente</option><option value="lost">Perdido</option>
+    </select>
+    <select id="fStatus">
+      <option value="">Todos</option><option value="lead">Lead</option>
+      <option value="prospect">Prospecto</option><option value="customer">Cliente</option>
+    </select>
+    <button class="btn primary" id="applyFilter">Filtrar</button>
+  </div>
+
+  <div class="crm-layout">
+    <div>
+      <div class="table-wrap card" style="padding:0;overflow:hidden">
+        <table class="contact-table">
+          <thead><tr><th>Contacto</th><th>Empresa</th><th>Etapa</th><th>Valor</th><th>Fuente</th><th>Alta</th></tr></thead>
+          <tbody id="contactBody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button class="page-btn" id="prevBtn" disabled>← Prev</button>
+        <span id="pageInfo">1 / 1</span>
+        <button class="page-btn" id="nextBtn">Sig →</button>
+        <span id="totalInfo" style="color:var(--muted);margin-left:4px"></span>
+      </div>
+    </div>
+
+    <div class="detail-panel">
+      <div style="text-align:center;color:var(--muted);padding:30px 0" id="detailEmpty">
+        <div style="font-size:2.5rem;margin-bottom:8px">👆</div>
+        <p style="font-size:.85rem">Selecciona un contacto.</p>
+      </div>
+      <div id="detailContent" style="display:none"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Contact Modal -->
+<div class="modal-backdrop" id="contactModal" style="display:none">
+  <div class="modal">
+    <h3 id="modalTitle">Nuevo contacto</h3>
+    <form id="contactForm">
+      <div class="form-row">
+        <div class="form-group"><label>Nombre *</label><input type="text" id="cName" required /></div>
+        <div class="form-group"><label>Email</label><input type="email" id="cEmail" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Teléfono</label><input type="tel" id="cPhone" /></div>
+        <div class="form-group"><label>Empresa</label><input type="text" id="cCompany" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Cargo</label><input type="text" id="cPosition" /></div>
+        <div class="form-group"><label>Valor (DOP)</label><input type="number" id="cValue" placeholder="0" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Etapa</label>
+          <select id="cStage"><option value="new">Nuevo</option><option value="contacted">Contactado</option><option value="qualified">Calificado</option><option value="proposal">Propuesta</option><option value="customer">Cliente</option><option value="lost">Perdido</option></select>
+        </div>
+        <div class="form-group"><label>Fuente</label>
+          <select id="cSource"><option value="manual">Manual</option><option value="contact_form">Formulario web</option><option value="referral">Referido</option><option value="social">Redes sociales</option><option value="import">Importación</option><option value="other">Otro</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>LinkedIn / Website</label><input type="text" id="cLinkedin" placeholder="https://..." /></div>
+      <div class="form-group"><label>Notas</label><textarea id="cNotes" rows="2"></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button type="submit" class="btn primary" style="flex:1">Guardar</button>
+        <button type="button" class="btn ghost" id="cancelContact">Cancelar</button>
+        <button type="button" class="btn" id="deleteContact" style="display:none;color:#ff4757;border-color:rgba(255,71,87,.3)">Eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Import modal -->
+<div class="modal-backdrop" id="importModal" style="display:none">
+  <div class="modal">
+    <h3>⬆ Importar CSV</h3>
+    <p class="muted" style="font-size:.85rem;margin-bottom:14px">Columnas requeridas: <code>name</code>, <code>email</code>, <code>phone</code>, <code>company</code></p>
+    <input type="file" id="csvFile" accept=".csv" style="margin-bottom:14px;color:#fff" />
+    <div style="display:flex;gap:8px">
+      <button class="btn primary" id="doImport">Importar</button>
+      <button class="btn ghost" onclick="document.getElementById('importModal').style.display='none'">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+const LIMIT=30; let offset=0,total=0,editingId=null,selectedId=null;
+const SN={new:'Nuevo',contacted:'Contactado',qualified:'Calificado',proposal:'Propuesta',customer:'Cliente',lost:'Perdido'};
+const SC={new:'#aaa',contacted:'#00d4ff',qualified:'#9b5bff',proposal:'#f59e0b',customer:'#22c55e',lost:'#ef4444'};
+const SRC={manual:'Manual',contact_form:'Web',referral:'Referido',social:'Social',import:'Import',other:'Otro'};
+
+function filters(){return{q:document.getElementById('fSearch').value.trim()||undefined,stage:document.getElementById('fStage').value||undefined,status:document.getElementById('fStatus').value||undefined,limit:LIMIT,offset};}
+
+async function loadStats(){
+  try{
+    const {items}=await NXS.apiGet('/api/crm/contacts?limit=500');
+    const stages=['new','contacted','qualified','proposal','customer','lost'];
+    document.getElementById('crmStats').innerHTML=stages.map(s=>{const c=items.filter(x=>x.stage===s).length;return`<div class="stat-pill"><span style="color:${SC[s]};font-weight:700">${c}</span> <span style="color:var(--muted)">${SN[s]}</span></div>`;}).join('');
+  }catch{}
+}
+
+async function load(){
+  document.getElementById('contactBody').innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr>';
+  try{
+    const p=new URLSearchParams(Object.fromEntries(Object.entries(filters()).filter(([,v])=>v!==undefined)));
+    const{items,total:t}=await NXS.apiGet('/api/crm/contacts?'+p);
+    total=t;
+    document.getElementById('pageInfo').textContent=`${Math.floor(offset/LIMIT)+1}/${Math.max(1,Math.ceil(t/LIMIT))}`;
+    document.getElementById('totalInfo').textContent=`(${t})`;
+    document.getElementById('prevBtn').disabled=offset===0;
+    document.getElementById('nextBtn').disabled=offset+LIMIT>=t;
+    if(!items.length){document.getElementById('contactBody').innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Sin contactos.</td></tr>';return;}
+    document.getElementById('contactBody').innerHTML=items.map(c=>`
+      <tr onclick="loadDetail(${c.id})">
+        <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar-circle">${c.name.charAt(0).toUpperCase()}</div><div><div style="font-weight:600">${c.name}</div><div style="color:var(--muted);font-size:.75rem">${c.email||'—'}</div></div></div></td>
+        <td>${c.company||'—'}</td>
+        <td><span class="stage-badge stage-${c.stage}">${SN[c.stage]||c.stage}</span></td>
+        <td>${c.value?'$'+(c.value).toLocaleString('es-DO'):'—'}</td>
+        <td><span class="source-tag">${SRC[c.source]||c.source||'—'}</span></td>
+        <td style="color:var(--muted)">${new Date(c.created_at).toLocaleDateString('es')}</td>
+      </tr>`).join('');
+  }catch{document.getElementById('contactBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#ff6b91;padding:20px">Se requiere rol agente o superior.</td></tr>';}
+}
+
+async function loadDetail(id){
+  selectedId=id;
+  document.getElementById('detailEmpty').style.display='none';
+  document.getElementById('detailContent').style.display='';
+  document.getElementById('detailContent').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">Cargando...</div>';
+  try{
+    const{contact:c,notes,deals,tickets}=await NXS.apiGet(`/api/crm/contacts/${id}`);
+    document.getElementById('detailContent').innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="avatar-circle" style="width:44px;height:44px;font-size:1rem">${c.name.charAt(0).toUpperCase()}</div>
+        <div><strong>${c.name}</strong><div style="color:var(--muted);font-size:.78rem">${c.position||''} ${c.company?'@ '+c.company:''}</div></div>
+      </div>
+      <button class="btn ghost" onclick="openEdit(${c.id})" style="width:100%;margin-bottom:12px;font-size:.82rem">✏️ Editar</button>
+      <div class="detail-section"><h5>Info</h5>
+        ${[['Email',c.email],['Tel',c.phone],['Fuente',SRC[c.source]||c.source],['Valor','$'+(c.value||0).toLocaleString('es-DO')],['Etapa',`<span class="stage-badge stage-${c.stage}">${SN[c.stage]}</span>`]].map(([l,v])=>v?`<div class="meta-row"><span class="lbl">${l}</span><span>${v}</span></div>`:'').join('')}
+      </div>
+      <div class="detail-section"><h5>Deals (${deals.length})</h5>
+        ${deals.slice(0,3).map(d=>`<div style="font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">${d.title} — <b style="color:#00d4ff">$${(d.value||0).toLocaleString()}</b></div>`).join('')||'<p class="muted" style="font-size:.8rem">Sin deals.</p>'}
+        <a href="pipeline.html" style="font-size:.75rem;color:#00d4ff;display:block;margin-top:4px">Ver pipeline →</a>
+      </div>
+      <div class="detail-section"><h5>Tickets (${tickets.length})</h5>
+        ${tickets.slice(0,3).map(t=>`<div style="font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">${t.number}: ${t.title.slice(0,35)} <span class="muted">(${t.status})</span></div>`).join('')||'<p class="muted" style="font-size:.8rem">Sin tickets.</p>'}
+      </div>
+      <div class="detail-section"><h5>Notas (${notes.length})</h5>
+        <div id="notesBox">${notes.slice(0,5).map(n=>`<div class="note-item">${n.text}<div class="note-date">${new Date(n.created_at).toLocaleDateString('es')}</div></div>`).join('')||'<p class="muted" style="font-size:.8rem">Sin notas.</p>'}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="newNote" placeholder="Nueva nota..." style="flex:1;padding:7px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#fff;font-size:.82rem" />
+          <button class="btn" onclick="addNote(${c.id})" style="padding:7px 12px">+</button>
+        </div>
+      </div>
+      <div class="detail-section"><h5>IA Insights</h5>
+        <button class="btn ghost" onclick="getInsights(${c.id})" style="font-size:.78rem;width:100%;padding:6px">🤖 Analizar</button>
+        <div id="insightsBox"></div>
+      </div>`;
+  }catch{document.getElementById('detailContent').innerHTML='<p class="muted" style="padding:16px;font-size:.82rem">Error cargando detalle.</p>';}
+}
+
+async function addNote(cid){const t=document.getElementById('newNote')?.value.trim();if(!t)return;await NXS.apiPost('/api/crm/notes',{contact_id:cid,text:t});document.getElementById('newNote').value='';showToast('Nota añadida');loadDetail(cid);}
+async function getInsights(cid){const b=document.getElementById('insightsBox');b.innerHTML='<p class="muted" style="font-size:.8rem;margin-top:6px">Analizando con IA...</p>';try{const{insights}=await NXS.apiPost('/api/ai/contact-insights',{contact_id:cid});b.innerHTML=`<div class="ai-insights-box">${insights}</div>`;}catch{b.innerHTML='<p class="muted" style="font-size:.8rem">IA no disponible.</p>';}}
+
+function openNew(){editingId=null;document.getElementById('modalTitle').textContent='Nuevo contacto';document.getElementById('contactForm').reset();document.getElementById('deleteContact').style.display='none';document.getElementById('contactModal').style.display='flex';}
+function openEdit(id){NXS.apiGet(`/api/crm/contacts/${id}`).then(({contact:c})=>{editingId=c.id;document.getElementById('modalTitle').textContent='Editar contacto';['cName','cEmail','cPhone','cCompany','cPosition'].forEach(f=>{const k=f.slice(1).toLowerCase();document.getElementById(f).value=c[k]||'';});document.getElementById('cValue').value=c.value||'';document.getElementById('cStage').value=c.stage||'new';document.getElementById('cSource').value=c.source||'manual';document.getElementById('cLinkedin').value=c.linkedin||c.website||'';document.getElementById('cNotes').value=c.notes||'';document.getElementById('deleteContact').style.display='';document.getElementById('contactModal').style.display='flex';});}
+
+document.getElementById('newContactBtn').addEventListener('click',openNew);
+document.getElementById('cancelContact').addEventListener('click',()=>document.getElementById('contactModal').style.display='none');
+document.getElementById('contactModal').addEventListener('click',e=>{if(e.target===document.getElementById('contactModal'))document.getElementById('contactModal').style.display='none';});
+document.getElementById('deleteContact').addEventListener('click',async()=>{if(!editingId||!confirm('¿Eliminar?'))return;await NXS.apiDelete(`/api/crm/contacts/${editingId}`);document.getElementById('contactModal').style.display='none';showToast('Eliminado');load();loadStats();});
+document.getElementById('contactForm').addEventListener('submit',async e=>{e.preventDefault();const data={name:document.getElementById('cName').value.trim(),email:document.getElementById('cEmail').value.trim()||null,phone:document.getElementById('cPhone').value.trim()||null,company:document.getElementById('cCompany').value.trim()||null,position:document.getElementById('cPosition').value.trim()||null,value:Number(document.getElementById('cValue').value)||0,stage:document.getElementById('cStage').value,source:document.getElementById('cSource').value,linkedin:document.getElementById('cLinkedin').value.trim()||null,notes:document.getElementById('cNotes').value.trim()||null};if(!data.name)return showToast('Nombre requerido');try{if(editingId)await NXS.apiPatch(`/api/crm/contacts/${editingId}`,data);else await NXS.apiPost('/api/crm/contacts',data);document.getElementById('contactModal').style.display='none';showToast(editingId?'Actualizado':'Creado');load();loadStats();}catch{showToast('Error guardando');}});
+document.getElementById('applyFilter').addEventListener('click',()=>{offset=0;load();});
+document.getElementById('fSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){offset=0;load();}});
+document.getElementById('prevBtn').addEventListener('click',()=>{if(offset>0){offset-=LIMIT;load();}});
+document.getElementById('nextBtn').addEventListener('click',()=>{if(offset+LIMIT<total){offset+=LIMIT;load();}});
+document.getElementById('exportBtn').addEventListener('click',()=>window.open(`${NXS.API_BASE}/api/crm/contacts.csv`,'_blank'));
+document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importModal').style.display='flex');
+document.getElementById('doImport').addEventListener('click',async()=>{const file=document.getElementById('csvFile').files[0];if(!file)return showToast('Selecciona un archivo');const fd=new FormData();fd.append('file',file);try{const r=await fetch(`${NXS.API_BASE}/api/crm/contacts/import`,{method:'POST',headers:{Authorization:`Bearer ${NXS.getToken()}`},body:fd});const{imported,skipped}=await r.json();document.getElementById('importModal').style.display='none';showToast(`✅ ${imported} importados, ${skipped} omitidos`);load();loadStats();}catch{showToast('Error importando');}});
+
+if(!NXS.getToken())window.location.href='login.html';
+else{load();loadStats();}
+</script>
+</body>
+</html>

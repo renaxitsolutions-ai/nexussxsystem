@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Planes — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .billing-toggle{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:32px}
+    .toggle-track{width:48px;height:26px;background:rgba(255,255,255,.1);border-radius:13px;cursor:pointer;position:relative;transition:.3s}
+    .toggle-track.on{background:#00d4ff}
+    .toggle-knob{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s}
+    .toggle-track.on .toggle-knob{left:25px}
+    .billing-label{font-size:.9rem;color:var(--muted)}
+    .billing-label.active{color:#fff;font-weight:600}
+    .save-badge{background:rgba(34,197,94,.2);color:#22c55e;padding:2px 8px;border-radius:20px;font-size:.72rem;margin-left:6px}
+    .plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:40px}
+    .plan-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;position:relative;transition:.3s}
+    .plan-card.popular{border-color:#00d4ff;background:rgba(0,212,255,.05)}
+    .plan-card.popular::before{content:'MÁS POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#00d4ff;color:#000;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:.5px}
+    .plan-card.current{border-color:#7926ff;background:rgba(121,38,255,.05)}
+    .plan-card.current::before{content:'PLAN ACTUAL';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7926ff;color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px}
+    .plan-name{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+    .plan-price{font-size:2.4rem;font-weight:800;margin:12px 0 4px;line-height:1}
+    .plan-price span{font-size:1rem;font-weight:400;color:var(--muted)}
+    .plan-desc{color:var(--muted);font-size:.82rem;margin-bottom:20px}
+    .plan-features{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:8px}
+    .plan-features li{display:flex;align-items:flex-start;gap:8px;font-size:.84rem}
+    .plan-features li::before{content:'✓';color:#22c55e;font-weight:700;flex-shrink:0;margin-top:1px}
+    .plan-features li.limit{color:var(--muted)}
+    .plan-features li.limit::before{content:'—';color:var(--muted)}
+    .plan-cta{width:100%;padding:12px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s;border:none}
+    .plan-cta.primary-cta{background:#00d4ff;color:#000}
+    .plan-cta.primary-cta:hover{background:#00b8d9}
+    .plan-cta.outline-cta{background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff}
+    .plan-cta.outline-cta:hover{border-color:#00d4ff;color:#00d4ff}
+    .plan-cta.current-cta{background:rgba(121,38,255,.2);border:1px solid #7926ff;color:#9b5bff;cursor:default}
+    .compare-table{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:32px}
+    .compare-table th{padding:12px 16px;background:rgba(255,255,255,.05);text-align:left;border-bottom:1px solid rgba(255,255,255,.08);color:var(--muted)}
+    .compare-table th:first-child{color:#fff}
+    .compare-table td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .compare-table td:first-child{color:var(--muted)}
+    .compare-table td.yes{color:#22c55e;font-weight:600;text-align:center}
+    .compare-table td.no{color:rgba(255,255,255,.2);text-align:center}
+    .compare-table td.val{text-align:center;font-weight:600;color:#00d4ff}
+    .faq-item{border-bottom:1px solid rgba(255,255,255,.08);padding:16px 0}
+    .faq-item summary{cursor:pointer;font-weight:600;font-size:.9rem;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-item summary::after{content:'▾';color:var(--muted)}
+    .faq-item[open] summary::after{content:'▴';color:#00d4ff}
+    .faq-item p{margin:12px 0 0;color:var(--muted);font-size:.85rem;line-height:1.7}
+  </style>
+</head>
+<body>
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="plans.html" style="color:#00d4ff">Planes</a>
+      <a href="contacto.html">Contacto</a>
+      <a href="login.html" class="btn">Acceder</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div style="text-align:center;margin-bottom:32px">
+    <span class="tag">💎 Planes</span>
+    <h2 class="reveal">Elige tu plan, <span class="gradient-label">escala sin límites</span></h2>
+    <p class="muted" style="max-width:500px;margin:0 auto">14 días de prueba gratuita en todos los planes. Sin tarjeta de crédito requerida.</p>
+  </div>
+
+  <!-- Billing toggle -->
+  <div class="billing-toggle">
+    <span class="billing-label active" id="monthlyLabel">Mensual</span>
+    <div class="toggle-track" id="billingToggle"><div class="toggle-knob"></div></div>
+    <span class="billing-label" id="yearlyLabel">Anual <span class="save-badge">Ahorra 20%</span></span>
+  </div>
+
+  <!-- Plan cards -->
+  <div class="plans-grid" id="plansGrid">
+    <div class="muted" style="grid-column:span 4;text-align:center">Cargando planes...</div>
+  </div>
+
+  <!-- Feature comparison -->
+  <div class="section-head" style="margin-top:40px"><div>
+    <h3>Comparación completa de características</h3>
+    <p class="muted">Todo lo que incluye cada plan.</p>
+  </div></div>
+  <div style="overflow-x:auto">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Característica</th>
+          <th style="text-align:center">Starter</th>
+          <th style="text-align:center">Business</th>
+          <th style="text-align:center">Agency</th>
+          <th style="text-align:center">Enterprise</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Usuarios</td><td class="val">5</td><td class="val">25</td><td class="val">Ilimitado</td><td class="val">Ilimitado</td></tr>
+        <tr><td>Contactos CRM</td><td class="val">200</td><td class="val">2,000</td><td class="val">Ilimitado</td><td class="val">Ilimitado</td></tr>
+        <tr><td>Tickets / mes</td><td class="val">50</td><td class="val">500</td><td class="val">Ilimitado</td><td class="val">Ilimitado</td></tr>
+        <tr><td>Pipeline de ventas</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>IA generativa (contenido)</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>IA en tickets</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Automatizaciones</td><td class="no">—</td><td class="val">5 reglas</td><td class="yes">Ilimitado</td><td class="yes">Ilimitado</td></tr>
+        <tr><td>Reportes avanzados</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>API access</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>White-label</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>SSO / SAML</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+        <tr><td>SLA garantizado</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+        <tr><td>Onboarding dedicado</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+        <tr><td>Dominio personalizado</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Auditoría avanzada</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Soporte</td><td class="val">Email</td><td class="val">Prioritario</td><td class="val">Dedicado</td><td class="val">24/7</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FAQ -->
+  <div style="max-width:700px;margin:48px auto 0">
+    <h3 style="text-align:center;margin-bottom:24px">Preguntas frecuentes</h3>
+    <details class="faq-item">
+      <summary>¿Puedo cambiar de plan en cualquier momento?</summary>
+      <p>Sí. Puedes hacer upgrade o downgrade desde tu panel en cualquier momento. Los cambios se aplican al siguiente ciclo de facturación.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Cómo funciona la prueba gratuita de 14 días?</summary>
+      <p>Al registrarte, tienes 14 días con acceso completo al plan que elijas, sin necesidad de tarjeta de crédito. Si no continúas, tu cuenta pasa automáticamente al plan gratuito limitado.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Los datos son seguros?</summary>
+      <p>Sí. Todos los datos están cifrados en tránsito y en reposo. Realizamos backups automáticos diarios y cumplimos con estándares de seguridad empresarial.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Qué pasa con mis datos si cancelo?</summary>
+      <p>Puedes exportar todos tus datos en cualquier momento desde el panel de administración. Tras la cancelación, mantenemos los datos por 30 días por si decides volver.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Tienen plan Enterprise personalizado?</summary>
+      <p>Sí. Contáctanos para discutir necesidades específicas: volúmenes de datos, integraciones personalizadas, implementación on-premise, etc.</p>
+    </details>
+  </div>
+
+  <!-- CTA band -->
+  <div class="cta-band" style="text-align:center;margin-top:48px">
+    <h3>¿Necesitas algo más específico?</h3>
+    <p class="muted">Hablemos de tu caso y diseñamos la solución perfecta para tu empresa.</p>
+    <a href="contacto.html" class="btn primary" style="margin-top:16px">Contactar ventas →</a>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+let yearly = false;
+let currentPlan = null;
+const COLORS = { starter:'#6366f1', business:'#00d4ff', agency:'#7926ff', enterprise:'#f59e0b' };
+
+document.getElementById('billingToggle').addEventListener('click', () => {
+  yearly = !yearly;
+  document.getElementById('billingToggle').classList.toggle('on', yearly);
+  document.getElementById('monthlyLabel').classList.toggle('active', !yearly);
+  document.getElementById('yearlyLabel').classList.toggle('active', yearly);
+  renderPlans(window._plans || []);
+});
+
+async function load() {
+  try {
+    const [{ items }, subRes] = await Promise.all([
+      fetch(`${NXS.API_BASE}/api/plans`).then(r=>r.json()),
+      NXS.getToken() ? NXS.apiGet('/api/subscription').catch(()=>null) : Promise.resolve(null)
+    ]);
+    window._plans = items;
+    if (subRes?.plan) currentPlan = subRes.plan;
+    renderPlans(items);
+  } catch { renderPlans(defaultPlans()); }
+}
+
+function defaultPlans() {
+  return [
+    { name:'starter',  price_monthly:49,  price_yearly:470, features:['CRM básico','Tickets de soporte','5 usuarios','KB pública','Dashboard básico'] },
+    { name:'business', price_monthly:199, price_yearly:1990, features:['CRM completo','Pipeline de ventas','IA en tickets','25 usuarios','Automatizaciones','Reportes avanzados','Email integrado'] },
+    { name:'agency',   price_monthly:499, price_yearly:4990, features:['Todo Business','White-label','Usuarios ilimitados','API acceso completo','Automatizaciones ilimitadas','Soporte dedicado','Dominio propio'] },
+    { name:'enterprise',price_monthly:0,  price_yearly:0,    features:['Todo Agency','SLA garantizado','Onboarding dedicado','SSO / SAML','Auditoría avanzada','Infraestructura dedicada','24/7 soporte'] }
+  ];
+}
+
+function renderPlans(items) {
+  const order = ['starter','business','agency','enterprise'];
+  const sorted = [...items].sort((a,b)=>order.indexOf(a.name)-order.indexOf(b.name));
+  document.getElementById('plansGrid').innerHTML = sorted.map(p => {
+    const price = yearly ? p.price_yearly : p.price_monthly;
+    const isPopular = p.name === 'business';
+    const isCurrent = p.name === currentPlan;
+    const isEnterprise = p.name === 'enterprise';
+    const color = COLORS[p.name] || '#00d4ff';
+    const features = Array.isArray(p.features) ? p.features : [];
+    return `
+      <div class="plan-card ${isPopular&&!isCurrent?'popular':''} ${isCurrent?'current':''}">
+        <div class="plan-name" style="color:${color}">${p.name.charAt(0).toUpperCase()+p.name.slice(1)}</div>
+        <div class="plan-price" style="color:${color}">
+          ${isEnterprise ? '<span style="font-size:1.1rem;font-weight:700">Personalizado</span>' : `$${price.toLocaleString()}<span>/${yearly?'año':'mes'}</span>`}
+        </div>
+        ${yearly&&!isEnterprise?`<div style="font-size:.75rem;color:#22c55e;margin-bottom:4px">Ahorra $${(p.price_monthly*12-p.price_yearly).toLocaleString()}/año</div>`:''}
+        <div class="plan-desc">${getPlanDesc(p.name)}</div>
+        <ul class="plan-features">${features.map(f=>`<li>${f}</li>`).join('')}</ul>
+        <button class="plan-cta ${isCurrent?'current-cta':isPopular?'primary-cta':'outline-cta'}"
+          onclick="selectPlan('${p.name}')" ${isCurrent?'disabled':''}>
+          ${isCurrent ? '✓ Plan actual' : isEnterprise ? 'Contactar ventas' : 'Empezar ahora'}
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function getPlanDesc(name) {
+  const d = { starter:'Ideal para freelancers y proyectos pequeños.', business:'Para equipos en crecimiento que necesitan más potencia.', agency:'Para agencias y empresas que gestionan múltiples clientes.', enterprise:'Solución a medida para grandes organizaciones.' };
+  return d[name] || '';
+}
+
+async function selectPlan(name) {
+  if (name === 'enterprise') { window.location.href='contacto.html'; return; }
+  if (!NXS.getToken()) { window.location.href='login.html'; return; }
+  if (!confirm(`¿Cambiar al plan ${name}? Contáctanos para activar el pago.`)) return;
+  try {
+    const { message } = await NXS.apiPatch('/api/subscription/plan', { plan: name });
+    showToast('✅ ' + (message || `Plan ${name} seleccionado`));
+    currentPlan = name;
+    renderPlans(window._plans || defaultPlans());
+  } catch { showToast('Error al cambiar de plan. Contacta soporte.'); }
+}
+
+load();
+</script>
+</body>
+</html>

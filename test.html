@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Validación</title>
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body>
+  <main class="container" style="padding: 40px 0;">
+    <h1>Test de Validación de Formularios</h1>
+    
+    <section class="section">
+      <div class="card">
+        <h2>Formulario de Contacto</h2>
+        <form id="testForm">
+          <div class="form-row">
+            <div class="field">
+              <label for="testName">Nombre</label>
+              <input type="text" id="testName" placeholder="Nombre" required />
+              <span class="field-status"></span>
+            </div>
+            <div class="field">
+              <label for="testEmail">Email</label>
+              <input type="email" id="testEmail" placeholder="Email" required />
+              <span class="field-status"></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="testMessage">Mensaje</label>
+            <textarea id="testMessage" rows="4" placeholder="Mensaje" required></textarea>
+            <span class="field-status"></span>
+          </div>
+          <button type="submit" class="btn primary">Enviar</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('testForm');
+    
+    function validateField(input) {
+      const value = input.value.trim();
+      let isValid = false;
+      
+      if(input.type === 'email') {
+        isValid = /^\S+@\S+\.\S+$/.test(value);
+      } else if(input.type === 'text' || input.type === 'textarea') {
+        isValid = value.length >= 2;
+      }
+      
+      if(isValid) {
+        input.classList.remove('err');
+        console.log(`✓ ${input.id} es válido`);
+      } else {
+        input.classList.add('err');
+        console.log(`✗ ${input.id} es inválido: "${value}"`);
+      }
+      return isValid;
+    }
+
+    // Validación en tiempo real
+    form.querySelectorAll('input, textarea').forEach(input => {
+      input.addEventListener('blur', () => validateField(input));
+    });
+
+    // Validación al enviar
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('testName');
+      const email = document.getElementById('testEmail');
+      const message = document.getElementById('testMessage');
+      
+      const okName = validateField(name);
+      const okEmail = validateField(email);
+      const okMessage = validateField(message);
+      
+      console.log('Validación:', { okName, okEmail, okMessage });
+      
+      if(okName && okEmail && okMessage) {
+        alert('✓ Formulario válido');
+      } else {
+        alert('✗ Por favor completa todos los campos');
+      }
+    });
+  </script>
+</body>
+</html>

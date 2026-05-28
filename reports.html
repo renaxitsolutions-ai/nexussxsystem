@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reportes — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:24px}
+    .report-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px}
+    .report-card h4{margin-bottom:16px;font-size:.95rem;display:flex;align-items:center;gap:8px}
+    .kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+    .kpi-mini{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px}
+    .kpi-mini .val{font-size:1.5rem;font-weight:700;margin-bottom:2px}
+    .kpi-mini .lbl{color:var(--muted);font-size:.75rem}
+    .donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center}
+    .donut-legend{display:flex;flex-direction:column;gap:7px}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:.8rem}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .ai-summary-box{background:linear-gradient(135deg,rgba(121,38,255,.1),rgba(0,212,255,.1));border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:20px;margin-bottom:20px}
+    .ai-summary-box h4{color:#00d4ff;margin-bottom:10px;font-size:.9rem}
+    .ai-summary-box p{font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.85)}
+    .csat-stars{display:flex;gap:4px;font-size:1.4rem;justify-content:center}
+    .funnel-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .funnel-item:last-child{border-bottom:none}
+    .funnel-bar{height:26px;border-radius:6px;min-width:4px;transition:.6s}
+    canvas{max-width:100%;display:block}
+    .seed-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);border-radius:10px}
+    .seed-bar span{font-size:.82rem;color:var(--muted)}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Admin ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="reports.html" style="color:#00d4ff">Reportes</a>
+          <a href="admin.html">Mensajes</a>
+          <a href="audit.html">Auditoría</a>
+        </div>
+      </div>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="tag">📊 Analytics</span>
+      <h2 class="reveal">Reportes del <span class="gradient-label">Negocio</span></h2>
+      <p class="muted">Métricas completas en tiempo real con gráficas interactivas.</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn ghost" id="refreshBtn">↻ Actualizar</button>
+      <button class="btn ghost" id="seedBtn">🌱 Cargar datos demo</button>
+      <button class="btn" id="exportBtn">⬇ Exportar CSV</button>
+    </div>
+  </div>
+
+  <!-- AI Summary -->
+  <div class="ai-summary-box" id="aiSummaryBox" style="display:none">
+    <h4>🤖 Resumen ejecutivo con IA</h4>
+    <p id="aiSummaryText">Generando análisis...</p>
+  </div>
+  <button class="btn ghost" id="generateSummaryBtn" style="margin-bottom:20px;font-size:.82rem">🤖 Generar resumen con IA</button>
+
+  <!-- KPIs -->
+  <div class="kpi-row" id="kpiRow"><div class="muted">Cargando métricas...</div></div>
+
+  <div class="reports-grid">
+
+    <!-- ── Ingresos (Line Chart) ─────────────────────────────────────────── -->
+    <div class="report-card" style="grid-column:span 2">
+      <h4>💰 Ingresos últimos 6 meses <span class="tag" style="font-size:.7rem;margin-left:auto">Chart.js</span></h4>
+      <canvas id="revenueChart" height="75"></canvas>
+    </div>
+
+    <!-- ── Estado de Tareas (Doughnut) ──────────────────────────────────── -->
+    <div class="report-card">
+      <h4>✅ Estado de tareas</h4>
+      <div class="donut-wrap">
+        <canvas id="taskStatusChart" width="150" height="150" style="max-width:150px;max-height:150px;flex-shrink:0"></canvas>
+        <div class="donut-legend" id="taskLegend"><span class="muted" style="font-size:.8rem">Cargando...</span></div>
+      </div>
+    </div>
+
+    <!-- ── Tickets por categoría (Bar horizontal) ────────────────────────── -->
+    <div class="report-card">
+      <h4>🎫 Tickets por categoría</h4>
+      <canvas id="ticketCatChart" height="160"></canvas>
+    </div>
+
+    <!-- ── Tickets por prioridad (Bar horizontal) ───────────────────────── -->
+    <div class="report-card">
+      <h4>🚦 Tickets por prioridad</h4>
+      <canvas id="ticketPriChart" height="140"></canvas>
+    </div>
+
+    <!-- ── Embudo de ventas ──────────────────────────────────────────────── -->
+    <div class="report-card">
+      <h4>🏆 Embudo de ventas (Pipeline)</h4>
+      <div id="dealFunnel"><span class="muted" style="font-size:.82rem">Cargando...</span></div>
+    </div>
+
+    <!-- ── CSAT ──────────────────────────────────────────────────────────── -->
+    <div class="report-card">
+      <h4>⭐ Satisfacción del cliente (CSAT)</h4>
+      <div id="csatSection" style="text-align:center;padding:10px 0"></div>
+    </div>
+
+    <!-- ── Contactos / mes (Line Chart) ─────────────────────────────────── -->
+    <div class="report-card">
+      <h4>👥 Nuevos contactos / mes</h4>
+      <canvas id="contactsChart" height="90"></canvas>
+    </div>
+
+    <!-- ── Tickets / mes (Bar Chart) ────────────────────────────────────── -->
+    <div class="report-card">
+      <h4>📩 Tickets / mes</h4>
+      <canvas id="ticketsChart" height="90"></canvas>
+    </div>
+
+  </div>
+
+  <!-- ══ SECCIÓN: RENDIMIENTO POR USUARIO ══════════════════════════════════════ -->
+  <div style="margin-top:8px;margin-bottom:8px">
+    <h3 style="font-size:1.05rem;margin-bottom:4px;display:flex;align-items:center;gap:8px">
+      👤 Rendimiento por Usuario
+      <span class="tag" style="font-size:.7rem">Requerido por el documento</span>
+    </h3>
+    <p class="muted" style="font-size:.82rem;margin-bottom:16px">Análisis de tareas completadas, en progreso y pendientes por cada usuario asignado.</p>
+  </div>
+
+  <div class="reports-grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+
+    <!-- Gráfica: Tareas completadas por usuario (Bar horizontal) -->
+    <div class="report-card" style="grid-column:span 2">
+      <h4>🏅 Tareas completadas por usuario <span class="tag" style="font-size:.7rem;margin-left:auto">Chart.js</span></h4>
+      <canvas id="userCompletedChart" height="80"></canvas>
+      <p id="userChartEmpty" class="muted" style="font-size:.8rem;display:none;text-align:center;padding:20px 0">
+        Sin tareas asignadas aún. Usa "Cargar datos demo" para ver datos de ejemplo.
+      </p>
+    </div>
+
+    <!-- Gráfica: Total de tareas por usuario (agrupada) -->
+    <div class="report-card" style="grid-column:span 2">
+      <h4>📊 Distribución de tareas por usuario <span class="tag" style="font-size:.7rem;margin-left:auto">Chart.js</span></h4>
+      <canvas id="userDistChart" height="80"></canvas>
+    </div>
+
+  </div>
+
+  <!-- Tabla de rendimiento -->
+  <div class="report-card" style="margin-bottom:24px">
+    <h4 style="margin-bottom:16px">📋 Tabla de rendimiento por usuario</h4>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.82rem" id="userPerfTable">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.1)">
+            <th style="padding:10px 14px;text-align:left;color:var(--muted);font-weight:600">Usuario</th>
+            <th style="padding:10px 14px;text-align:center;color:var(--muted);font-weight:600">Total</th>
+            <th style="padding:10px 14px;text-align:center;color:#22c55e;font-weight:600">✅ Completadas</th>
+            <th style="padding:10px 14px;text-align:center;color:#00d4ff;font-weight:600">🔧 En progreso</th>
+            <th style="padding:10px 14px;text-align:center;color:#f59e0b;font-weight:600">⏳ Pendientes</th>
+            <th style="padding:10px 14px;text-align:center;color:var(--muted);font-weight:600">Tasa</th>
+            <th style="padding:10px 14px;text-align:center;color:var(--muted);font-weight:600">⏱ Prom. horas</th>
+          </tr>
+        </thead>
+        <tbody id="userPerfBody">
+          <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+// ── Chart.js — tema oscuro global ──────────────────────────────────────────
+Chart.defaults.color               = 'rgba(255,255,255,0.55)';
+Chart.defaults.borderColor         = 'rgba(255,255,255,0.07)';
+Chart.defaults.font.family         = "'Inter','Segoe UI',system-ui,sans-serif";
+Chart.defaults.font.size           = 11;
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(8,8,20,0.92)';
+Chart.defaults.plugins.tooltip.borderColor     = 'rgba(0,212,255,0.35)';
+Chart.defaults.plugins.tooltip.borderWidth     = 1;
+Chart.defaults.plugins.tooltip.padding         = 10;
+Chart.defaults.plugins.tooltip.titleColor      = '#00d4ff';
+Chart.defaults.plugins.tooltip.bodyColor       = 'rgba(255,255,255,0.85)';
+
+const _charts = {};
+function destroyChart(id) { if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; } }
+
+// Crea un gradiente vertical para line charts
+function gradient(ctx, color) {
+  const g = ctx.createLinearGradient(0, 0, 0, 200);
+  g.addColorStop(0, color.replace('1)', '0.25)'));
+  g.addColorStop(1, color.replace('1)', '0.0)'));
+  return g;
+}
+
+function mkLine(id, labels, data, color, label) {
+  destroyChart(id);
+  const canv = document.getElementById(id);
+  if (!canv) return;
+  const ctx = canv.getContext('2d');
+  _charts[id] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: label || '',
+        data,
+        borderColor: color,
+        backgroundColor: gradient(ctx, color),
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: color,
+        pointBorderColor: 'rgba(0,0,0,0.5)',
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.45)' } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.45)' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function mkBar(id, labels, data, colors, horizontal) {
+  destroyChart(id);
+  const canv = document.getElementById(id);
+  if (!canv) return;
+  const ctx = canv.getContext('2d');
+  _charts[id] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: Array.isArray(colors) ? colors : labels.map((_,i) => colors),
+        borderRadius: 5,
+        borderSkipped: false,
+        hoverBackgroundColor: Array.isArray(colors) ? colors.map(c => c.replace('0.75','1')) : colors
+      }]
+    },
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.45)' } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.45)' } }
+      }
+    }
+  });
+}
+
+function mkDoughnut(id, labels, data, colors) {
+  destroyChart(id);
+  const canv = document.getElementById(id);
+  if (!canv) return;
+  const ctx = canv.getContext('2d');
+  _charts[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderColor: 'rgba(5,5,15,0.6)',
+        borderWidth: 3,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed}` } }
+      }
+    }
+  });
+}
+
+// ── Carga principal ─────────────────────────────────────────────────────────
+async function load() {
+  try {
+    const data = await NXS.apiGet('/api/metrics');
+    const s = data.summary;
+
+    // KPIs
+    document.getElementById('kpiRow').innerHTML = [
+      { val:`$${(s.total_revenue||0).toLocaleString('es-DO')}`, lbl:'Ingresos totales',   color:'#00d4ff' },
+      { val:s.total_orders||0,                                   lbl:'Órdenes totales',    color:'#7926ff' },
+      { val:s.total_contacts||0,                                 lbl:'Contactos CRM',      color:'#22c55e' },
+      { val:s.total_deals||0,                                    lbl:'Deals totales',       color:'#f59e0b' },
+      { val:s.won_deals||0,                                      lbl:'Deals ganados',       color:'#22c55e' },
+      { val:`$${(s.pipeline_value||0).toLocaleString('es-DO')}`, lbl:'Pipeline activo',    color:'#00d4ff' },
+      { val:s.open_tickets||0,                                   lbl:'Tickets abiertos',   color:'#f97316' },
+      { val:s.breached_sla||0,                                   lbl:'SLA incumplidos',    color:'#ef4444' },
+      { val:s.avg_csat ? s.avg_csat+'/5' : 'N/D',               lbl:'CSAT promedio',      color:'#f59e0b' },
+      { val:s.total_users||0,                                    lbl:'Usuarios',            color:'#6366f1' },
+    ].map(k=>`<div class="kpi-mini"><div class="val" style="color:${k.color}">${k.val}</div><div class="lbl">${k.lbl}</div></div>`).join('');
+
+    // ── Ingresos — Line Chart ───────────────────────────────────────────────
+    const rev = data.revenue_by_month || [];
+    mkLine('revenueChart', rev.map(d=>d.label), rev.map(d=>d.value), 'rgba(0,212,255,1)', 'Ingresos RD$');
+
+    // ── Contactos — Line Chart ─────────────────────────────────────────────
+    const cnt = data.contacts_by_month || [];
+    mkLine('contactsChart', cnt.map(d=>d.label), cnt.map(d=>d.value), 'rgba(121,38,255,1)', 'Contactos');
+
+    // ── Tickets / mes — Bar Chart ──────────────────────────────────────────
+    const tck = data.tickets_by_month || [];
+    mkBar('ticketsChart', tck.map(d=>d.label), tck.map(d=>d.value),
+      tck.map((_,i)=>`hsla(${38+i*8},95%,${55+i*2}%,0.75)`), false);
+
+    // ── Tickets por categoría — Horizontal Bar ────────────────────────────
+    const catPalette = ['rgba(0,212,255,0.75)','rgba(121,38,255,0.75)','rgba(34,197,94,0.75)',
+                        'rgba(245,158,11,0.75)','rgba(239,68,68,0.75)','rgba(99,102,241,0.75)'];
+    const cats = data.tickets_by_category || [];
+    mkBar('ticketCatChart', cats.map(d=>d.category||'—'), cats.map(d=>d.count), catPalette, true);
+
+    // ── Tickets por prioridad — Horizontal Bar ────────────────────────────
+    const priLabels  = { urgent:'🔴 Urgente', high:'🟠 Alta', normal:'🔵 Normal', low:'🟢 Baja' };
+    const priPalette = { urgent:'rgba(239,68,68,0.75)', high:'rgba(249,115,22,0.75)',
+                         normal:'rgba(0,212,255,0.75)',  low:'rgba(34,197,94,0.75)' };
+    const pris = data.tickets_by_priority || [];
+    mkBar('ticketPriChart',
+      pris.map(d => priLabels[d.priority] || d.priority),
+      pris.map(d => d.count),
+      pris.map(d => priPalette[d.priority] || 'rgba(99,102,241,0.75)'),
+      true);
+
+    // ── Estado de tareas — Doughnut ────────────────────────────────────────
+    const taskMap = {
+      completada: { label:'Completada',   color:'#22c55e' },
+      en_progreso:{ label:'En progreso',  color:'#00d4ff' },
+      pendiente:  { label:'Pendiente',    color:'#f59e0b' },
+      cancelada:  { label:'Cancelada',    color:'#ef4444' }
+    };
+    const ts = data.tasks_by_status || [];
+    const tsLabels = ts.map(t => (taskMap[t.status]||{label:t.status}).label);
+    const tsData   = ts.map(t => t.count);
+    const tsColors = ts.map(t => (taskMap[t.status]||{color:'#6366f1'}).color);
+
+    if (ts.length) {
+      mkDoughnut('taskStatusChart', tsLabels, tsData, tsColors);
+    }
+    document.getElementById('taskLegend').innerHTML = ts.length
+      ? ts.map((t,i) => `
+          <div class="legend-item">
+            <div class="legend-dot" style="background:${tsColors[i]}"></div>
+            <span>${tsLabels[i]}: <strong>${t.count}</strong></span>
+          </div>`).join('')
+      : '<span class="muted" style="font-size:.8rem">Sin datos de tareas aún.</span>';
+
+    // ── Embudo de ventas ────────────────────────────────────────────────────
+    const stageNames  = { prospecting:'Prospectando', qualified:'Calificado', proposal:'Propuesta', negotiation:'Negociación', won:'Ganado', lost:'Perdido' };
+    const stageColors = ['#6366f1','#3b82f6','#f59e0b','#f97316','#22c55e','#ef4444'];
+    const funnel = data.deals_by_stage || [];
+    const maxVal = Math.max(...funnel.map(d=>d.value||0), 1);
+    document.getElementById('dealFunnel').innerHTML = funnel.map((d,i) => `
+      <div class="funnel-item">
+        <div style="width:92px;color:var(--muted);font-size:.78rem;flex-shrink:0">${stageNames[d.stage]||d.stage}</div>
+        <div class="funnel-bar" style="width:${Math.max(((d.value||0)/maxVal)*175,4)}px;background:${stageColors[i%stageColors.length]}"></div>
+        <div style="font-size:.78rem;color:var(--muted);margin-left:6px">${d.count} · $${(d.value||0).toLocaleString('es-DO')}</div>
+      </div>`).join('') || '<p class="muted" style="font-size:.82rem">Sin deals todavía.</p>';
+
+    // ── Rendimiento por Usuario ────────────────────────────────────────────
+    const users = data.tasks_by_user || [];
+    if (users.length) {
+      document.getElementById('userChartEmpty').style.display = 'none';
+
+      // Etiquetas (solo parte antes del @)
+      const uLabels = users.map(u => u.assigned_email.split('@')[0]);
+
+      // Gráfica 1: Tareas completadas por usuario (bar horizontal)
+      mkBar('userCompletedChart', uLabels, users.map(u => u.completadas || 0),
+        users.map((u,i) => `hsla(${140+i*25},70%,55%,0.8)`), true);
+
+      // Gráfica 2: Distribución por estado (grouped bar — 3 datasets)
+      destroyChart('userDistChart');
+      const distCanvas = document.getElementById('userDistChart');
+      if (distCanvas) {
+        _charts['userDistChart'] = new Chart(distCanvas.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: uLabels,
+            datasets: [
+              { label: 'Completadas', data: users.map(u=>u.completadas||0),  backgroundColor: 'rgba(34,197,94,0.75)',  borderRadius:4 },
+              { label: 'En progreso', data: users.map(u=>u.en_progreso||0),  backgroundColor: 'rgba(0,212,255,0.75)',  borderRadius:4 },
+              { label: 'Pendientes',  data: users.map(u=>u.pendientes||0),   backgroundColor: 'rgba(245,158,11,0.75)', borderRadius:4 }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: true, position: 'top',
+                labels: { color: 'rgba(255,255,255,0.6)', font: { size: 11 }, boxWidth: 12 }
+              }
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.45)' } },
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.45)' }, beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      // Tabla de rendimiento
+      document.getElementById('userPerfBody').innerHTML = users.map(u => {
+        const tasa = u.total > 0 ? Math.round((u.completadas/u.total)*100) : 0;
+        const taColor = tasa >= 70 ? '#22c55e' : tasa >= 40 ? '#f59e0b' : '#ef4444';
+        const horas = u.avg_horas != null ? `${u.avg_horas}h` : '—';
+        return `<tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+          <td style="padding:10px 14px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7926ff,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0">
+                ${u.assigned_email[0].toUpperCase()}
+              </div>
+              <span style="font-size:.82rem">${u.assigned_email}</span>
+            </div>
+          </td>
+          <td style="padding:10px 14px;text-align:center;font-weight:700">${u.total}</td>
+          <td style="padding:10px 14px;text-align:center;color:#22c55e;font-weight:600">${u.completadas||0}</td>
+          <td style="padding:10px 14px;text-align:center;color:#00d4ff">${u.en_progreso||0}</td>
+          <td style="padding:10px 14px;text-align:center;color:#f59e0b">${u.pendientes||0}</td>
+          <td style="padding:10px 14px;text-align:center">
+            <span style="color:${taColor};font-weight:700">${tasa}%</span>
+            <div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:4px;overflow:hidden;min-width:50px">
+              <div style="height:100%;width:${tasa}%;background:${taColor};border-radius:2px;transition:.5s"></div>
+            </div>
+          </td>
+          <td style="padding:10px 14px;text-align:center;color:var(--muted)">${horas}</td>
+        </tr>`;
+      }).join('');
+    } else {
+      document.getElementById('userChartEmpty').style.display = 'block';
+      document.getElementById('userPerfBody').innerHTML =
+        '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Sin tareas asignadas. Haz clic en "Cargar datos demo" para ver datos de ejemplo.</td></tr>';
+    }
+
+    // ── CSAT ────────────────────────────────────────────────────────────────
+    const csat = s.avg_csat;
+    const csatStars = csat ? Math.round(Number(csat)) : 0;
+    document.getElementById('csatSection').innerHTML = csat
+      ? `<div class="csat-stars">${'⭐'.repeat(csatStars)}${'☆'.repeat(5-csatStars)}</div>
+         <div style="font-size:2.2rem;font-weight:700;color:#f59e0b;margin:10px 0">${csat}</div>
+         <div class="muted" style="font-size:.82rem">promedio sobre 5</div>`
+      : '<p class="muted" style="font-size:.82rem">Sin valoraciones todavía.<br>Los clientes pueden calificar al cerrar un ticket.</p>';
+
+  } catch(e) {
+    showToast('Error cargando métricas. ¿El servidor está activo?');
+    console.error(e);
+  }
+}
+
+// ── Seed datos de demo ──────────────────────────────────────────────────────
+document.getElementById('seedBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('seedBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Cargando...';
+  try {
+    const r = await NXS.apiPost('/api/admin/seed', {});
+    const items = Object.entries(r.seeded).map(([k,v])=>`<b>${k}:</b> ${v}`).join(' &nbsp;·&nbsp; ');
+    showToast('✅ Datos cargados — ' + Object.values(r.seeded).join(', '));
+    await load();
+  } catch(e) {
+    showToast('Error al cargar datos. Solo admins pueden hacer esto.');
+    console.error(e);
+  }
+  btn.disabled = false;
+  btn.textContent = '🌱 Cargar datos demo';
+});
+
+document.getElementById('refreshBtn').addEventListener('click', load);
+document.getElementById('exportBtn').addEventListener('click', () => {
+  window.open(`${NXS.API_BASE}/api/metrics.csv?token=${NXS.getToken()}`, '_blank');
+});
+
+document.getElementById('generateSummaryBtn').addEventListener('click', async () => {
+  document.getElementById('aiSummaryBox').style.display = '';
+  document.getElementById('aiSummaryText').textContent  = 'Generando análisis con IA...';
+  document.getElementById('generateSummaryBtn').disabled = true;
+  try {
+    const { summary } = await NXS.apiPost('/api/ai/business-summary', {});
+    document.getElementById('aiSummaryText').textContent = summary;
+  } catch {
+    document.getElementById('aiSummaryText').textContent = 'No se pudo generar el resumen. Verifica la API key de Anthropic.';
+  }
+  document.getElementById('generateSummaryBtn').disabled = false;
+});
+
+if (!NXS.getToken()) window.location.href = 'login.html';
+else load();
+</script>
+</body>
+</html>

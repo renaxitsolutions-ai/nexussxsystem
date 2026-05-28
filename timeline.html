@@ -1,0 +1,356 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mi Proyecto — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body data-requires-auth="true">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html" data-i18n="nav_home">Home</a>
+          <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+          <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+          <div class="nav-dropdown" id="ddRecursos">
+            <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="blog.html">Blog</a>
+              <a href="casos.html">Casos de exito</a>
+              <a href="calculadora.html">Calculadora</a>
+              <a href="faq.html">FAQ</a>
+              <a href="sobre.html">Sobre nosotros</a>
+            </div>
+          </div>
+          <div class="nav-dropdown" id="ddPanel">
+            <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="timeline.html">Mi proyecto</a>
+              <a href="tickets.html">Soporte</a>
+              <a href="crm.html">CRM</a>
+              <a href="referidos.html">Referidos</a>
+            </div>
+          </div>
+          <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+          <a href="admin.html" data-i18n="nav_admin">Admin</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+          <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ══ HERO ══ -->
+    <section class="hero-split">
+      <div class="hero-panel reveal">
+        <span class="tag" style="background:rgba(121,38,255,0.12);color:#9b5bff;border-color:rgba(121,38,255,0.3);box-shadow:0 0 14px rgba(121,38,255,0.2)">
+          📊 Seguimiento en tiempo real
+        </span>
+        <h1 class="hero-title" style="margin-top:14px">Tu proyecto, transparente al 100%.</h1>
+        <p class="sub" style="margin-top:10px;line-height:1.65">Ve en qué etapa estamos, qué ya está completado y cuándo recibirás la próxima actualización. Sin secretos, sin sorpresas.</p>
+        <div class="chip-row" style="margin:14px 0">
+          <span class="chip">📈 Progreso visual</span>
+          <span class="chip">💬 Notas del equipo</span>
+          <span class="chip">🔔 Actualizaciones en tiempo real</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <a class="btn" href="tickets.html">🎫 Ir a soporte</a>
+          <a class="btn whatsapp" href="https://wa.me/18293689630" target="_blank" rel="noopener">💬 Preguntar al equipo</a>
+        </div>
+      </div>
+      <div class="hero-art reveal">
+        <div class="shape-line"></div>
+        <div class="shape-line alt"></div>
+        <img alt="Seguimiento de proyecto" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80" />
+      </div>
+    </section>
+
+    <div class="pulse-line"></div>
+
+    <!-- ══ ETAPAS EXPLICADAS ══ -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="reveal">Cómo funciona el <span class="gradient-label">seguimiento</span></h2>
+        <p class="muted">Cada proyecto pasa por etapas claras y visibles para ti desde el primer día.</p>
+      </div>
+      <div class="process-grid" style="margin-top:18px">
+        <div class="process-card reveal"><div class="icon">📋</div><b>Planificación</b><div class="muted" style="font-size:.88rem;margin-top:4px">Definición de alcance, metas y entregables detallados.</div></div>
+        <div class="process-card reveal"><div class="icon">🎨</div><b>Diseño</b><div class="muted" style="font-size:.88rem;margin-top:4px">Maquetas visuales, UX y aprobación de la identidad.</div></div>
+        <div class="process-card reveal"><div class="icon">⚙️</div><b>Desarrollo</b><div class="muted" style="font-size:.88rem;margin-top:4px">Código, funcionalidades, integraciones y pruebas.</div></div>
+        <div class="process-card reveal"><div class="icon">🧪</div><b>QA & Pruebas</b><div class="muted" style="font-size:.88rem;margin-top:4px">Testing en dispositivos, navegadores y casos de uso.</div></div>
+        <div class="process-card reveal"><div class="icon">🚀</div><b>Lanzamiento</b><div class="muted" style="font-size:.88rem;margin-top:4px">Deploy, dominio y entrega oficial del proyecto.</div></div>
+        <div class="process-card reveal"><div class="icon">🔧</div><b>Soporte</b><div class="muted" style="font-size:.88rem;margin-top:4px">Acompañamiento, ajustes y mejoras post-entrega.</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="tag" style="margin-bottom:10px;display:inline-block">📊 Mis proyectos</span>
+          <h2 class="reveal"><span class="gradient-label">Mi Proyecto</span></h2>
+          <p class="muted">Sigue el progreso de tu proyecto en tiempo real. Ve en qué etapa estamos y qué sigue.</p>
+        </div>
+        <!-- Admin: crear proyecto -->
+        <div id="adminControls" style="display:none">
+          <button class="btn primary" id="newProjectBtn">+ Nuevo proyecto</button>
+        </div>
+      </div>
+
+      <!-- Admin: form nuevo proyecto -->
+      <div id="newProjectForm" style="display:none;margin:20px 0">
+        <div class="card" style="max-width:600px">
+          <h3 style="margin:0 0 16px">Crear proyecto para cliente</h3>
+          <form id="projectForm">
+            <div class="field">
+              <label>Correo del cliente</label>
+              <input type="email" id="projEmail" placeholder="cliente@correo.com" required />
+            </div>
+            <div class="field">
+              <label>Nombre del proyecto</label>
+              <input type="text" id="projName" placeholder="Ej: Landing page para empresa XYZ" required />
+            </div>
+            <div style="display:flex;gap:10px;margin-top:4px">
+              <button type="submit" class="btn primary">Crear proyecto</button>
+              <button type="button" class="btn" id="cancelProject">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Lista de proyectos -->
+      <div id="projectsList" style="display:grid;gap:16px;margin-top:20px">
+        <div class="card" style="text-align:center;color:var(--muted)">Cargando proyectos...</div>
+      </div>
+
+      <!-- Sin proyectos (cliente) -->
+      <div id="noProjects" style="display:none;text-align:center;padding:40px 20px">
+        <div style="font-size:3rem;margin-bottom:14px">🚀</div>
+        <h3>Aún no tienes un proyecto activo</h3>
+        <p class="muted">Cuando contrates un servicio, podrás seguir el progreso de tu proyecto aquí en tiempo real.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">
+          <a class="btn primary" href="calculadora.html">💰 Ver precios</a>
+          <a class="btn whatsapp" href="https://wa.me/18293689630" target="_blank">💬 Hablar con el equipo</a>
+        </div>
+      </div>
+
+      <!-- Admin: modal editar stages -->
+      <div id="stageModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+        <div class="card" style="max-width:520px;width:90%;max-height:80vh;overflow-y:auto">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="margin:0" id="stageModalTitle">Actualizar proyecto</h3>
+            <button class="btn ghost" id="closeStageModal" style="padding:6px 10px">✕</button>
+          </div>
+          <div id="stageList" style="display:grid;gap:8px;margin-bottom:14px"></div>
+          <div class="field">
+            <label>Notas para el cliente (opcional)</label>
+            <textarea id="stageNotes" rows="3" placeholder="Ej: Diseño aprobado, comenzamos desarrollo el lunes."></textarea>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="btn primary" id="saveStages">Guardar cambios</button>
+            <button class="btn danger" id="deleteProject">Eliminar proyecto</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA sin proyecto -->
+    <section class="section">
+      <div class="cta-band reveal" style="padding:32px 28px">
+        <span class="tag" style="margin-bottom:12px;display:inline-block;background:rgba(121,38,255,0.1);color:#9b5bff;border-color:rgba(121,38,255,0.3)">✦ ¿Sin proyecto activo?</span>
+        <h2>Empieza tu proyecto hoy</h2>
+        <p class="muted" style="max-width:520px;margin:8px auto 0">Contrata uno de nuestros servicios y en 48 horas verás tu primer progreso reflejado aquí. Sin esperas, sin burocracia.</p>
+        <div class="cta-actions" style="margin-top:20px">
+          <a class="btn primary" href="calculadora.html">💰 Calcular mi proyecto</a>
+          <a class="btn whatsapp" href="https://wa.me/18293689630?text=Hola,%20quiero%20empezar%20un%20proyecto" target="_blank">💬 WhatsApp</a>
+          <a class="btn" href="casos.html">🏆 Ver casos de éxito</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Systems</span></div>
+      <div class="muted" style="font-size:.82rem">Seguimiento de proyectos en tiempo real</div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Systems</div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="nexus.js"></script>
+  <script>
+    let allProjects = [];
+    let currentProject = null;
+    let isAdmin = false;
+    function showToast(msg, err = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = err ? 'rgba(255,107,145,0.2)' : '';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function renderProjects(projects) {
+      const el = document.getElementById('projectsList');
+      const noProj = document.getElementById('noProjects');
+      if (!projects.length) {
+        el.style.display = 'none';
+        noProj.style.display = '';
+        return;
+      }
+      el.style.display = 'grid';
+      noProj.style.display = 'none';
+      // Animar barras de progreso después de renderizar
+      setTimeout(() => {
+        document.querySelectorAll('.project-progress-fill').forEach(bar => {
+          const width = bar.style.width;
+          bar.style.width = '0%';
+          requestAnimationFrame(() => {
+            bar.style.transition = 'width 1.2s cubic-bezier(0.34,1.56,0.64,1)';
+            bar.style.width = width;
+          });
+        });
+      }, 100);
+
+      el.innerHTML = projects.map(p => {
+        const done = p.stages.filter(s => s.done).length;
+        const total = p.stages.length;
+        return `
+          <div class="project-card" ${isAdmin ? `style="cursor:pointer" data-id="${p.id}"` : ''}>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+              <div>
+                <div class="project-name">${p.name}</div>
+                ${isAdmin ? `<div style="font-size:.82rem;color:var(--muted)">${p.client_email}</div>` : ''}
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:1.4rem;font-weight:700;color:var(--accent);font-family:'Space Grotesk',sans-serif">${p.progress}%</div>
+                <div style="font-size:.78rem;color:var(--muted)">completado</div>
+              </div>
+            </div>
+            <div class="project-progress-bar">
+              <div class="project-progress-fill" style="width:${p.progress}%"></div>
+            </div>
+            <div class="project-stages">
+              ${p.stages.map(s => `
+                <span class="stage-badge ${s.done ? 'done' : 'pending'}">
+                  <span class="stage-check">${s.done ? '✓' : '○'}</span>
+                  ${s.label}
+                </span>
+              `).join('')}
+            </div>
+            ${p.notes ? `<div style="margin-top:12px;padding:10px 14px;background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);border-radius:10px;font-size:.86rem;color:var(--muted)">💬 ${p.notes}</div>` : ''}
+            <div style="margin-top:10px;font-size:.78rem;color:var(--muted)">📅 Creado: ${new Date(p.created_at).toLocaleDateString('es-DO')} · Etapa ${done}/${total}</div>
+            ${!isAdmin ? `
+              <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+                <a href="tickets.html" class="btn" style="font-size:.82rem;padding:7px 12px">🎫 Abrir ticket de soporte</a>
+                <a href="https://wa.me/18293689630" target="_blank" class="btn whatsapp" style="font-size:.82rem;padding:7px 12px">💬 WhatsApp</a>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      if (isAdmin) {
+        document.querySelectorAll('.project-card[data-id]').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = Number(card.dataset.id);
+            currentProject = allProjects.find(p => p.id === id);
+            openStageModal(currentProject);
+          });
+        });
+      }
+    }
+
+    function openStageModal(project) {
+      document.getElementById('stageModalTitle').textContent = project.name;
+      document.getElementById('stageNotes').value = project.notes || '';
+      document.getElementById('stageList').innerHTML = project.stages.map((s, i) => `
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:${s.done ? 'rgba(101,240,177,0.06)' : 'transparent'}">
+          <input type="checkbox" data-index="${i}" ${s.done ? 'checked' : ''} style="accent-color:var(--accent);width:16px;height:16px" />
+          <span>${s.label}</span>
+          ${s.done ? '<span style="margin-left:auto;color:#65f0b1;font-size:.85rem">✓ Completado</span>' : ''}
+        </label>
+      `).join('');
+      document.getElementById('stageModal').style.display = 'flex';
+    }
+
+    document.getElementById('closeStageModal').addEventListener('click', () => document.getElementById('stageModal').style.display = 'none');
+
+    document.getElementById('saveStages').addEventListener('click', async () => {
+      if (!currentProject) return;
+      const checkboxes = document.querySelectorAll('#stageList input[type=checkbox]');
+      const stages = currentProject.stages.map((s, i) => ({ ...s, done: checkboxes[i].checked }));
+      const notes = document.getElementById('stageNotes').value.trim();
+      try {
+        const result = await NXS.apiPatch(`/api/projects/${currentProject.id}`, { stages, notes });
+        document.getElementById('stageModal').style.display = 'none';
+        await loadProjects();
+        showToast(`Proyecto actualizado · ${result.progress}% completado`);
+      } catch(e) { showToast('Error al actualizar', true); }
+    });
+
+    document.getElementById('deleteProject').addEventListener('click', async () => {
+      if (!currentProject || !confirm('¿Eliminar este proyecto?')) return;
+      try {
+        await NXS.apiDelete(`/api/projects/${currentProject.id}`);
+        document.getElementById('stageModal').style.display = 'none';
+        await loadProjects();
+        showToast('Proyecto eliminado');
+      } catch(e) { showToast('Error al eliminar', true); }
+    });
+
+    async function loadProjects() {
+      try {
+        const data = await NXS.apiGet('/api/projects');
+        allProjects = data.items || [];
+        renderProjects(allProjects);
+      } catch(e) {
+        document.getElementById('projectsList').innerHTML = `<div class="card" style="color:#ff6b91">Error al cargar proyectos.</div>`;
+      }
+    }
+
+    // Admin controls
+    document.getElementById('newProjectBtn')?.addEventListener('click', () => {
+      const f = document.getElementById('newProjectForm');
+      f.style.display = f.style.display === 'none' ? '' : 'none';
+    });
+    document.getElementById('cancelProject')?.addEventListener('click', () => {
+      document.getElementById('newProjectForm').style.display = 'none';
+    });
+
+    document.getElementById('projectForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const client_email = document.getElementById('projEmail').value.trim();
+      const name = document.getElementById('projName').value.trim();
+      try {
+        await NXS.apiPost('/api/projects', { client_email, name });
+        document.getElementById('projectForm').reset();
+        document.getElementById('newProjectForm').style.display = 'none';
+        await loadProjects();
+        showToast('Proyecto creado');
+      } catch(e) { showToast('Error al crear proyecto', true); }
+    });
+
+    // Check role
+    const token = NXS.getToken();
+    if (token) {
+      try { const p = JSON.parse(atob(token.split('.')[1])); isAdmin = p.role === 'admin'; } catch(_) {}
+    }
+    if (isAdmin) document.getElementById('adminControls').style.display = '';
+
+    loadProjects();
+  </script>
+</body>
+</html>
+
+

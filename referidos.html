@@ -1,0 +1,346 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Programa de Referidos — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body data-requires-auth="true">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html" data-i18n="nav_home">Home</a>
+          <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+          <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+          <div class="nav-dropdown" id="ddRecursos">
+            <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="blog.html">Blog</a>
+              <a href="casos.html">Casos de exito</a>
+              <a href="calculadora.html">Calculadora</a>
+              <a href="faq.html">FAQ</a>
+              <a href="sobre.html">Sobre nosotros</a>
+            </div>
+          </div>
+          <div class="nav-dropdown" id="ddPanel">
+            <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="timeline.html">Mi proyecto</a>
+              <a href="tickets.html">Soporte</a>
+              <a href="crm.html">CRM</a>
+              <a href="referidos.html">Referidos</a>
+            </div>
+          </div>
+          <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+          <a href="admin.html" data-i18n="nav_admin">Admin</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+          <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div style="text-align:center;padding:20px 0 30px">
+        <span class="tag" style="margin-bottom:14px;display:inline-block;background:rgba(245,158,11,0.1);color:var(--gold);border-color:rgba(245,158,11,0.3)">🎁 Programa de referidos</span>
+        <h2 class="reveal">Gana dinero <span class="gradient-label">recomendando</span> Nexuss X Systems</h2>
+        <p class="muted" style="max-width:560px;margin:10px auto 0">Recomienda nuestros servicios a tus contactos y gana comisiones por cada cliente que llegue con tu código. Ellos obtienen un descuento, tú ganas dinero.</p>
+      </div>
+
+      <!-- Cómo funciona -->
+      <div class="referral-steps reveal">
+        <div class="referral-step">
+          <div class="step-num">1</div>
+          <h4 style="margin:0 0 6px">Genera tu código</h4>
+          <p style="margin:0;color:var(--muted);font-size:.87rem">Obtén tu código único de referido con un clic. Es tuyo para siempre.</p>
+        </div>
+        <div class="referral-step">
+          <div class="step-num">2</div>
+          <h4 style="margin:0 0 6px">Compártelo</h4>
+          <p style="margin:0;color:var(--muted);font-size:.87rem">Envía el código a tus contactos, redes o clientes que necesiten presencia digital.</p>
+        </div>
+        <div class="referral-step">
+          <div class="step-num">3</div>
+          <h4 style="margin:0 0 6px">Ellos ahorran 10%</h4>
+          <p style="margin:0;color:var(--muted);font-size:.87rem">Tu referido aplica el código en su compra y obtiene un 10% de descuento automático.</p>
+        </div>
+        <div class="referral-step">
+          <div class="step-num">4</div>
+          <h4 style="margin:0 0 6px">Tú cobras comisión</h4>
+          <p style="margin:0;color:var(--muted);font-size:.87rem">Contáctanos y te transferimos tu comisión por cada proyecto cerrado con tu código.</p>
+        </div>
+      </div>
+
+      <!-- Stats del programa -->
+      <div class="stats-band reveal" style="margin:24px 0">
+        <div>
+          <div class="stat"><span data-counter="10" data-suffix="%">10%</span></div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Descuento para tu referido</div>
+        </div>
+        <div>
+          <div class="stat"><span data-counter="15" data-suffix="%">15%</span></div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Comisión por referido cerrado</div>
+        </div>
+        <div>
+          <div class="stat">24h</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Pago de comisión</div>
+        </div>
+        <div>
+          <div class="stat">∞</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Sin límite de referidos</div>
+        </div>
+      </div>
+
+      <!-- Código del usuario -->
+      <div class="referral-box reveal">
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px">Tu código personal de referido</div>
+        <div class="referral-code-display" id="myCode" title="Click para copiar">— — — — — — — —</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Haz clic en el código para copiarlo</div>
+        <button class="btn primary" id="generateBtn">🎁 Generar mi código</button>
+        <div id="codeMsg" style="margin-top:10px;font-size:.88rem"></div>
+        <div id="usesInfo" style="margin-top:14px;display:none">
+          <div style="font-size:1.1rem">Usos del código: <span id="usesCount" style="color:var(--accent);font-weight:700">0</span></div>
+        </div>
+      </div>
+
+      <!-- Compartir -->
+      <div class="card reveal" style="max-width:600px;margin:0 auto">
+        <h3 style="margin:0 0 16px">📤 Compartir tu código</h3>
+        <div style="display:grid;gap:10px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" id="shareWhatsApp" style="flex:1;min-width:140px;justify-content:center">💬 WhatsApp</button>
+            <button class="btn" id="shareEmail" style="flex:1;min-width:140px;justify-content:center">📧 Email</button>
+            <button class="btn" id="shareClipboard" style="flex:1;min-width:140px;justify-content:center">📋 Copiar link</button>
+          </div>
+          <div style="padding:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:.85rem;color:var(--muted)">
+            Mensaje sugerido: <em>"Hola, te recomiendo Nexuss X Systems para tu presencia digital. Usa mi código <span id='codePlaceholder' style='color:var(--accent);font-weight:700'>[TU CÓDIGO]</span> y obtén 10% de descuento. Web: nexussxsystems.com"</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sistema de niveles -->
+      <div class="section" style="padding:30px 0 0">
+        <div class="section-head">
+          <h3 class="reveal">Sistema de <span class="gradient-label">niveles</span></h3>
+          <p class="muted">Cuantos más referidos activos tengas, mayores son tus beneficios.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px">
+          <div class="card reveal" style="padding:22px;text-align:center;border-top:3px solid rgba(255,255,255,0.2)">
+            <div style="font-size:2rem;margin-bottom:8px">🌱</div>
+            <div style="font-weight:700;font-size:1.1rem;margin-bottom:4px">Starter</div>
+            <div class="muted" style="font-size:.82rem;margin-bottom:12px">0 – 2 referidos</div>
+            <div style="font-size:1.4rem;font-weight:700;color:#00d4ff">10%</div>
+            <div class="muted" style="font-size:.78rem">descuento para referido</div>
+            <div style="font-size:1.2rem;font-weight:700;color:#65f0b1;margin-top:6px">+5%</div>
+            <div class="muted" style="font-size:.78rem">comisión para ti</div>
+          </div>
+          <div class="card reveal" style="padding:22px;text-align:center;border-top:3px solid rgba(121,38,255,0.7)">
+            <div style="font-size:2rem;margin-bottom:8px">⚡</div>
+            <div style="font-weight:700;font-size:1.1rem;margin-bottom:4px">Pro</div>
+            <div class="muted" style="font-size:.82rem;margin-bottom:12px">3 – 7 referidos</div>
+            <div style="font-size:1.4rem;font-weight:700;color:#9b5bff">12%</div>
+            <div class="muted" style="font-size:.78rem">descuento para referido</div>
+            <div style="font-size:1.2rem;font-weight:700;color:#65f0b1;margin-top:6px">+10%</div>
+            <div class="muted" style="font-size:.78rem">comisión para ti</div>
+          </div>
+          <div class="card reveal" style="padding:22px;text-align:center;border-top:3px solid rgba(245,158,11,0.8);background:linear-gradient(135deg,rgba(245,158,11,0.06),transparent)">
+            <div style="font-size:2rem;margin-bottom:8px">🏆</div>
+            <div style="font-weight:700;font-size:1.1rem;margin-bottom:4px">Elite</div>
+            <div class="muted" style="font-size:.82rem;margin-bottom:12px">8+ referidos</div>
+            <div style="font-size:1.4rem;font-weight:700;color:#f59e0b">15%</div>
+            <div class="muted" style="font-size:.78rem">descuento para referido</div>
+            <div style="font-size:1.2rem;font-weight:700;color:#65f0b1;margin-top:6px">+15%</div>
+            <div class="muted" style="font-size:.78rem">comisión para ti</div>
+            <span class="tag" style="font-size:.7rem;margin-top:10px;display:inline-block;background:rgba(245,158,11,0.1);color:#f59e0b;border-color:rgba(245,158,11,0.3)">+ Bono mensual</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculadora de comisiones -->
+      <div class="card reveal" style="max-width:600px;margin:30px auto;padding:28px">
+        <h3 style="margin:0 0 6px">🧮 Calculadora de comisiones</h3>
+        <p class="muted" style="font-size:.85rem;margin-bottom:18px">Estima cuánto puedes ganar recomendando Nexuss X Systems.</p>
+        <div class="field">
+          <label for="calcReferidos">¿Cuántos referidos mensuales crees que puedes conseguir?</label>
+          <input type="range" id="calcReferidos" min="1" max="20" value="3" style="width:100%;accent-color:#00d4ff" oninput="updateCalc()" />
+          <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)"><span>1</span><span>10</span><span>20</span></div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label for="calcValor">Valor promedio de proyecto referido (DOP)</label>
+          <select id="calcValor" style="width:100%" onchange="updateCalc()">
+            <option value="2500">DOP 2,500 – Landing page</option>
+            <option value="4500" selected>DOP 4,500 – Página de ventas</option>
+            <option value="7500">DOP 7,500 – Panel de gestión</option>
+            <option value="9000">DOP 9,000 – E-commerce</option>
+            <option value="12000">DOP 12,000+ – App personalizada</option>
+          </select>
+        </div>
+        <div style="margin-top:20px;padding:18px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);border-radius:14px;text-align:center">
+          <div class="muted" style="font-size:.82rem;margin-bottom:6px">Comisión mensual estimada</div>
+          <div id="calcResult" style="font-size:2.2rem;font-weight:800;color:#00d4ff">DOP 2,025</div>
+          <div class="muted" style="font-size:.78rem;margin-top:4px">Basado en nivel Pro · 10% comisión</div>
+        </div>
+      </div>
+
+      <!-- Ranking (admin only) -->
+      <div id="adminRanking" style="display:none;margin-top:30px">
+        <div class="section-head" style="margin-bottom:14px">
+          <h3>🏆 Ranking de referidores</h3>
+        </div>
+        <div class="table-wrap" id="referralTable">
+          <table>
+            <thead><tr><th>#</th><th>Usuario</th><th>Código</th><th>Usos</th><th>Descuento</th></tr></thead>
+            <tbody id="referralBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="cta-band reveal" style="text-align:center">
+        <h2>¿Tienes preguntas sobre el programa?</h2>
+        <p class="muted">Nuestro equipo está disponible para explicarte todos los detalles.</p>
+        <div class="cta-actions" style="margin-top:16px">
+          <a class="btn whatsapp" href="https://wa.me/18293689630?text=Hola,%20quiero%20información%20sobre%20el%20programa%20de%20referidos" target="_blank">💬 WhatsApp</a>
+          <a class="btn primary" href="contacto.html">📩 Contactar</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Systems</span></div>
+      <div class="muted" style="font-size:.82rem">Programa de referidos · LATAM</div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Systems</div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="nexus.js"></script>
+  <script>
+    let myCode = '';
+    function showToast(msg, err = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = err ? 'rgba(255,107,145,0.2)' : '';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function setCode(code, uses) {
+      myCode = code;
+      document.getElementById('myCode').textContent = code;
+      document.getElementById('codePlaceholder').textContent = code;
+      document.getElementById('usesInfo').style.display = '';
+      document.getElementById('usesCount').textContent = uses;
+      document.getElementById('generateBtn').textContent = '✅ Código activo';
+      document.getElementById('codeMsg').textContent = 'Comparte este código y gana comisiones.';
+      document.getElementById('codeMsg').style.color = '#65f0b1';
+    }
+
+    // Load existing code
+    async function loadMyCode() {
+      try {
+        const data = await NXS.apiGet('/api/referrals');
+        if (data.items && data.items.length > 0) {
+          setCode(data.items[0].code, data.items[0].uses);
+        }
+      } catch(_) {}
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      try {
+        const data = await NXS.apiPost('/api/referrals/generate', {});
+        setCode(data.code, data.uses);
+        showToast('Código generado exitosamente');
+      } catch(e) {
+        showToast('Error al generar código. ¿Estás logueado?', true);
+      }
+    });
+
+    document.getElementById('myCode').addEventListener('click', () => {
+      if (!myCode || myCode.includes('—')) return;
+      navigator.clipboard.writeText(myCode).then(() => {
+        showToast('✅ Código copiado al portapapeles');
+        const el = document.getElementById('myCode');
+        el.style.background = 'rgba(101,240,177,0.15)';
+        el.style.borderColor = 'rgba(101,240,177,0.5)';
+        el.style.color = '#65f0b1';
+        setTimeout(() => {
+          el.style.background = '';
+          el.style.borderColor = '';
+          el.style.color = '';
+        }, 1500);
+      });
+    });
+
+    const shareMsg = () => `Hola, te recomiendo Nexuss X Systems para tu presencia digital. Usa mi código ${myCode} y obtén 10% de descuento. nexussxsystems.com`;
+
+    document.getElementById('shareWhatsApp').addEventListener('click', () => {
+      if (!myCode || myCode.includes('—')) { showToast('Genera tu código primero', true); return; }
+      window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg()), '_blank');
+    });
+
+    document.getElementById('shareEmail').addEventListener('click', () => {
+      if (!myCode || myCode.includes('—')) { showToast('Genera tu código primero', true); return; }
+      window.open(`mailto:?subject=10% de descuento en desarrollo web&body=${encodeURIComponent(shareMsg())}`, '_blank');
+    });
+
+    document.getElementById('shareClipboard').addEventListener('click', () => {
+      if (!myCode || myCode.includes('—')) { showToast('Genera tu código primero', true); return; }
+      navigator.clipboard.writeText(shareMsg()).then(() => showToast('Mensaje copiado al portapapeles'));
+    });
+
+    // Admin: load all referrals
+    const token = NXS.getToken();
+    let isAdmin = false;
+    if (token) {
+      try { const p = JSON.parse(atob(token.split('.')[1])); isAdmin = p.role === 'admin'; } catch(_) {}
+    }
+
+    if (isAdmin) {
+      document.getElementById('adminRanking').style.display = '';
+      NXS.apiGet('/api/referrals').then(data => {
+        const sorted = (data.items || []).sort((a, b) => b.uses - a.uses);
+        document.getElementById('referralBody').innerHTML = sorted.map((r, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${r.email}</td>
+            <td><span style="font-family:monospace;color:var(--accent)">${r.code}</span></td>
+            <td><b>${r.uses}</b></td>
+            <td>${r.discount}%</td>
+          </tr>
+        `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Sin referidos aún</td></tr>';
+      }).catch(() => {});
+    }
+
+    loadMyCode();
+
+    function updateCalc() {
+      const refs = parseInt(document.getElementById('calcReferidos').value) || 3;
+      const valor = parseInt(document.getElementById('calcValor').value) || 4500;
+      let pct = 0.05;
+      let nivel = 'Starter';
+      if (refs >= 3 && refs <= 7) { pct = 0.10; nivel = 'Pro'; }
+      if (refs >= 8) { pct = 0.15; nivel = 'Elite'; }
+      const total = Math.round(refs * valor * pct);
+      document.getElementById('calcResult').textContent = 'DOP ' + total.toLocaleString('es-DO');
+      document.querySelector('#calcResult + div').textContent = `Basado en nivel ${nivel} · ${Math.round(pct*100)}% comisión · ${refs} referidos`;
+    }
+    updateCalc();
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Verificar email — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html">Home</a>
+          <a href="servicios.html">Servicios</a>
+          <a href="contacto.html">Contacto</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:center;padding:54px 0 20px;min-height:calc(100svh - 180px)">
+      
+      <div style="max-width:500px;margin:0 auto;width:100%">
+        
+        <!-- Card -->
+        <div class="hero-card" style="padding:40px;text-align:center">
+          <div style="font-size:3.5rem;margin-bottom:20px">✉️</div>
+          
+          <h2 style="margin:0 0 12px;font-family:'Space Grotesk', sans-serif;font-size:1.8rem">
+            Verificar email
+          </h2>
+          <p style="margin:0 0 24px;color:var(--muted);font-size:.95rem;line-height:1.6">
+            Te hemos enviado un código de verificación a:
+          </p>
+          
+          <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:var(--border-radius);padding:14px;margin-bottom:24px;font-weight:500;color:var(--accent)" id="emailDisplay"></div>
+
+          <form id="verifyForm" style="display:flex;flex-direction:column;gap:16px">
+            
+            <!-- Código de verificación -->
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-weight:500;font-size:.9rem;color:var(--ink)">
+                Código de verificación
+              </label>
+              <input 
+                type="text" 
+                name="code" 
+                placeholder="000000"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required
+                style="
+                  background:var(--bg-2);
+                  border:1px solid var(--line);
+                  border-radius:var(--border-radius);
+                  padding:12px 14px;
+                  color:var(--ink);
+                  font-size:1.2rem;
+                  font-family:'Courier New', monospace;
+                  text-align:center;
+                  letter-spacing:8px;
+                  transition:var(--transition);
+                "
+              />
+              <span style="font-size:.8rem;color:var(--muted)">Ingresa los 6 dígitos enviados a tu email</span>
+            </div>
+
+            <!-- Submit -->
+            <button 
+              type="submit" 
+              class="btn primary" 
+              style="width:100%;justify-content:center;font-size:1rem;padding:14px"
+            >
+              Verificar email
+            </button>
+
+          </form>
+
+          <!-- Resend Code -->
+          <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line)">
+            <p style="margin:0 0 12px;color:var(--muted);font-size:.9rem">
+              ¿No recibiste el código?
+            </p>
+            <button 
+              type="button" 
+              class="btn ghost"
+              id="resendBtn"
+              style="width:100%;justify-content:center;font-size:.95rem"
+            >
+              Reenviar código
+            </button>
+            <span id="resendTimer" style="display:none;margin-top:12px;display:block;color:var(--muted);font-size:.85rem">
+              Puedes reenviar en <strong id="timer">60</strong>s
+            </span>
+          </div>
+
+          <!-- Footer -->
+          <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:.9rem;color:var(--muted)">
+            <p style="margin:0">
+              <a href="login.html" style="color:var(--accent);text-decoration:none">
+                ← Volver al inicio de sesión
+              </a>
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:24px 0;text-align:center;color:var(--muted);font-size:.85rem;margin-top:40px">
+    <div class="container">
+      <p style="margin:0">&copy; 2026 Nexuss X Systems. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="nexus.js"></script>
+  <script>
+    // Obtener email de sessionStorage (establecido en registro)
+    const verifyEmail = sessionStorage.getItem('nxs_verify_email');
+    const verifyCode = sessionStorage.getItem('nxs_verify_code');
+
+    if (!verifyEmail || !verifyCode) {
+      window.location.href = 'registro.html';
+    }
+
+    document.getElementById('emailDisplay').textContent = verifyEmail;
+
+    const form = document.getElementById('verifyForm');
+    const resendBtn = document.getElementById('resendBtn');
+    const resendTimer = document.getElementById('resendTimer');
+    const timerDisplay = document.getElementById('timer');
+    let resendCountdown = 0;
+
+    // Manejar envío de formulario
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const code = form.code.value;
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+
+      if (code !== verifyCode) {
+        alert('❌ Código incorrecto');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Verificando...';
+
+      try {
+        // Intenta verificar en servidor
+        const response = await fetch(`${NXS.API_BASE}/auth/verify-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: verifyEmail, code })
+        }).catch(() => {
+          console.log('Servidor no disponible, usando verificación local');
+          return null;
+        });
+
+        if (response && response.ok) {
+          const data = await response.json();
+          
+          localStorage.setItem('nxs_auth', JSON.stringify({
+            token: data.token,
+            user: data.user,
+            timestamp: Date.now()
+          }));
+
+          sessionStorage.removeItem('nxs_verify_email');
+          sessionStorage.removeItem('nxs_verify_code');
+
+          alert('✓ Email verificado exitosamente');
+          window.location.href = 'home.html';
+
+        } else if (!response) {
+          // Simulación local
+          alert('✓ Email verificado exitosamente');
+          
+          // Marcar usuario como verificado
+          const users = JSON.parse(localStorage.getItem('nxs_users') || '[]');
+          const userIndex = users.findIndex(u => u.email === verifyEmail);
+          
+          if (userIndex !== -1) {
+            users[userIndex].verified = true;
+            localStorage.setItem('nxs_users', JSON.stringify(users));
+          }
+
+          localStorage.setItem('nxs_auth', JSON.stringify({
+            token: 'local_' + Math.random().toString(36).substr(2, 9),
+            user: { email: verifyEmail, verified: true },
+            timestamp: Date.now()
+          }));
+
+          sessionStorage.removeItem('nxs_verify_email');
+          sessionStorage.removeItem('nxs_verify_code');
+
+          window.location.href = 'home.html';
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error de conexión');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+
+    // Reenviar código
+    resendBtn.addEventListener('click', async () => {
+      if (resendCountdown > 0) return;
+
+      try {
+        // Intenta reenviar en servidor
+        await fetch(`${NXS.API_BASE}/auth/resend-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: verifyEmail })
+        }).catch(() => null);
+
+        alert('✓ Código reenviado a tu email');
+        startResendCountdown();
+
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error al reenviar código');
+      }
+    });
+
+    function startResendCountdown() {
+      resendCountdown = 60;
+      resendBtn.disabled = true;
+      resendTimer.style.display = 'block';
+
+      const interval = setInterval(() => {
+        resendCountdown--;
+        timerDisplay.textContent = resendCountdown;
+
+        if (resendCountdown === 0) {
+          clearInterval(interval);
+          resendBtn.disabled = false;
+          resendTimer.style.display = 'none';
+        }
+      }, 1000);
+    }
+
+    // Iniciar countdown al cargar
+    startResendCountdown();
+  </script>
+</body>
+</html>

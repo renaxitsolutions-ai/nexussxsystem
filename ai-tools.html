@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IA Tools — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .tools-layout{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
+    @media(max-width:800px){.tools-layout{grid-template-columns:1fr}}
+    .tool-panel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:24px}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;margin-bottom:6px;font-size:.85rem;color:var(--muted)}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;font-size:.9rem;box-sizing:border-box}
+    .form-group textarea{resize:vertical;min-height:80px}
+    .form-group select{cursor:pointer}
+    .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+    .type-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 8px;cursor:pointer;text-align:center;font-size:.8rem;color:#fff;transition:.2s}
+    .type-btn:hover{border-color:rgba(0,212,255,0.4);color:#00d4ff}
+    .type-btn.active{background:rgba(0,212,255,0.1);border-color:#00d4ff;color:#00d4ff}
+    .type-btn .type-icon{font-size:1.4rem;margin-bottom:4px}
+    .result-panel{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;min-height:400px;position:relative}
+    .result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .result-content{white-space:pre-wrap;font-size:.9rem;line-height:1.7;color:rgba(255,255,255,0.9)}
+    .result-content h2,.result-content h3{color:#00d4ff;margin:16px 0 8px}
+    .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:16px}
+    .spinner{width:40px;height:40px;border:3px solid rgba(0,212,255,0.2);border-top-color:#00d4ff;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .history-list{margin-top:20px}
+    .history-item{padding:10px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:.82rem;color:var(--muted);transition:.2s}
+    .history-item:hover{border-color:rgba(0,212,255,0.3);color:#fff}
+    .word-count{font-size:.78rem;color:var(--muted);text-align:right;margin-top:8px}
+    .char-count{display:block;font-size:.72rem;color:var(--muted);margin-top:4px}
+    .ai-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(121,38,255,.2),rgba(0,212,255,.2));border:1px solid rgba(0,212,255,.3);padding:3px 10px;border-radius:20px;font-size:.75rem;color:#00d4ff;margin-bottom:12px}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Herramientas ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a><a href="pipeline.html">Pipeline</a>
+          <a href="crm.html">CRM</a><a href="ai-tools.html" style="color:#00d4ff">IA Tools</a>
+          <a href="knowledge.html">Base de Conocimiento</a>
+        </div>
+      </div>
+      <a href="contacto.html">Contacto</a>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="ai-badge">🤖 Powered by Claude AI</span>
+      <h2 class="reveal">Generador de Contenido con <span class="gradient-label">IA</span></h2>
+      <p class="muted">Genera artículos, emails, copy publicitario y más en segundos.</p>
+    </div>
+  </div>
+
+  <div class="tools-layout">
+    <!-- Left panel: controls -->
+    <div class="tool-panel">
+      <h4 style="margin-bottom:16px">Tipo de contenido</h4>
+      <div class="type-grid" id="typeGrid">
+        <button class="type-btn active" data-type="blog_post"><div class="type-icon">📝</div>Blog Post</button>
+        <button class="type-btn" data-type="email"><div class="type-icon">📧</div>Email</button>
+        <button class="type-btn" data-type="social_post"><div class="type-icon">📱</div>Social Media</button>
+        <button class="type-btn" data-type="landing_copy"><div class="type-icon">🎯</div>Landing Page</button>
+        <button class="type-btn" data-type="product_desc"><div class="type-icon">🏷️</div>Producto</button>
+        <button class="type-btn" data-type="faq"><div class="type-icon">❓</div>FAQ</button>
+        <button class="type-btn" data-type="ad_copy"><div class="type-icon">📣</div>Publicidad</button>
+        <button class="type-btn" data-type="custom"><div class="type-icon">✨</div>Personalizado</button>
+      </div>
+
+      <div class="form-group">
+        <label>Tema / Descripción *</label>
+        <textarea id="topicInput" placeholder="Ej: Los beneficios del CRM para pequeñas empresas..." rows="4"></textarea>
+        <span class="char-count" id="charCount">0 / 500 chars</span>
+      </div>
+
+      <div class="form-group">
+        <label>Tono</label>
+        <select id="toneSelect">
+          <option value="profesional">Profesional</option>
+          <option value="amigable">Amigable y cercano</option>
+          <option value="persuasivo">Persuasivo / Ventas</option>
+          <option value="técnico">Técnico / Experto</option>
+          <option value="inspirador">Inspirador</option>
+          <option value="informal">Informal / Casual</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Extensión</label>
+        <select id="lengthSelect">
+          <option value="short">Corto (2-3 párrafos)</option>
+          <option value="medium" selected>Medio (4-6 párrafos)</option>
+          <option value="long">Largo (800-1200 palabras)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="extraGroup">
+        <label>Instrucciones adicionales (opcional)</label>
+        <input type="text" id="extraInput" placeholder="Ej: Enfocarse en pymes dominicanas..." />
+      </div>
+
+      <button class="btn primary" id="generateBtn" style="width:100%;padding:14px;font-size:1rem">
+        🚀 Generar contenido
+      </button>
+
+      <div class="history-list" id="historyList" style="display:none">
+        <h5 style="margin-bottom:10px;color:var(--muted)">Historial</h5>
+      </div>
+    </div>
+
+    <!-- Right panel: result -->
+    <div class="result-panel" id="resultPanel">
+      <div class="loading-state" id="emptyState">
+        <div style="font-size:4rem">🤖</div>
+        <h3 style="color:var(--muted)">Listo para generar</h3>
+        <p class="muted" style="text-align:center">Elige un tipo, escribe tu tema y haz clic en Generar.</p>
+      </div>
+      <div id="loadingState" style="display:none">
+        <div class="loading-state"><div class="spinner"></div><p class="muted">Generando contenido con IA...</p></div>
+      </div>
+      <div id="resultContent" style="display:none">
+        <div class="result-actions">
+          <button class="btn" id="copyBtn">📋 Copiar</button>
+          <button class="btn ghost" id="saveBlogBtn">💾 Guardar en Blog</button>
+          <button class="btn ghost" id="regenerateBtn">🔄 Regenerar</button>
+          <span class="word-count" id="wordCount"></span>
+        </div>
+        <div class="result-content" id="resultText"></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+let currentType = 'blog_post';
+let lastTopic = '';
+const history = [];
+
+// Type selection
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+    if (currentType === 'custom') {
+      document.getElementById('extraGroup').style.display = '';
+    }
+  });
+});
+
+// Char count
+document.getElementById('topicInput').addEventListener('input', e => {
+  const len = e.target.value.length;
+  document.getElementById('charCount').textContent = `${len} / 500 chars`;
+  if (len > 480) e.target.value = e.target.value.slice(0,500);
+});
+
+async function generate() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) return showToast('Ingresa un tema primero');
+  lastTopic = topic;
+  const tone   = document.getElementById('toneSelect').value;
+  const length = document.getElementById('lengthSelect').value;
+  const extra  = document.getElementById('extraInput').value.trim();
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('loadingState').style.display = '';
+  document.getElementById('resultContent').style.display = 'none';
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('generateBtn').textContent = '⏳ Generando...';
+
+  try {
+    const data = await NXS.apiPost('/api/ai/generate-content', { type: currentType, topic, tone, length, lang:'es', extra });
+    const content = data.content || '';
+    document.getElementById('resultText').textContent = content;
+    const words = content.split(/\s+/).filter(Boolean).length;
+    document.getElementById('wordCount').textContent = `${words} palabras · ${content.length} caracteres`;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('resultContent').style.display = '';
+    // Add to history
+    history.unshift({ topic, type: currentType, preview: topic.slice(0,40) });
+    renderHistory();
+  } catch(e) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('emptyState').style.display = '';
+    showToast('Error generando contenido. Verifica la API key de Anthropic.');
+  }
+  document.getElementById('generateBtn').disabled = false;
+  document.getElementById('generateBtn').textContent = '🚀 Generar contenido';
+}
+
+document.getElementById('generateBtn').addEventListener('click', generate);
+document.getElementById('regenerateBtn').addEventListener('click', generate);
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const text = document.getElementById('resultText').textContent;
+  try { await navigator.clipboard.writeText(text); showToast('¡Copiado al portapapeles!'); }
+  catch { showToast('No se pudo copiar automáticamente'); }
+});
+
+document.getElementById('saveBlogBtn').addEventListener('click', async () => {
+  const content = document.getElementById('resultText').textContent;
+  if (!content) return;
+  const title = lastTopic.slice(0,80) || 'Artículo generado con IA';
+  try {
+    await NXS.apiPost('/api/blog', { title, content, category:'ia', is_published: false });
+    showToast('✅ Guardado en Blog como borrador. Puedes publicarlo desde Admin.');
+  } catch { showToast('Error guardando en blog'); }
+});
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (history.length === 0) { list.style.display='none'; return; }
+  list.style.display='';
+  const typeNames = { blog_post:'Blog', email:'Email', social_post:'Social', landing_copy:'Landing', product_desc:'Producto', faq:'FAQ', ad_copy:'Publicidad', custom:'Custom' };
+  list.innerHTML = '<h5 style="margin-bottom:10px;color:var(--muted)">Historial reciente</h5>' +
+    history.slice(0,5).map((h,i) => `<div class="history-item" onclick="restoreHistory(${i})">${typeNames[h.type]||h.type}: ${h.preview}...</div>`).join('');
+}
+
+function restoreHistory(i) {
+  document.getElementById('topicInput').value = history[i].topic;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-type="${history[i].type}"]`)?.classList.add('active');
+  currentType = history[i].type;
+  generate();
+}
+
+// Auth check
+if (!NXS.getToken()) window.location.href = 'login.html';
+</script>
+</body>
+</html>

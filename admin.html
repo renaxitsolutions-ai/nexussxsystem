@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .admin-tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:0}
+    .tab-btn{padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;font-size:.88rem;transition:.2s;margin-bottom:-1px}
+    .tab-btn:hover{color:#fff}
+    .tab-btn.active{color:#00d4ff;border-bottom-color:#00d4ff}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .data-table{width:100%;border-collapse:collapse;font-size:.83rem}
+    .data-table th{padding:10px 14px;background:rgba(255,255,255,.05);text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
+    .data-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+    .data-table tr:hover td{background:rgba(255,255,255,.03)}
+    .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+    .filter-row input,.filter-row select{padding:7px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.82rem}
+    .filter-row input:focus,.filter-row select:focus{outline:none;border-color:#00d4ff}
+    .role-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:600}
+    .r-owner,.r-admin{background:rgba(121,38,255,.2);color:#9b5bff}
+    .r-manager{background:rgba(0,212,255,.12);color:#00d4ff}
+    .r-agent{background:rgba(245,158,11,.12);color:#f59e0b}
+    .r-viewer{background:rgba(255,255,255,.08);color:#aaa}
+    .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+    .status-dot.new{background:#00d4ff}.status-dot.replied{background:#22c55e}.status-dot.archived{background:#aaa}
+    .pagination{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.82rem}
+    .page-btn{padding:5px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;cursor:pointer}
+    .page-btn:hover:not(:disabled){background:rgba(0,212,255,.1);border-color:#00d4ff}
+    .page-btn:disabled{opacity:.3;cursor:default}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center}
+    .modal{background:#161626;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;margin-bottom:5px;font-size:.82rem;color:var(--muted)}
+    .form-group input,.form-group select{width:100%;padding:9px 13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.88rem;box-sizing:border-box}
+    .msg-body{background:rgba(255,255,255,.04);border-radius:8px;padding:12px;font-size:.85rem;line-height:1.6;margin:12px 0;max-height:200px;overflow-y:auto}
+    .order-item{background:rgba(255,255,255,.04);border-left:3px solid rgba(0,212,255,.3);border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:8px;font-size:.83rem}
+    .table-wrap{overflow-x:auto}
+    .auto-rule{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-bottom:10px}
+    .auto-rule h5{margin-bottom:6px;font-size:.88rem}
+    .auto-rule .trigger{font-size:.75rem;color:#00d4ff;background:rgba(0,212,255,.1);padding:2px 8px;border-radius:10px}
+    .auto-rule .actions-list{font-size:.78rem;color:var(--muted);margin-top:6px}
+    .toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0}
+    .toggle-switch input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:11px;cursor:pointer;transition:.3s}
+    .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+    .toggle-switch input:checked+.toggle-slider{background:#00d4ff}
+    .toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px)}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Admin ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a><a href="admin.html" style="color:#00d4ff">Panel admin</a>
+          <a href="reports.html">Reportes</a><a href="audit.html">Auditoría</a>
+        </div>
+      </div>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="tag">⚙️ Admin</span>
+      <h2 class="reveal">Panel de <span class="gradient-label">Administración</span></h2>
+    </div>
+    <a href="dashboard.html" class="btn ghost">← Dashboard</a>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="tab-btn active" data-tab="messages">📨 Mensajes</button>
+    <button class="tab-btn" data-tab="orders">📦 Órdenes</button>
+    <button class="tab-btn" data-tab="users">👥 Usuarios</button>
+    <button class="tab-btn" data-tab="automations">⚡ Automatizaciones</button>
+    <button class="tab-btn" data-tab="branding">🎨 Branding</button>
+    <button class="tab-btn" data-tab="queries">🔍 5 Consultas SQL</button>
+    <button class="tab-btn" data-tab="backup">💾 Backup BD</button>
+    <button class="tab-btn" data-tab="alerts">📧 Alertas Email</button>
+  </div>
+
+  <!-- MESSAGES TAB -->
+  <div class="tab-panel active" id="tab-messages">
+    <div class="filter-row">
+      <input type="text" id="mSearch" placeholder="Buscar nombre o email..." style="min-width:180px" />
+      <select id="mStatus"><option value="">Todos</option><option value="new">Nuevo</option><option value="replied">Respondido</option><option value="archived">Archivado</option></select>
+      <button class="btn primary" id="applyMsgFilter">Filtrar</button>
+      <button class="btn ghost" id="exportMsgs">⬇ CSV</button>
+    </div>
+    <div class="table-wrap card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>Nombre</th><th>Email</th><th>Asunto</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+        <tbody id="msgBody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination"><button class="page-btn" id="msgPrev" disabled>← Prev</button><span id="msgPageInfo">1/1</span><button class="page-btn" id="msgNext">Sig →</button><span id="msgTotal" style="color:var(--muted);margin-left:4px"></span></div>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div class="tab-panel" id="tab-orders">
+    <div class="filter-row">
+      <select id="oStatus"><option value="">Todos</option><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option></select>
+      <button class="btn primary" id="applyOrderFilter">Filtrar</button>
+    </div>
+    <div class="table-wrap card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Descuento</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr></thead>
+        <tbody id="orderBody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div class="tab-panel" id="tab-users">
+    <div class="filter-row">
+      <input type="text" id="uSearch" placeholder="Buscar email o nombre..." style="min-width:180px" />
+      <select id="uRole"><option value="">Todos los roles</option><option value="owner">Owner</option><option value="admin">Admin</option><option value="manager">Manager</option><option value="agent">Agente</option><option value="viewer">Viewer</option></select>
+      <button class="btn primary" id="applyUserFilter">Filtrar</button>
+    </div>
+    <div class="table-wrap card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>Usuario</th><th>Rol</th><th>Verificado</th><th>2FA</th><th>Último acceso</th><th>Logins</th><th>Acciones</th></tr></thead>
+        <tbody id="userBody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination"><button class="page-btn" id="uPrev" disabled>← Prev</button><span id="uPageInfo">1/1</span><button class="page-btn" id="uNext">Sig →</button></div>
+  </div>
+
+  <!-- AUTOMATIONS TAB -->
+  <div class="tab-panel" id="tab-automations">
+    <div style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+      <p class="muted" style="font-size:.85rem">Reglas que se ejecutan automáticamente cuando ocurren eventos.</p>
+      <button class="btn primary" id="newAutoBtn">+ Nueva regla</button>
+    </div>
+    <div id="autoList"><div class="muted" style="font-size:.85rem">Cargando...</div></div>
+  </div>
+
+  <!-- QUERIES TAB -->
+  <div class="tab-panel" id="tab-queries">
+    <p class="muted" style="font-size:.85rem;margin-bottom:16px">Ejecuta las 5 consultas SQL predefinidas para analizar los datos del sistema.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px" id="queryCards"></div>
+    <div id="queryResult" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div>
+          <h4 style="margin:0;font-size:.95rem" id="queryName"></h4>
+          <code style="font-size:.72rem;color:var(--muted);display:block;margin-top:4px;word-break:break-all" id="querySQL"></code>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="exportQueryCSV" style="font-size:.8rem">⬇ CSV</button>
+          <button class="btn ghost" onclick="document.getElementById('queryResult').style.display='none'" style="font-size:.8rem">✕ Cerrar</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;max-height:440px;overflow-y:auto">
+        <table class="data-table" id="queryTable">
+          <thead id="queryHead"></thead>
+          <tbody id="queryBody"></tbody>
+        </table>
+      </div>
+      <p style="color:var(--muted);font-size:.78rem;margin-top:8px" id="queryCount"></p>
+    </div>
+  </div>
+
+  <!-- BACKUP TAB -->
+  <div class="tab-panel" id="tab-backup">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:800px" id="backupGrid">
+      <div class="card" style="padding:24px">
+        <h4 style="margin-bottom:8px">💾 Crear Respaldo</h4>
+        <p class="muted" style="font-size:.83rem;margin-bottom:16px">Genera una copia de seguridad de la base de datos SQLite en el servidor.</p>
+        <button class="btn primary" id="btnCreateBackup" style="width:100%;margin-bottom:10px">🗄 Crear backup ahora</button>
+        <button class="btn ghost" id="btnDownloadBackup" style="width:100%">⬇ Descargar backup directo</button>
+      </div>
+      <div class="card" style="padding:24px">
+        <h4 style="margin-bottom:8px">📋 Info de la Base de Datos</h4>
+        <div id="dbInfo" style="font-size:.83rem;color:var(--muted)">Cargando...</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;max-width:800px">
+      <h4 style="margin-bottom:12px;font-size:.9rem">🕒 Historial de Respaldos</h4>
+      <div id="backupList"><p class="muted" style="font-size:.85rem">Cargando...</p></div>
+    </div>
+  </div>
+
+  <!-- ALERTS TAB -->
+  <div class="tab-panel" id="tab-alerts">
+    <div style="max-width:780px">
+
+      <!-- Estado SMTP -->
+      <div class="card" style="padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div id="smtpStatusDot" style="width:12px;height:12px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:.9rem" id="smtpStatusText">Verificando estado SMTP...</div>
+          <div style="font-size:.78rem;color:var(--muted)" id="smtpStatusSub">Si SMTP no está activo, los emails se registran en la consola del servidor.</div>
+        </div>
+        <a href="#" onclick="switchToTab('branding');return false" class="btn ghost" style="font-size:.8rem">⚙️ Configurar SMTP</a>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+        <!-- Test Email -->
+        <div class="card" style="padding:22px">
+          <h4 style="margin-bottom:8px;font-size:.95rem">✉️ Probar sistema de email</h4>
+          <p class="muted" style="font-size:.8rem;margin-bottom:14px">Envía un email de prueba a tu cuenta. Si SMTP no está configurado, muestra la vista previa.</p>
+          <button class="btn primary" id="btnTestEmail" style="width:100%">Enviar email de prueba</button>
+          <div id="testEmailResult" style="margin-top:12px;font-size:.82rem;display:none"></div>
+        </div>
+
+        <!-- Verificar BD -->
+        <div class="card" style="padding:22px">
+          <h4 style="margin-bottom:8px;font-size:.95rem">🔍 Verificar base de datos</h4>
+          <p class="muted" style="font-size:.8rem;margin-bottom:14px">Detecta tareas vencidas y tickets con SLA incumplido. Envía email automático de alerta a los responsables.</p>
+          <button class="btn primary" id="btnCheckOverdue" style="width:100%;background:linear-gradient(135deg,#ef4444,#f97316)">Verificar y enviar alertas</button>
+          <div id="checkOverdueResult" style="margin-top:12px;font-size:.82rem;display:none"></div>
+        </div>
+
+      </div>
+
+      <!-- Resultados / log de alertas -->
+      <div class="card" id="alertLogCard" style="padding:22px;display:none">
+        <h4 style="margin-bottom:14px;font-size:.9rem">📋 Resultado del monitoreo</h4>
+        <div id="alertLog"></div>
+      </div>
+
+      <!-- Vista previa del email (mock) -->
+      <div class="card" id="emailPreviewCard" style="padding:22px;display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h4 style="font-size:.9rem;margin:0">👁️ Vista previa del email (modo simulación)</h4>
+          <button onclick="document.getElementById('emailPreviewCard').style.display='none'" class="btn ghost" style="font-size:.75rem">✕</button>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:0;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+          <iframe id="emailPreviewFrame" style="width:100%;min-height:400px;border:none;display:block"></iframe>
+        </div>
+      </div>
+
+      <!-- Descripción del sistema -->
+      <div style="margin-top:16px;background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);border-radius:12px;padding:18px">
+        <h5 style="color:#00d4ff;margin-bottom:10px;font-size:.85rem">ℹ️ Cómo funciona el sistema de alertas</h5>
+        <ul style="color:var(--muted);font-size:.8rem;line-height:1.8;padding-left:16px;margin:0">
+          <li>El sistema monitorea la base de datos en busca de <strong style="color:#fff">tareas vencidas</strong> (fecha límite pasada, no completada)</li>
+          <li>También detecta <strong style="color:#fff">tickets con SLA incumplido</strong> (tiempo de respuesta superado)</li>
+          <li>Al encontrar alertas, envía un <strong style="color:#fff">email automático</strong> a cada responsable</li>
+          <li>Si SMTP no está configurado, las alertas se <strong style="color:#fff">registran en la consola</strong> del servidor</li>
+          <li>En producción, este proceso puede automatizarse con un cron job cada hora</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BRANDING TAB -->
+  <div class="tab-panel" id="tab-branding">
+    <div style="max-width:500px">
+      <div class="card" style="padding:24px">
+        <h4 style="margin-bottom:16px">🎨 White-label — Personalización</h4>
+        <div class="form-group"><label>Nombre de la empresa</label><input type="text" id="bName" placeholder="Mi Empresa" /></div>
+        <div class="form-group"><label>URL del logo</label><input type="text" id="bLogo" placeholder="https://..." /></div>
+        <div class="form-group"><label>Color primario</label><div style="display:flex;gap:8px;align-items:center"><input type="color" id="bColor" value="#00d4ff" style="width:48px;height:40px;padding:2px;border-radius:8px;cursor:pointer" /><input type="text" id="bColorText" placeholder="#00d4ff" style="flex:1" /></div></div>
+        <button class="btn primary" id="saveBranding" style="width:100%;margin-top:8px">Guardar cambios</button>
+      </div>
+      <div class="card" style="padding:24px;margin-top:16px">
+        <h4 style="margin-bottom:14px">📧 Configurar SMTP (email)</h4>
+        <p class="muted" style="font-size:.82rem;margin-bottom:14px">Sin SMTP configurado, los emails solo aparecen en la consola del servidor.</p>
+        <div class="form-group"><label>Host SMTP</label><input type="text" id="smtpHost" placeholder="smtp.gmail.com" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Puerto</label><input type="number" id="smtpPort" placeholder="587" /></div>
+          <div class="form-group"><label>Usuario</label><input type="text" id="smtpUser" placeholder="tu@gmail.com" /></div>
+        </div>
+        <div class="form-group"><label>Contraseña / App Password</label><input type="password" id="smtpPass" placeholder="••••••••" /></div>
+        <button class="btn primary" id="saveSMTP" style="width:100%;margin-top:4px">Guardar SMTP</button>
+        <p class="muted" style="font-size:.75rem;margin-top:8px">Para Gmail: usa una <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#00d4ff">contraseña de aplicación</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Message detail modal -->
+<div class="modal-backdrop" id="msgModal" style="display:none">
+  <div class="modal">
+    <h4 id="msgModalTitle" style="margin-bottom:4px"></h4>
+    <div style="color:var(--muted);font-size:.82rem;margin-bottom:12px" id="msgModalMeta"></div>
+    <div class="msg-body" id="msgModalBody"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn ghost" id="markReplied" style="font-size:.82rem">✓ Marcar respondido</button>
+      <button class="btn ghost" id="deleteMsg" style="font-size:.82rem;color:#ff4757;border-color:rgba(255,71,87,.3)">🗑 Eliminar</button>
+      <button class="btn ghost" onclick="document.getElementById('msgModal').style.display='none'" style="margin-left:auto;font-size:.82rem">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- User edit modal -->
+<div class="modal-backdrop" id="userModal" style="display:none">
+  <div class="modal">
+    <h4 style="margin-bottom:16px" id="userModalTitle">Editar usuario</h4>
+    <div class="form-group"><label>Email</label><input type="email" id="uEmail" disabled style="opacity:.5" /></div>
+    <div class="form-group"><label>Nombre</label><input type="text" id="uName" /></div>
+    <div class="form-group"><label>Rol</label>
+      <select id="uRoleEdit">
+        <option value="viewer">Viewer — Solo lectura</option>
+        <option value="agent">Agente — Responde tickets y CRM</option>
+        <option value="manager">Manager — Crea y gestiona proyectos</option>
+        <option value="admin">Admin — Acceso completo</option>
+      </select>
+    </div>
+    <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px;font-size:.78rem;color:var(--muted);margin-bottom:14px">
+      ⚠ El rol <strong>owner</strong> no puede asignarse manualmente. Solo el email configurado en ADMIN_EMAIL lo recibe automáticamente.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn primary" id="saveUserRole" style="flex:1">Guardar</button>
+      <button class="btn ghost" onclick="document.getElementById('userModal').style.display='none'">Cancelar</button>
+      <button class="btn" id="deleteUserBtn" style="color:#ff4757;border-color:rgba(255,71,87,.3)">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='messages'&&!msgLoaded)loadMessages();
+    if(btn.dataset.tab==='orders'&&!ordersLoaded)loadOrders();
+    if(btn.dataset.tab==='users'&&!usersLoaded)loadUsers();
+    if(btn.dataset.tab==='automations'&&!autoLoaded)loadAutomations();
+    if(btn.dataset.tab==='branding'&&!brandingLoaded)loadBranding();
+    if(btn.dataset.tab==='queries'&&!queriesLoaded)loadQueryList();
+    if(btn.dataset.tab==='backup'&&!backupLoaded)loadBackupTab();
+    if(btn.dataset.tab==='alerts')loadAlertsTab();
+  });
+});
+
+function switchToTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const btn = document.querySelector(`[data-tab="${name}"]`);
+  if(btn) { btn.classList.add('active'); document.getElementById('tab-'+name).classList.add('active'); }
+}
+
+// ─── MESSAGES ────────────────────────────────────────────────────────────────
+let msgLoaded=false,msgOffset=0,msgTotal=0,currentMsgId=null;
+const MSG_LIMIT=50;
+
+async function loadMessages(){
+  msgLoaded=true;
+  const q=document.getElementById('mSearch').value.trim();
+  const status=document.getElementById('mStatus').value;
+  const p=new URLSearchParams({limit:MSG_LIMIT,offset:msgOffset,...(q&&{q}),...(status&&{status})});
+  try{
+    const{items,total:t}=await NXS.apiGet('/api/messages?'+p);
+    msgTotal=t;
+    document.getElementById('msgPageInfo').textContent=`${Math.floor(msgOffset/MSG_LIMIT)+1}/${Math.max(1,Math.ceil(t/MSG_LIMIT))}`;
+    document.getElementById('msgTotal').textContent=`(${t})`;
+    document.getElementById('msgPrev').disabled=msgOffset===0;
+    document.getElementById('msgNext').disabled=msgOffset+MSG_LIMIT>=t;
+    document.getElementById('msgBody').innerHTML=items.length?items.map(m=>`
+      <tr onclick="openMsg(${m.id})">
+        <td style="font-weight:600">${m.name}</td>
+        <td style="color:var(--muted)">${m.email}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.subject||m.message.slice(0,50)}</td>
+        <td><span class="status-dot ${m.status||'new'}"></span>${m.status||'nuevo'}</td>
+        <td style="color:var(--muted)">${new Date(m.created_at).toLocaleDateString('es')}</td>
+        <td><button class="btn ghost" onclick="event.stopPropagation();deleteMsg(${m.id})" style="padding:3px 10px;font-size:.72rem;color:#ff4757;border-color:rgba(255,71,87,.3)">🗑</button></td>
+      </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Sin mensajes.</td></tr>';
+  }catch{document.getElementById('msgBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#ff6b91">Se requiere rol agente o superior.</td></tr>';}
+}
+
+let _msgs=[];
+async function openMsg(id){
+  if(!_msgs.length){const{items}=await NXS.apiGet('/api/messages?limit=200');_msgs=items;}
+  const m=_msgs.find(x=>x.id===id);if(!m)return;
+  currentMsgId=id;
+  document.getElementById('msgModalTitle').textContent=m.name;
+  document.getElementById('msgModalMeta').textContent=`${m.email} · ${new Date(m.created_at).toLocaleString('es')}`;
+  document.getElementById('msgModalBody').innerHTML=`${m.subject?`<strong>${m.subject}</strong><br><br>`:''}<p>${m.message.replace(/\n/g,'<br>')}</p>${m.phone?`<br><span style="color:var(--muted)">📞 ${m.phone}</span>`:''}`;
+  document.getElementById('msgModal').style.display='flex';
+}
+document.getElementById('markReplied').addEventListener('click',async()=>{if(!currentMsgId)return;await NXS.apiPatch(`/api/messages/${currentMsgId}`,{status:'replied'});document.getElementById('msgModal').style.display='none';showToast('Marcado como respondido');_msgs=[];loadMessages();});
+document.getElementById('deleteMsg').addEventListener('click',async()=>{if(!currentMsgId||!confirm('¿Eliminar?'))return;await NXS.apiDelete(`/api/messages/${currentMsgId}`);document.getElementById('msgModal').style.display='none';showToast('Eliminado');_msgs=[];loadMessages();});
+async function deleteMsg(id){if(!confirm('¿Eliminar este mensaje?'))return;await NXS.apiDelete(`/api/messages/${id}`);showToast('Eliminado');_msgs=[];loadMessages();}
+document.getElementById('applyMsgFilter').addEventListener('click',()=>{msgOffset=0;_msgs=[];loadMessages();});
+document.getElementById('msgPrev').addEventListener('click',()=>{if(msgOffset>0){msgOffset-=MSG_LIMIT;loadMessages();}});
+document.getElementById('msgNext').addEventListener('click',()=>{if(msgOffset+MSG_LIMIT<msgTotal){msgOffset+=MSG_LIMIT;loadMessages();}});
+document.getElementById('exportMsgs').addEventListener('click',()=>window.open(`${NXS.API_BASE}/api/messages.csv`,'_blank'));
+document.getElementById('msgModal').addEventListener('click',e=>{if(e.target===document.getElementById('msgModal'))document.getElementById('msgModal').style.display='none';});
+
+// ─── ORDERS ──────────────────────────────────────────────────────────────────
+let ordersLoaded=false;
+async function loadOrders(){
+  ordersLoaded=true;
+  const status=document.getElementById('oStatus').value;
+  const p=new URLSearchParams({limit:100,...(status&&{status})});
+  try{
+    const{items}=await NXS.apiGet('/api/orders?'+p);
+    const SC={pending:'rgba(245,158,11,.15)',confirmed:'rgba(0,212,255,.1)',completed:'rgba(34,197,94,.12)',cancelled:'rgba(239,68,68,.1)'};
+    const TC={pending:'#f59e0b',confirmed:'#00d4ff',completed:'#22c55e',cancelled:'#ef4444'};
+    document.getElementById('orderBody').innerHTML=items.length?items.map(o=>{
+      const c=o.customer||{};
+      return`<tr><td style="font-family:monospace;font-size:.75rem;color:var(--muted)">#${o.id}</td>
+        <td><div style="font-weight:600">${c.name||'—'}</div><div style="color:var(--muted);font-size:.75rem">${c.email||''}</div></td>
+        <td style="font-weight:700;color:#00d4ff">$${(o.total||0).toLocaleString('es-DO')}</td>
+        <td>${o.discount?`<span style="color:#22c55e">-${o.discount}%</span>`:'—'}</td>
+        <td><span style="padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:600;background:${SC[o.status]||SC.pending};color:${TC[o.status]||TC.pending}">${o.status}</span></td>
+        <td style="color:var(--muted)">${new Date(o.created_at).toLocaleDateString('es')}</td>
+        <td>
+          <select onchange="updateOrder(${o.id},this.value);this.value=''" style="padding:4px 8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;font-size:.75rem">
+            <option value="">Estado</option><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join(''):'<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin órdenes.</td></tr>';
+  }catch{document.getElementById('orderBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:#ff6b91">Error cargando órdenes.</td></tr>';}
+}
+async function updateOrder(id,status){if(!status)return;await NXS.apiPatch(`/api/orders/${id}`,{status});showToast(`Orden #${id} → ${status}`);loadOrders();}
+document.getElementById('applyOrderFilter').addEventListener('click',loadOrders);
+
+// ─── USERS ───────────────────────────────────────────────────────────────────
+let usersLoaded=false,uOffset=0,uTotal=0,editingUserId=null;
+const U_LIMIT=30;
+
+async function loadUsers(){
+  usersLoaded=true;
+  const q=document.getElementById('uSearch').value.trim();
+  const role=document.getElementById('uRole').value;
+  const p=new URLSearchParams({limit:U_LIMIT,offset:uOffset,...(q&&{q}),...(role&&{role})});
+  try{
+    const{items,total:t}=await NXS.apiGet('/api/admin/users?'+p);
+    uTotal=t;
+    document.getElementById('uPageInfo').textContent=`${Math.floor(uOffset/U_LIMIT)+1}/${Math.max(1,Math.ceil(t/U_LIMIT))}`;
+    document.getElementById('uPrev').disabled=uOffset===0;
+    document.getElementById('uNext').disabled=uOffset+U_LIMIT>=t;
+    document.getElementById('userBody').innerHTML=items.length?items.map(u=>`
+      <tr>
+        <td><div style="font-weight:600">${u.name||'—'}</div><div style="color:var(--muted);font-size:.75rem">${u.email}</div></td>
+        <td><span class="role-badge r-${u.role}">${u.role}</span></td>
+        <td>${u.verified?'<span style="color:#22c55e">✓</span>':'<span style="color:#aaa">—</span>'}</td>
+        <td>${u.totp_enabled?'<span style="color:#22c55e">🔒 ON</span>':'<span style="color:var(--muted)">—</span>'}</td>
+        <td style="color:var(--muted);font-size:.78rem">${u.last_login_at?new Date(u.last_login_at).toLocaleDateString('es'):'—'}</td>
+        <td style="color:var(--muted)">${u.login_count||0}</td>
+        <td><button class="btn ghost" onclick="openUserEdit(${JSON.stringify(u).replace(/"/g,'&quot;')})" style="padding:4px 10px;font-size:.75rem">Editar</button></td>
+      </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin usuarios.</td></tr>';
+  }catch{document.getElementById('userBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:#ff6b91">Se requiere rol admin/owner.</td></tr>';}
+}
+
+function openUserEdit(u){
+  editingUserId=u.id;
+  document.getElementById('uEmail').value=u.email;
+  document.getElementById('uName').value=u.name||'';
+  document.getElementById('uRoleEdit').value=['admin','manager','agent','viewer'].includes(u.role)?u.role:'viewer';
+  document.getElementById('userModal').style.display='flex';
+}
+document.getElementById('saveUserRole').addEventListener('click',async()=>{
+  const role=document.getElementById('uRoleEdit').value;
+  const name=document.getElementById('uName').value.trim();
+  await NXS.apiPatch(`/api/admin/users/${editingUserId}`,{role,name});
+  document.getElementById('userModal').style.display='none';
+  showToast('Usuario actualizado'); loadUsers();
+});
+document.getElementById('deleteUserBtn').addEventListener('click',async()=>{
+  if(!confirm('¿Eliminar este usuario permanentemente?'))return;
+  await NXS.apiDelete(`/api/admin/users/${editingUserId}`);
+  document.getElementById('userModal').style.display='none';
+  showToast('Usuario eliminado'); loadUsers();
+});
+document.getElementById('userModal').addEventListener('click',e=>{if(e.target===document.getElementById('userModal'))document.getElementById('userModal').style.display='none';});
+document.getElementById('applyUserFilter').addEventListener('click',()=>{uOffset=0;loadUsers();});
+document.getElementById('uPrev').addEventListener('click',()=>{if(uOffset>0){uOffset-=U_LIMIT;loadUsers();}});
+document.getElementById('uNext').addEventListener('click',()=>{if(uOffset+U_LIMIT<uTotal){uOffset+=U_LIMIT;loadUsers();}});
+
+// ─── AUTOMATIONS ─────────────────────────────────────────────────────────────
+let autoLoaded=false;
+async function loadAutomations(){
+  autoLoaded=true;
+  try{
+    const{items}=await NXS.apiGet('/api/automations');
+    document.getElementById('autoList').innerHTML=items.length?items.map(r=>`
+      <div class="auto-rule">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <h5>${r.name}</h5>
+            <span class="trigger">${r.trigger_event}</span>
+            <div class="actions-list">Acciones: ${(r.actions||[]).map(a=>a.type).join(', ')} · Ejecutada ${r.runs_count||0} veces</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="toggle-switch"><input type="checkbox" ${r.is_active?'checked':''} onchange="toggleAuto(${r.id},this.checked)" /><span class="toggle-slider"></span></label>
+            <button class="btn ghost" onclick="deleteAuto(${r.id})" style="padding:4px 8px;font-size:.72rem;color:#ff4757;border-color:rgba(255,71,87,.3)">🗑</button>
+          </div>
+        </div>
+      </div>`).join(''):'<p class="muted" style="font-size:.85rem">Sin reglas de automatización.</p>';
+  }catch{document.getElementById('autoList').innerHTML='<p class="muted" style="font-size:.85rem">Error. Se requiere rol manager o superior.</p>';}
+}
+async function toggleAuto(id,active){await NXS.apiPatch(`/api/automations/${id}`,{is_active:active});showToast(active?'Automatización activada':'Desactivada');}
+async function deleteAuto(id){if(!confirm('¿Eliminar esta regla?'))return;await NXS.apiDelete(`/api/automations/${id}`);showToast('Eliminada');loadAutomations();}
+document.getElementById('newAutoBtn').addEventListener('click',()=>{const name=prompt('Nombre de la regla:');if(!name)return;NXS.apiPost('/api/automations',{name,trigger_event:'ticket.created',conditions:[],actions:[{type:'notify_admin',message:'{{title}}'}]}).then(()=>{showToast('Regla creada');autoLoaded=false;loadAutomations();}).catch(()=>showToast('Error'));});
+
+// ─── BRANDING ─────────────────────────────────────────────────────────────────
+let brandingLoaded=false;
+async function loadBranding(){
+  brandingLoaded=true;
+  try{
+    const{branding}=await NXS.apiGet('/api/branding');
+    if(branding){
+      document.getElementById('bName').value=branding.name||'';
+      document.getElementById('bLogo').value=branding.logo_url||'';
+      document.getElementById('bColor').value=branding.primary_color||'#00d4ff';
+      document.getElementById('bColorText').value=branding.primary_color||'#00d4ff';
+    }
+  }catch{}
+}
+document.getElementById('bColor').addEventListener('input',e=>document.getElementById('bColorText').value=e.target.value);
+document.getElementById('bColorText').addEventListener('input',e=>document.getElementById('bColor').value=e.target.value);
+document.getElementById('saveBranding').addEventListener('click',async()=>{
+  const d={name:document.getElementById('bName').value.trim(),logo_url:document.getElementById('bLogo').value.trim(),primary_color:document.getElementById('bColorText').value.trim()};
+  try{await NXS.apiPatch('/api/branding',d);showToast('✅ Branding guardado');}catch{showToast('Error. Se requiere rol admin.');}
+});
+document.getElementById('saveSMTP').addEventListener('click',async()=>{
+  const d={host:document.getElementById('smtpHost').value.trim(),port:document.getElementById('smtpPort').value,user:document.getElementById('smtpUser').value.trim(),pass:document.getElementById('smtpPass').value};
+  if(!d.host||!d.port||!d.user||!d.pass)return showToast('Completa todos los campos SMTP');
+  try{await NXS.apiPatch('/api/settings/smtp',d);showToast('✅ SMTP guardado. Reinicia el servidor para aplicar.');}catch{showToast('Error guardando SMTP');}
+});
+
+// ─── 5 CONSULTAS SQL ──────────────────────────────────────────────────────────
+let queriesLoaded = false;
+let currentQueryData = [];
+
+async function loadQueryList() {
+  queriesLoaded = true;
+  try {
+    const { queries } = await NXS.apiGet('/api/queries/list');
+    const colors = ['#00d4ff','#7926ff','#22c55e','#f59e0b','#ef4444'];
+    document.getElementById('queryCards').innerHTML = queries.map((q, i) => `
+      <div class="card" style="padding:18px;cursor:pointer;border:1px solid rgba(255,255,255,.08);transition:.2s" onclick="runQuery('${q.id}')"
+        onmouseover="this.style.borderColor='${colors[i]}'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+        <div style="font-size:1.5rem;margin-bottom:8px">📊</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
+          <strong style="font-size:.88rem">Consulta ${q.id}</strong>
+          <span style="background:${colors[i]}22;color:${colors[i]};padding:2px 8px;border-radius:8px;font-size:.7rem;font-weight:700;flex-shrink:0">SQL</span>
+        </div>
+        <div style="font-size:.85rem;font-weight:600;margin-bottom:4px">${q.name}</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5">${q.description}</div>
+        <button class="btn" style="width:100%;margin-top:12px;font-size:.8rem;padding:7px" onclick="event.stopPropagation();runQuery('${q.id}')">▶ Ejecutar consulta</button>
+      </div>`).join('');
+  } catch(e) { document.getElementById('queryCards').innerHTML = '<p class="muted">Error cargando consultas</p>'; }
+}
+
+async function runQuery(id) {
+  document.getElementById('queryResult').style.display = 'none';
+  try {
+    const d = await NXS.apiGet(`/api/queries/run?q=${id}`);
+    currentQueryData = d.rows || [];
+    document.getElementById('queryName').textContent = d.name;
+    document.getElementById('querySQL').textContent = d.sql;
+    document.getElementById('queryCount').textContent = `${d.total} registros encontrados`;
+    const cols = d.columns || [];
+    document.getElementById('queryHead').innerHTML = `<tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+    document.getElementById('queryBody').innerHTML = d.rows.length
+      ? d.rows.map(row=>`<tr>${cols.map(c=>`<td>${row[c]??'—'}</td>`).join('')}</tr>`).join('')
+      : '<tr><td colspan="99" style="text-align:center;color:var(--muted);padding:20px">Sin resultados</td></tr>';
+    document.getElementById('queryResult').style.display = 'block';
+    document.getElementById('queryResult').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  } catch(e) { showToast('Error ejecutando consulta. Se requiere rol admin.'); }
+}
+
+document.getElementById('exportQueryCSV').addEventListener('click', () => {
+  if (!currentQueryData.length) return;
+  const cols = Object.keys(currentQueryData[0]);
+  let csv = cols.join(',') + '\n';
+  currentQueryData.forEach(row => { csv += cols.map(c => `"${String(row[c]??'').replace(/"/g,'""')}"`).join(',') + '\n'; });
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `consulta-${Date.now()}.csv`;
+  a.click();
+});
+
+// ─── BACKUP ───────────────────────────────────────────────────────────────────
+let backupLoaded = false;
+
+async function loadBackupTab() {
+  backupLoaded = true;
+  try {
+    const health = await NXS.apiGet('/api/health');
+    document.getElementById('dbInfo').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div>📦 <strong>Tamaño BD:</strong> ${health.db_size_kb} KB</div>
+        <div>🟢 <strong>Estado:</strong> ${health.ok ? 'Operativa' : 'Error'}</div>
+        <div>🤖 <strong>IA:</strong> ${health.ai_ready ? 'Conectada' : 'Sin clave API'}</div>
+        <div>⏱ <strong>Uptime:</strong> ${Math.round(health.uptime_seconds/60)} min</div>
+        <div>🟩 <strong>Node.js:</strong> ${health.node}</div>
+        <div>📋 <strong>Versión:</strong> ${health.version}</div>
+      </div>`;
+    await loadBackupList();
+  } catch { document.getElementById('dbInfo').textContent = 'Servidor no disponible'; }
+}
+
+async function loadBackupList() {
+  try {
+    const { backups } = await NXS.apiGet('/api/backup/list');
+    document.getElementById('backupList').innerHTML = backups.length
+      ? `<div style="overflow-x:auto"><table class="data-table">
+          <thead><tr><th>Nombre del archivo</th><th>Tamaño</th><th>Fecha de creación</th></tr></thead>
+          <tbody>${backups.map(b=>`
+            <tr>
+              <td><code style="font-size:.78rem">${b.name}</code></td>
+              <td>${b.size_kb} KB</td>
+              <td>${new Date(b.created_at).toLocaleString('es')}</td>
+            </tr>`).join('')}
+          </tbody></table></div>
+          <p class="muted" style="font-size:.78rem;margin-top:8px">📁 Ubicación en servidor: server/data/backups/</p>`
+      : '<p class="muted" style="font-size:.85rem">No hay respaldos aún. Crea el primero.</p>';
+  } catch { document.getElementById('backupList').innerHTML = '<p class="muted">Error cargando historial</p>'; }
+}
+
+document.getElementById('btnCreateBackup').addEventListener('click', async () => {
+  const btn = document.getElementById('btnCreateBackup');
+  btn.disabled = true; btn.textContent = '⏳ Creando...';
+  try {
+    const d = await NXS.apiPost('/api/backup/create', {});
+    showToast(`✅ Backup creado: ${d.filename} (${d.size_kb} KB)`);
+    await loadBackupList();
+  } catch { showToast('Error. Se requiere rol admin.'); }
+  finally { btn.disabled = false; btn.textContent = '🗄 Crear backup ahora'; }
+});
+
+document.getElementById('btnDownloadBackup').addEventListener('click', () => {
+  const token = NXS.getToken();
+  if (!token) return showToast('No autenticado');
+  const link = document.createElement('a');
+  link.href = `http://localhost:3002/api/backup/download`;
+  link.click();
+  showToast('📥 Descargando base de datos...');
+});
+
+// ─── ALERTS TAB ──────────────────────────────────────────────────────────────
+function loadAlertsTab() {
+  // Detectar SMTP activo preguntando al servidor
+  NXS.apiGet('/api/metrics').then(m => {
+    // No hay endpoint de estado SMTP directo — usamos heurística
+  }).catch(()=>{});
+
+  // Mostrar estado (el servidor lo dice en check-overdue)
+  document.getElementById('smtpStatusDot').style.background = '#f59e0b';
+  document.getElementById('smtpStatusText').textContent = 'Estado SMTP: verificando...';
+
+  // Test email
+  document.getElementById('btnTestEmail').addEventListener('click', async function() {
+    this.disabled = true; this.textContent = '⏳ Enviando...';
+    const res = document.getElementById('testEmailResult');
+    res.style.display = 'none';
+    try {
+      const data = await NXS.apiPost('/api/admin/test-email', {});
+      res.style.display = 'block';
+
+      // Actualizar indicador SMTP
+      const dot = document.getElementById('smtpStatusDot');
+      const txt = document.getElementById('smtpStatusText');
+      if (data.sent) {
+        dot.style.background = '#22c55e';
+        txt.textContent = 'SMTP activo — Emails reales funcionando ✅';
+      } else {
+        dot.style.background = '#f59e0b';
+        txt.textContent = 'SMTP no configurado — Modo simulación activo';
+      }
+
+      if (data.mock && data.html) {
+        res.innerHTML = `<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px">
+          ⚠️ ${data.message}
+          <button onclick="showEmailPreview('${encodeURIComponent(data.html)}')" class="btn ghost" style="font-size:.75rem;margin-top:8px;display:block">👁️ Ver vista previa del email</button>
+        </div>`;
+      } else if (data.sent) {
+        res.innerHTML = `<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:10px;color:#22c55e">✅ ${data.message}</div>`;
+      } else {
+        res.innerHTML = `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px;color:#ef4444">❌ Error: ${data.error||'No se pudo enviar'}</div>`;
+      }
+    } catch(e) { res.style.display='block'; res.innerHTML = '<span style="color:#ef4444">Error conectando al servidor.</span>'; }
+    this.disabled = false; this.textContent = 'Enviar email de prueba';
+  }, { once: true });
+
+  // Check overdue
+  document.getElementById('btnCheckOverdue').addEventListener('click', async function() {
+    this.disabled = true; this.textContent = '⏳ Verificando...';
+    const res = document.getElementById('checkOverdueResult');
+    const logCard = document.getElementById('alertLogCard');
+    const log = document.getElementById('alertLog');
+    res.style.display = 'none'; logCard.style.display = 'none';
+    try {
+      const data = await NXS.apiPost('/api/admin/check-overdue', {});
+      res.style.display = 'block';
+
+      const smtpOk = data.smtp_active;
+      document.getElementById('smtpStatusDot').style.background = smtpOk ? '#22c55e' : '#f59e0b';
+      document.getElementById('smtpStatusText').textContent = smtpOk
+        ? 'SMTP activo — Emails reales funcionando ✅'
+        : 'SMTP no configurado — Modo simulación activo';
+
+      const allOk = data.overdue_tasks === 0 && data.breached_tickets === 0;
+      res.innerHTML = allOk
+        ? `<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:10px;color:#22c55e">✅ Sin alertas — No hay tareas vencidas ni SLA incumplidos en este momento.</div>`
+        : `<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px">
+            ⚠️ <strong>${data.overdue_tasks}</strong> tarea(s) vencida(s) · <strong>${data.breached_tickets}</strong> ticket(s) con SLA incumplido<br>
+            <span style="color:var(--muted);font-size:.78rem">${data.message}</span>
+           </div>`;
+
+      if (data.alerts && data.alerts.length > 0) {
+        logCard.style.display = 'block';
+        log.innerHTML = data.alerts.map(a => `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+            <span style="font-size:1.1rem">${a.type==='task_overdue'?'📋':'🎫'}</span>
+            <div style="flex:1">
+              <div style="font-size:.82rem;font-weight:600">${a.subject}</div>
+              <div style="font-size:.75rem;color:var(--muted)">→ ${a.to}</div>
+            </div>
+            <span style="font-size:.72rem;padding:2px 8px;border-radius:8px;${a.sent?'background:rgba(34,197,94,.15);color:#22c55e':'background:rgba(245,158,11,.15);color:#f59e0b'}">${a.sent?'Enviado':'Simulado'}</span>
+          </div>`).join('');
+      }
+    } catch(e) { res.style.display='block'; res.innerHTML = '<span style="color:#ef4444">Error conectando al servidor.</span>'; }
+    this.disabled = false; this.textContent = 'Verificar y enviar alertas';
+  }, { once: true });
+}
+
+function showEmailPreview(encodedHtml) {
+  const card = document.getElementById('emailPreviewCard');
+  const frame = document.getElementById('emailPreviewFrame');
+  card.style.display = 'block';
+  frame.srcdoc = decodeURIComponent(encodedHtml);
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Init
+if(!NXS.getToken())window.location.href='login.html';
+else loadMessages();
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blog — Nexuss X Systems | Desarrollo Web, IA y Marketing Digital</title>
+  <meta name="description" content="Aprende sobre desarrollo web, inteligencia artificial, marketing digital y estrategias para hacer crecer tu negocio en LATAM." />
+  <meta name="keywords" content="desarrollo web LATAM, chatbot IA, landing page, marketing digital República Dominicana, páginas web profesionales" />
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body data-requires-auth="true">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html" data-i18n="nav_home">Home</a>
+          <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+          <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+          <div class="nav-dropdown" id="ddRecursos">
+            <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="blog.html">Blog</a>
+              <a href="casos.html">Casos de exito</a>
+              <a href="calculadora.html">Calculadora</a>
+              <a href="faq.html">FAQ</a>
+              <a href="sobre.html">Sobre nosotros</a>
+            </div>
+          </div>
+          <div class="nav-dropdown" id="ddPanel">
+            <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="timeline.html">Mi proyecto</a>
+              <a href="tickets.html">Soporte</a>
+              <a href="crm.html">CRM</a>
+              <a href="referidos.html">Referidos</a>
+            </div>
+          </div>
+          <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+          <a href="admin.html" data-i18n="nav_admin">Admin</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+          <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="tag" style="margin-bottom:10px;display:inline-block">📝 Conocimiento</span>
+          <h2 class="reveal">Blog de <span class="gradient-label">Nexuss X Systems</span></h2>
+          <p class="muted">Recursos, estrategias y tendencias de tecnología para hacer crecer tu negocio digital en LATAM.</p>
+        </div>
+      </div>
+
+      <!-- Categorías -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:20px 0" id="catFilters">
+        <button class="btn cat-filter active" data-cat="all">Todos</button>
+        <button class="btn cat-filter" data-cat="web">Desarrollo Web</button>
+        <button class="btn cat-filter" data-cat="ia">Inteligencia Artificial</button>
+        <button class="btn cat-filter" data-cat="marketing">Marketing Digital</button>
+        <button class="btn cat-filter" data-cat="negocio">Negocios</button>
+      </div>
+
+      <!-- Artículo destacado -->
+      <div class="blog-hero reveal">
+        <div style="position:relative;border-radius:18px;overflow:hidden">
+          <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=1200&q=80" alt="Inteligencia Artificial en negocios" style="width:100%;height:360px;object-fit:cover" />
+          <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 50%);display:flex;align-items:flex-end;padding:28px">
+            <div>
+              <span class="blog-cat">🤖 Inteligencia Artificial</span>
+              <h2 style="margin:10px 0 6px;font-size:clamp(1.3rem,3vw,1.9rem)">Cómo los chatbots con IA están transformando las ventas en LATAM en 2026</h2>
+              <p style="color:rgba(255,255,255,0.7);margin:0;font-size:.9rem">15 de abril, 2026 · 8 min de lectura</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de artículos -->
+      <div class="blog-grid" id="blogGrid">
+
+        <article class="blog-card reveal" data-cat="web">
+          <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=600&q=80" alt="Landing page que convierte" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">💻 Desarrollo Web</span>
+              <span class="blog-date">10 abr, 2026</span>
+            </div>
+            <h3>5 elementos que toda landing page necesita para convertir en 2026</h3>
+            <p>Descubre los componentes esenciales que hacen que una landing page genere leads y ventas de forma consistente.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="ia">
+          <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&q=80" alt="Chatbot con IA" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">🤖 IA</span>
+              <span class="blog-date">5 abr, 2026</span>
+            </div>
+            <h3>Chatbots con IA: cómo entrenarlo con la información de tu negocio</h3>
+            <p>Una guía paso a paso para crear un asistente virtual que responda como un experto de tu empresa, las 24 horas.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="marketing">
+          <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80" alt="Marketing digital" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">📱 Marketing Digital</span>
+              <span class="blog-date">28 mar, 2026</span>
+            </div>
+            <h3>El algoritmo de Instagram en 2026: qué funciona y qué ya no</h3>
+            <p>Analizamos los cambios más recientes del algoritmo y las estrategias que están generando mayor alcance orgánico.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="negocio">
+          <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=600&q=80" alt="Automatización de negocios" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">🏢 Negocios</span>
+              <span class="blog-date">20 mar, 2026</span>
+            </div>
+            <h3>Automatización con Zapier y Make: 7 flujos que te ahorran 20 horas a la semana</h3>
+            <p>Los procesos repetitivos están robando tu tiempo. Aquí te mostramos cómo automatizarlos sin código.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="web">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" alt="Dashboard empresarial" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">💻 Desarrollo Web</span>
+              <span class="blog-date">15 mar, 2026</span>
+            </div>
+            <h3>Panel de gestión vs spreadsheets: por qué tu empresa necesita un dashboard propio</h3>
+            <p>Las hojas de cálculo tienen un límite. Un panel personalizado puede multiplicar la eficiencia de tu equipo.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="marketing">
+          <img src="https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&w=600&q=80" alt="SEO en 2026" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">📱 Marketing</span>
+              <span class="blog-date">8 mar, 2026</span>
+            </div>
+            <h3>SEO en 2026: cómo posicionar tu sitio en Google con inteligencia artificial</h3>
+            <p>El SEO ha evolucionado. Descubre las técnicas que están dominando los resultados de búsqueda este año.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="negocio">
+          <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" alt="Presencia digital" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">🏢 Negocios</span>
+              <span class="blog-date">1 mar, 2026</span>
+            </div>
+            <h3>¿Cuánto pierde tu negocio por no tener presencia digital profesional?</h3>
+            <p>Calculamos el impacto real en ventas que tiene no tener un sitio web optimizado. Las cifras sorprenden.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="ia">
+          <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=600&q=80" alt="IA para empresas" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">🤖 IA</span>
+              <span class="blog-date">22 feb, 2026</span>
+            </div>
+            <h3>Cómo usar Claude y ChatGPT para crear contenido de marketing que vende</h3>
+            <p>La IA puede generar copys, emails y posts que realmente convierten, si sabes cómo pedírselo.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+      </div>
+
+        <article class="blog-card reveal" data-cat="web">
+          <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80" alt="Programación web" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">💻 Desarrollo Web</span>
+              <span class="blog-date">15 feb, 2026</span>
+            </div>
+            <h3>¿WordPress o desarrollo a medida? La guía definitiva para 2026</h3>
+            <p>Comparamos costos, velocidad, escalabilidad y control para ayudarte a elegir la mejor opción según tu negocio.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="ia">
+          <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=600&q=80" alt="IA empresarial" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">🤖 IA</span>
+              <span class="blog-date">8 feb, 2026</span>
+            </div>
+            <h3>RAG: La técnica que hace que tu chatbot responda como un experto real</h3>
+            <p>Aprende cómo el Retrieval-Augmented Generation permite que la IA use la información exacta de tu empresa.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="marketing">
+          <img src="https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&w=600&q=80" alt="Email marketing" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">📱 Marketing Digital</span>
+              <span class="blog-date">1 feb, 2026</span>
+            </div>
+            <h3>Email marketing en 2026: las 6 secuencias automáticas que generan más ventas</h3>
+            <p>El email marketing tiene el mayor ROI de todos los canales digitales. Te enseñamos las secuencias que funcionan.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+        <article class="blog-card reveal" data-cat="negocio">
+          <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=600&q=80" alt="Escalamiento" />
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-cat">🏢 Negocios</span>
+              <span class="blog-date">25 ene, 2026</span>
+            </div>
+            <h3>De 0 a 6 cifras: cómo estructurar tu negocio digital para escalar sin caos</h3>
+            <p>Los sistemas, herramientas y procesos que usan los negocios que pasan de emprendimiento a empresa.</p>
+            <a href="#" class="blog-read">Leer artículo →</a>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Stats del blog -->
+      <div class="stats-band reveal" style="margin-top:40px">
+        <div>
+          <div class="stat"><span data-counter="12">12</span></div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Artículos publicados</div>
+        </div>
+        <div>
+          <div class="stat"><span data-counter="5">5</span></div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Categorías</div>
+        </div>
+        <div>
+          <div class="stat"><span data-counter="500" data-prefix="+">+500</span></div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Suscriptores</div>
+        </div>
+        <div>
+          <div class="stat">Semanal</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Frecuencia de publicación</div>
+        </div>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="cta-band reveal" style="margin-top:40px;text-align:center">
+        <span class="tag" style="margin-bottom:10px;display:inline-block;background:rgba(245,158,11,0.1);color:var(--gold);border-color:rgba(245,158,11,0.3)">✦ Newsletter gratuito</span>
+        <h2>Recibe los mejores artículos cada semana</h2>
+        <p class="muted">Estrategias, herramientas y tendencias de tecnología para tu negocio. Sin spam.</p>
+        <form id="newsletterForm" style="max-width:420px;margin:20px auto 0;background:transparent;border:none;box-shadow:none;padding:0">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+            <input type="email" id="newsletterEmail" placeholder="tu@correo.com" required style="flex:1;min-width:200px" />
+            <button type="submit" class="btn primary">Suscribirme →</button>
+          </div>
+        </form>
+        <div id="newsletterMsg" style="margin-top:10px;font-size:.88rem"></div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Systems</span></div>
+      <div class="muted" style="font-size:.82rem">Soluciones digitales de alto impacto · LATAM</div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Systems</div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="nexus.js"></script>
+  <script>
+    // Category filters con animación
+    document.querySelectorAll('.cat-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+        document.querySelectorAll('.blog-card').forEach(card => {
+          const show = (cat === 'all' || card.dataset.cat === cat);
+          if (show) {
+            card.style.display = '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(12px)';
+            requestAnimationFrame(() => {
+              card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+              card.style.opacity = '1';
+              card.style.transform = '';
+            });
+          } else {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-8px)';
+            setTimeout(() => { card.style.display = 'none'; }, 250);
+          }
+        });
+      });
+    });
+
+    // Newsletter
+    document.getElementById('newsletterForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('newsletterEmail').value;
+      const msg = document.getElementById('newsletterMsg');
+      try {
+        await fetch(NXS.CONTACT_ENDPOINT, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'Newsletter', email, message: 'Suscripción al newsletter del blog.' })
+        });
+        msg.textContent = '✅ ¡Suscrito! Te llegará el próximo número.';
+        msg.style.color = '#65f0b1';
+        document.getElementById('newsletterEmail').value = '';
+      } catch(_) {
+        msg.textContent = '❌ Error al suscribirse. Inténtalo de nuevo.';
+        msg.style.color = '#ff6b91';
+      }
+    });
+  </script>
+</body>
+</html>
+
+

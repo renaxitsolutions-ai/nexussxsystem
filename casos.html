@@ -1,0 +1,407 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Casos de Éxito — Nexuss X Systems</title>
+  <meta name="description" content="Proyectos reales que transformaron negocios en LATAM. Mira los resultados de nuestros clientes." />
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body data-requires-auth="true">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html" data-i18n="nav_home">Home</a>
+          <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+          <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+          <div class="nav-dropdown" id="ddRecursos">
+            <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="blog.html">Blog</a>
+              <a href="casos.html">Casos de exito</a>
+              <a href="calculadora.html">Calculadora</a>
+              <a href="faq.html">FAQ</a>
+              <a href="sobre.html">Sobre nosotros</a>
+            </div>
+          </div>
+          <div class="nav-dropdown" id="ddPanel">
+            <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="timeline.html">Mi proyecto</a>
+              <a href="tickets.html">Soporte</a>
+              <a href="crm.html">CRM</a>
+              <a href="referidos.html">Referidos</a>
+            </div>
+          </div>
+          <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+          <a href="admin.html" data-i18n="nav_admin">Admin</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+          <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="tag" style="margin-bottom:10px;display:inline-block">🏆 Resultados reales</span>
+          <h2 class="reveal">Casos de <span class="gradient-label">Éxito</span></h2>
+          <p class="muted">Proyectos reales que transformaron negocios en LATAM. Números, resultados y testimonios de nuestros clientes.</p>
+        </div>
+      </div>
+
+      <!-- Stats globales -->
+      <div class="stats-band reveal" style="margin-top:24px">
+        <div>
+          <div class="stat">+30</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.95rem;margin-top:4px">Proyectos entregados</div>
+        </div>
+        <div>
+          <div class="stat">100%</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.95rem;margin-top:4px">Satisfacción del cliente</div>
+        </div>
+        <div>
+          <div class="stat">+240%</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.95rem;margin-top:4px">Aumento promedio de leads</div>
+        </div>
+        <div>
+          <div class="stat">&lt;7d</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.95rem;margin-top:4px">Tiempo promedio de entrega</div>
+        </div>
+      </div>
+
+      <!-- Filtros de categoría -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:24px 0" id="casoCatFilters">
+        <button class="btn cat-filter active" data-cat="all">Todos</button>
+        <button class="btn cat-filter" data-cat="ecommerce">E-commerce</button>
+        <button class="btn cat-filter" data-cat="dashboard">Dashboards</button>
+        <button class="btn cat-filter" data-cat="marketing">Marketing</button>
+        <button class="btn cat-filter" data-cat="landing">Landing Pages</button>
+        <button class="btn cat-filter" data-cat="chatbot">Chatbots IA</button>
+        <button class="btn cat-filter" data-cat="app">Apps Web</button>
+      </div>
+
+      <!-- Casos -->
+      <div class="casos-grid" style="margin-top:20px">
+
+        <div class="caso-card reveal" data-cat="ecommerce">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80" alt="E-commerce caso de éxito" />
+            <span class="caso-tag-overlay">🛒 E-commerce</span>
+          </div>
+          <div class="caso-body">
+            <h3>Tienda Online — Moda LATAM</h3>
+            <p>Diseñamos y desarrollamos una tienda online completa con catálogo, carrito y pasarela de pagos para una marca de moda independiente.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">+320%</div><div class="lbl">Ventas online</div></div>
+              <div class="caso-metric"><div class="val">4.8s→1.2s</div><div class="lbl">Carga de página</div></div>
+              <div class="caso-metric"><div class="val">2x</div><div class="lbl">Tasa de conversión</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "En menos de 3 meses recuperamos la inversión y las ventas se triplicaron. El panel de admin es increíble." — Carolina M., Directora
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <span class="chip">E-commerce</span>
+              <span class="chip">Pagos online</span>
+              <span class="chip">Panel admin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="dashboard">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80" alt="Dashboard empresarial" />
+            <span class="caso-tag-overlay">📊 Panel de gestión</span>
+          </div>
+          <div class="caso-body">
+            <h3>Dashboard de Gestión — Empresa Financiera</h3>
+            <p>Desarrollamos un panel de control interno para gestionar clientes, reportes y KPIs en tiempo real, reemplazando hojas de cálculo obsoletas.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">-80%</div><div class="lbl">Tiempo en reportes</div></div>
+              <div class="caso-metric"><div class="val">0</div><div class="lbl">Errores manuales</div></div>
+              <div class="caso-metric"><div class="val">+15</div><div class="lbl">Horas/semana libres</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "Ya no perdemos tiempo en Excel. El equipo trabaja el doble de rápido con datos en tiempo real." — Roberto A., CFO
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <span class="chip">Dashboard</span>
+              <span class="chip">Automatización</span>
+              <span class="chip">Reportes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="marketing">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=800&q=80" alt="Marketing digital resultados" />
+            <span class="caso-tag-overlay">📱 Marketing Digital</span>
+          </div>
+          <div class="caso-body">
+            <h3>Estrategia Digital — Clínica de Salud</h3>
+            <p>Diseñamos una estrategia de marketing digital completa: landing page, redes sociales y chatbot de citas para una clínica privada.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">+180%</div><div class="lbl">Leads mensuales</div></div>
+              <div class="caso-metric"><div class="val">92%</div><div class="lbl">Citas confirmadas</div></div>
+              <div class="caso-metric"><div class="val">5x</div><div class="lbl">ROI del primer mes</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "El chatbot agenda citas solo mientras dormimos. Fue la mejor decisión del año." — Dra. Patricia L.
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <span class="chip">Landing page</span>
+              <span class="chip">Chatbot IA</span>
+              <span class="chip">Redes sociales</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="landing">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&w=800&q=80" alt="Landing page conversión" />
+            <span class="caso-tag-overlay">🚀 Landing Page</span>
+          </div>
+          <div class="caso-body">
+            <h3>Landing de Alta Conversión — Curso Online</h3>
+            <p>Creamos una landing page de ventas para el lanzamiento de un curso online con formulario de inscripción y automatización de emails.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">38%</div><div class="lbl">Tasa de conversión</div></div>
+              <div class="caso-metric"><div class="val">DOP 280k</div><div class="lbl">Ventas en 1 semana</div></div>
+              <div class="caso-metric"><div class="val">4 días</div><div class="lbl">Tiempo de entrega</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "En 4 días tenía mi página lista y en la primera semana de lanzamiento vendí DOP 280,000." — Marcos V., Coach
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <span class="chip">Landing page</span>
+              <span class="chip">Email marketing</span>
+              <span class="chip">Copywriting</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="app">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80" alt="App web a medida" />
+            <span class="caso-tag-overlay">⚡ App Web</span>
+          </div>
+          <div class="caso-body">
+            <h3>App de Gestión — Empresa Logística</h3>
+            <p>Construimos una aplicación web para gestionar pedidos, rutas y conductores en tiempo real con panel administrativo completo.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">-60%</div><div class="lbl">Tiempo de despacho</div></div>
+              <div class="caso-metric"><div class="val">Real-time</div><div class="lbl">Tracking de pedidos</div></div>
+              <div class="caso-metric"><div class="val">+40%</div><div class="lbl">Capacidad operativa</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "Pasamos de manejar 50 pedidos diarios a más de 200, con menos personal y menos errores." — Luis S., CEO
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <span class="chip">App web</span>
+              <span class="chip">Tiempo real</span>
+              <span class="chip">Logística</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="chatbot">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80" alt="Chatbot IA WhatsApp" />
+            <span class="caso-tag-overlay">🤖 Chatbot IA</span>
+          </div>
+          <div class="caso-body">
+            <h3>Chatbot IA — Tienda de Productos Naturales</h3>
+            <p>Implementamos un chatbot de ventas en WhatsApp entrenado con el catálogo completo de la tienda, capaz de tomar pedidos autónomamente.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">24/7</div><div class="lbl">Atención automática</div></div>
+              <div class="caso-metric"><div class="val">+90%</div><div class="lbl">Consultas respondidas</div></div>
+              <div class="caso-metric"><div class="val">+55%</div><div class="lbl">Ventas nocturnas</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "El bot vende mientras duermo. Ahora tengo ventas a las 3am sin estar despierto." — Ana T., Emprendedora
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <span class="chip">Chatbot IA</span>
+              <span class="chip">WhatsApp</span>
+              <span class="chip">Automatización</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="ecommerce">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80" alt="Tienda online electrodomésticos" />
+            <span class="caso-tag-overlay">🛒 E-commerce</span>
+          </div>
+          <div class="caso-body">
+            <h3>Tienda Online — Distribuidora de Electrodomésticos</h3>
+            <p>Desarrollamos una tienda e-commerce completa con más de 500 SKUs, búsqueda inteligente y panel de inventario en tiempo real.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">+450%</div><div class="lbl">Órdenes online</div></div>
+              <div class="caso-metric"><div class="val">-70%</div><div class="lbl">Tiempo en pedidos</div></div>
+              <div class="caso-metric"><div class="val">3.2s</div><div class="lbl">Tiempo de carga</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "Pasamos de vender por teléfono a tener una tienda profesional que vende sola los fines de semana." — Miguel R., Gerente
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+              <span class="chip">E-commerce</span>
+              <span class="chip">Inventario</span>
+              <span class="chip">Multi-categoría</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="dashboard">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80" alt="Dashboard de ventas" />
+            <span class="caso-tag-overlay">📊 Dashboard</span>
+          </div>
+          <div class="caso-body">
+            <h3>Dashboard de Ventas — Red de Franquicias</h3>
+            <p>Sistema centralizado para gestionar 12 sucursales, con reportes consolidados, control de stock y metas por tienda en tiempo real.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">12</div><div class="lbl">Sucursales gestionadas</div></div>
+              <div class="caso-metric"><div class="val">+25%</div><div class="lbl">Eficiencia operativa</div></div>
+              <div class="caso-metric"><div class="val">DOP 4M</div><div class="lbl">Flujo monitoreado/mes</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "Ahora veo en tiempo real cómo está cada tienda desde mi celular. El control es total." — Sandra P., Directora de Franquicias
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+              <span class="chip">Multi-sucursal</span>
+              <span class="chip">Reportes</span>
+              <span class="chip">Roles</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="caso-card reveal" data-cat="landing">
+          <div class="caso-img">
+            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80" alt="Landing inmobiliaria" />
+            <span class="caso-tag-overlay">🏠 Inmobiliaria</span>
+          </div>
+          <div class="caso-body">
+            <h3>Estrategia Digital — Promotora Inmobiliaria</h3>
+            <p>Landing page + campañas en Meta Ads con captación de leads calificados para venta de apartamentos en pre-construcción.</p>
+            <div class="caso-metrics">
+              <div class="caso-metric"><div class="val">+340%</div><div class="lbl">Leads calificados</div></div>
+              <div class="caso-metric"><div class="val">22%</div><div class="lbl">Conversión lead → cita</div></div>
+              <div class="caso-metric"><div class="val">3 semanas</div><div class="lbl">Para ver resultados</div></div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "En el primer mes de campaña cerramos 4 pre-ventas directamente desde los leads que generó la landing." — José M., Director Comercial
+            </blockquote>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+              <span class="chip">Landing page</span>
+              <span class="chip">Meta Ads</span>
+              <span class="chip">Inmobiliaria</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Comparativa antes/después -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="reveal">Antes y <span class="gradient-label">después</span></h2>
+        <p class="muted">El impacto real de tener una presencia digital profesional y bien ejecutada.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:24px">
+        <div class="card reveal" style="padding:24px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <span style="background:rgba(255,107,145,0.15);color:#ff6b91;border:1px solid rgba(255,107,145,0.3);padding:4px 12px;border-radius:8px;font-size:.82rem;font-weight:600">ANTES</span>
+            <span style="font-weight:600">Sin presencia digital</span>
+          </div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:8px">
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem;color:rgba(255,255,255,0.65)"><span style="color:#ff6b91">✕</span> Sitio web desactualizado o sin sitio</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem;color:rgba(255,255,255,0.65)"><span style="color:#ff6b91">✕</span> Atención manual 8 horas/día</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem;color:rgba(255,255,255,0.65)"><span style="color:#ff6b91">✕</span> Sin datos ni métricas de clientes</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem;color:rgba(255,255,255,0.65)"><span style="color:#ff6b91">✕</span> Reportes manuales en Excel</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem;color:rgba(255,255,255,0.65)"><span style="color:#ff6b91">✕</span> Leads perdidos por respuesta tardía</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem;color:rgba(255,255,255,0.65)"><span style="color:#ff6b91">✕</span> Imagen poco profesional online</li>
+          </ul>
+        </div>
+        <div class="card reveal" style="padding:24px;border:1px solid rgba(101,240,177,0.2);background:linear-gradient(135deg,rgba(101,240,177,0.04),transparent)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <span style="background:rgba(101,240,177,0.15);color:#65f0b1;border:1px solid rgba(101,240,177,0.3);padding:4px 12px;border-radius:8px;font-size:.82rem;font-weight:600">DESPUÉS</span>
+            <span style="font-weight:600">Con Nexuss X Systems</span>
+          </div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:8px">
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem"><span style="color:#65f0b1">✓</span> Sitio web moderno y profesional</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem"><span style="color:#65f0b1">✓</span> Chatbot con IA activo 24/7</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem"><span style="color:#65f0b1">✓</span> Dashboard con métricas en tiempo real</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem"><span style="color:#65f0b1">✓</span> Reportes automáticos en tu correo</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem"><span style="color:#65f0b1">✓</span> Leads atendidos al instante</li>
+            <li style="display:flex;align-items:center;gap:8px;font-size:.88rem"><span style="color:#65f0b1">✓</span> Marca digital de clase mundial</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="cta-band reveal" style="text-align:center">
+        <span class="tag" style="margin-bottom:10px;display:inline-block">✦ Tu negocio es el siguiente</span>
+        <h2>¿Listo para ser nuestro próximo caso de éxito?</h2>
+        <p class="muted">Cuéntanos tu proyecto y diseñamos una estrategia que genere resultados reales.</p>
+        <div class="cta-actions" style="margin-top:18px">
+          <a class="btn primary" href="calculadora.html">💰 Calcular mi proyecto</a>
+          <a class="btn whatsapp" href="https://wa.me/18293689630?text=Hola,%20quiero%20empezar%20mi%20proyecto" target="_blank">💬 WhatsApp</a>
+          <a class="btn" href="contacto.html">📩 Solicitar propuesta</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Systems</span></div>
+      <div class="muted" style="font-size:.82rem">Resultados reales para negocios reales · LATAM</div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Systems</div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="nexus.js"></script>
+  <script>
+    document.querySelectorAll('#casoCatFilters .cat-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#casoCatFilters .cat-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+        document.querySelectorAll('.caso-card').forEach(card => {
+          const show = cat === 'all' || card.dataset.cat === cat;
+          if (show) {
+            card.style.display = '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(12px)';
+            requestAnimationFrame(() => {
+              card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+              card.style.opacity = '1';
+              card.style.transform = '';
+            });
+          } else {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-8px)';
+            setTimeout(() => { card.style.display = 'none'; }, 250);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
+

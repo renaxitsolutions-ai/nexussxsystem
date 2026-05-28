@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gestión de Tareas — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .tasks-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+    .kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+    .kpi-mini{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;text-align:center}
+    .kpi-mini .val{font-size:1.6rem;font-weight:800}
+    .kpi-mini .lbl{color:var(--muted);font-size:.72rem;margin-top:4px}
+    .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+    .filter-bar input,.filter-bar select{padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.82rem}
+    .filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:#00d4ff}
+    .task-board{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+    @media(max-width:900px){.task-board{grid-template-columns:1fr}}
+    .board-col{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px}
+    .board-col-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .board-col-title{font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:8px}
+    .col-count{background:rgba(255,255,255,.1);border-radius:10px;padding:2px 8px;font-size:.75rem}
+    .task-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:.2s}
+    .task-card:hover{border-color:rgba(0,212,255,.4);transform:translateY(-1px)}
+    .task-card.completada{opacity:.6}
+    .task-title{font-weight:600;font-size:.88rem;margin-bottom:6px;line-height:1.4}
+    .task-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .pri-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.68rem;font-weight:700}
+    .p-urgente{background:rgba(239,68,68,.2);color:#ef4444}
+    .p-alta{background:rgba(249,115,22,.15);color:#f97316}
+    .p-normal{background:rgba(0,212,255,.1);color:#00d4ff}
+    .p-baja{background:rgba(255,255,255,.08);color:#aaa}
+    .cat-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.68rem;font-weight:600}
+    .progress-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:8px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#00d4ff,#7926ff);transition:.4s}
+    .due-date{font-size:.72rem;color:var(--muted)}
+    .due-date.overdue{color:#ef4444}
+    .assign-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#7926ff);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal{background:#161626;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+    .modal h3{margin-bottom:20px;font-size:1.1rem}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;margin-bottom:5px;font-size:.82rem;color:var(--muted)}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.88rem;box-sizing:border-box}
+    .form-group textarea{resize:vertical;min-height:80px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .view-tabs{display:flex;gap:4px;margin-bottom:16px}
+    .view-tab{padding:7px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:var(--muted);cursor:pointer;font-size:.82rem;transition:.2s}
+    .view-tab.active{background:rgba(0,212,255,.1);border-color:#00d4ff;color:#00d4ff}
+    .task-list-view{display:none}
+    .task-list-view.active,.task-board-wrap.active{display:block}
+    .task-table{width:100%;border-collapse:collapse;font-size:.83rem}
+    .task-table th{padding:10px 14px;background:rgba(255,255,255,.05);text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid rgba(255,255,255,.08)}
+    .task-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+    .task-table tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
+    .status-sel{padding:4px 8px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#fff;font-size:.75rem;cursor:pointer}
+    .comment-box{background:rgba(255,255,255,.04);border-radius:8px;padding:10px;margin-bottom:8px;font-size:.83rem}
+    .comment-meta{font-size:.72rem;color:var(--muted);margin-bottom:4px}
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+    @media(max-width:700px){.charts-row{grid-template-columns:1fr}}
+    .chart-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px}
+    .chart-card h4{font-size:.85rem;color:var(--muted);margin-bottom:14px}
+    .bar-group{display:flex;flex-direction:column;gap:8px}
+    .bar-item{display:flex;align-items:center;gap:10px;font-size:.8rem}
+    .bar-item .lbl{width:90px;flex-shrink:0;color:var(--muted);text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+    .bar-item .track{flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:8px;overflow:hidden}
+    .bar-item .fill{height:100%;border-radius:4px;transition:.5s}
+    .bar-item .cnt{width:36px;text-align:right;color:var(--muted);font-size:.75rem}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Gestión ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="tareas.html" style="color:#00d4ff">Tareas</a>
+          <a href="tickets.html">Soporte</a>
+          <a href="crm.html">CRM</a>
+          <a href="reports.html">Reportes</a>
+        </div>
+      </div>
+      <a href="fol.html" class="btn ghost">FOL/SDSS</a>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="tasks-header">
+    <div>
+      <span class="tag" style="background:rgba(0,212,255,.1);color:#00d4ff;border-color:rgba(0,212,255,.3)">📋 Gestión de Tareas</span>
+      <h1 style="margin-top:8px;font-size:1.5rem">Panel de Tareas</h1>
+      <p class="muted" style="font-size:.85rem">Crea, asigna, sigue y completa tareas del proyecto</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn ghost" id="btnRefresh" type="button">🔄 Actualizar</button>
+      <button class="btn primary" id="btnNewTask" type="button">+ Nueva Tarea</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row" id="kpiRow">
+    <div class="kpi-mini"><div class="val" id="kpiTotal">—</div><div class="lbl">Total</div></div>
+    <div class="kpi-mini" style="border-color:rgba(0,212,255,.2)"><div class="val" style="color:#00d4ff" id="kpiPendiente">—</div><div class="lbl">Pendientes</div></div>
+    <div class="kpi-mini" style="border-color:rgba(245,158,11,.2)"><div class="val" style="color:#f59e0b" id="kpiProgreso">—</div><div class="lbl">En Progreso</div></div>
+    <div class="kpi-mini" style="border-color:rgba(34,197,94,.2)"><div class="val" style="color:#22c55e" id="kpiCompletada">—</div><div class="lbl">Completadas</div></div>
+    <div class="kpi-mini" style="border-color:rgba(239,68,68,.2)"><div class="val" style="color:#ef4444" id="kpiVencidas">—</div><div class="lbl">Vencidas</div></div>
+    <div class="kpi-mini" style="border-color:rgba(121,38,255,.2)"><div class="val" style="color:#9b5bff" id="kpiUrgente">—</div><div class="lbl">Urgentes</div></div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h4>📊 Tareas por Categoría</h4>
+      <div class="bar-group" id="chartCategory"></div>
+    </div>
+    <div class="chart-card">
+      <h4>🏷️ Tareas por Prioridad</h4>
+      <div class="bar-group" id="chartPriority"></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <input id="searchInput" type="text" placeholder="🔍 Buscar tarea..." style="flex:1;min-width:160px" />
+    <select id="filterStatus">
+      <option value="">Todos los estados</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="en_progreso">En Progreso</option>
+      <option value="completada">Completada</option>
+    </select>
+    <select id="filterPriority">
+      <option value="">Toda prioridad</option>
+      <option value="urgente">Urgente</option>
+      <option value="alta">Alta</option>
+      <option value="normal">Normal</option>
+      <option value="baja">Baja</option>
+    </select>
+    <select id="filterCategory">
+      <option value="">Todas las categorías</option>
+    </select>
+    <div class="view-tabs">
+      <button class="view-tab active" id="tabBoard" type="button">🗂 Kanban</button>
+      <button class="view-tab" id="tabList" type="button">📋 Lista</button>
+    </div>
+  </div>
+
+  <!-- Board view -->
+  <div class="task-board-wrap active" id="boardWrap">
+    <div class="task-board">
+      <div class="board-col">
+        <div class="board-col-head">
+          <span class="board-col-title"><span style="color:#00d4ff">⏳</span> Pendientes <span class="col-count" id="cntPendiente">0</span></span>
+        </div>
+        <div id="colPendiente"></div>
+      </div>
+      <div class="board-col">
+        <div class="board-col-head">
+          <span class="board-col-title"><span style="color:#f59e0b">🔧</span> En Progreso <span class="col-count" id="cntProgreso">0</span></span>
+        </div>
+        <div id="colProgreso"></div>
+      </div>
+      <div class="board-col">
+        <div class="board-col-head">
+          <span class="board-col-title"><span style="color:#22c55e">✅</span> Completadas <span class="col-count" id="cntCompletada">0</span></span>
+        </div>
+        <div id="colCompletada"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List view -->
+  <div class="task-list-view" id="listWrap">
+    <div style="overflow-x:auto">
+      <table class="task-table">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Categoría</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Asignado a</th>
+            <th>Vence</th>
+            <th>Progreso</th>
+          </tr>
+        </thead>
+        <tbody id="taskListBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Modal: Nueva / Editar Tarea -->
+<div class="modal-backdrop" id="taskModal" style="display:none">
+  <div class="modal">
+    <h3 id="modalTitle">Nueva Tarea</h3>
+    <div class="form-group">
+      <label>Título *</label>
+      <input type="text" id="fTitle" placeholder="Describe la tarea..." />
+    </div>
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea id="fDesc" placeholder="Detalles adicionales..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="fStatus">
+          <option value="pendiente">Pendiente</option>
+          <option value="en_progreso">En Progreso</option>
+          <option value="completada">Completada</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="fPriority">
+          <option value="baja">Baja</option>
+          <option value="normal" selected>Normal</option>
+          <option value="alta">Alta</option>
+          <option value="urgente">Urgente</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="fCategory"><option value="">Sin categoría</option></select>
+      </div>
+      <div class="form-group">
+        <label>Fecha límite</label>
+        <input type="date" id="fDue" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Asignar a (email)</label>
+      <input type="email" id="fAssigned" placeholder="usuario@ejemplo.com" />
+    </div>
+    <div class="form-group" id="progressGroup" style="display:none">
+      <label>Progreso: <span id="progressVal">0</span>%</label>
+      <input type="range" id="fProgress" min="0" max="100" value="0" style="width:100%" />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn ghost" id="btnModalClose" type="button">Cancelar</button>
+      <button class="btn primary" id="btnModalSave" type="button">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Ver Tarea -->
+<div class="modal-backdrop" id="viewModal" style="display:none">
+  <div class="modal" style="max-width:620px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div>
+        <div id="vmCatBadge" style="margin-bottom:8px"></div>
+        <h3 id="vmTitle" style="margin:0;font-size:1.1rem"></h3>
+      </div>
+      <button class="btn ghost" id="btnViewClose" type="button" style="padding:6px 12px">✕</button>
+    </div>
+    <p id="vmDesc" style="color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:16px"></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="vmMeta"></div>
+    <div class="progress-bar" style="height:8px;margin-bottom:16px"><div class="progress-fill" id="vmProgress" style="width:0%"></div></div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="btn ghost" id="btnEditTask" type="button">✏️ Editar</button>
+      <button class="btn" id="btnCompleteTask" type="button" style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3);color:#22c55e">✅ Marcar completada</button>
+      <button class="btn" id="btnDeleteTask" type="button" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#ef4444">🗑 Eliminar</button>
+    </div>
+    <div>
+      <h4 style="font-size:.85rem;margin-bottom:10px">💬 Comentarios</h4>
+      <div id="vmComments"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="vmCommentInput" placeholder="Escribe un comentario..." style="flex:1;padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.85rem" />
+        <button class="btn primary" id="btnAddComment" type="button" style="padding:8px 14px">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="nexus.js"></script>
+<script>
+const API = 'http://localhost:3002';
+let token = null;
+let tasks = [];
+let categories = [];
+let currentTaskId = null;
+let viewMode = 'board';
+
+async function apiGet(url) {
+  const r = await fetch(API + url, { headers: { Authorization: 'Bearer ' + token } });
+  return r.json();
+}
+async function apiPost(url, body) {
+  const r = await fetch(API + url, { method:'POST', headers:{ Authorization:'Bearer '+token, 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+  return r.json();
+}
+async function apiPatch(url, body) {
+  const r = await fetch(API + url, { method:'PATCH', headers:{ Authorization:'Bearer '+token, 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+  return r.json();
+}
+async function apiDelete(url) {
+  const r = await fetch(API + url, { method:'DELETE', headers:{ Authorization:'Bearer '+token } });
+  return r.json();
+}
+
+function priClass(p) { return { urgente:'p-urgente', alta:'p-alta', normal:'p-normal', baja:'p-baja' }[p]||'p-normal'; }
+function statusLabel(s) { return { pendiente:'Pendiente', en_progreso:'En Progreso', completada:'Completada' }[s]||s; }
+function fmtDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('es',{day:'2-digit',month:'short',year:'numeric'}); }
+function isOverdue(d, status) { return d && status !== 'completada' && new Date(d) < new Date(); }
+
+async function loadStats() {
+  const d = await apiGet('/api/tasks/stats');
+  document.getElementById('kpiTotal').textContent     = d.total ?? '—';
+  document.getElementById('kpiPendiente').textContent = d.pendiente ?? '—';
+  document.getElementById('kpiProgreso').textContent  = d.en_progreso ?? '—';
+  document.getElementById('kpiCompletada').textContent= d.completada ?? '—';
+  document.getElementById('kpiVencidas').textContent  = d.vencidas ?? '—';
+  document.getElementById('kpiUrgente').textContent   = d.urgente ?? '—';
+
+  const colors = ['#00d4ff','#7926ff','#22c55e','#f59e0b','#ef4444','#e879f9'];
+  const cats = d.by_category || [];
+  const maxC = Math.max(...cats.map(c=>c.count), 1);
+  document.getElementById('chartCategory').innerHTML = cats.map((c,i)=>`
+    <div class="bar-item">
+      <span class="lbl">${c.icon||'📋'} ${c.name}</span>
+      <div class="track"><div class="fill" style="width:${(c.count/maxC)*100}%;background:${c.color||colors[i%colors.length]}"></div></div>
+      <span class="cnt">${c.count}</span>
+    </div>`).join('');
+
+  const pris = d.by_priority || [];
+  const maxP = Math.max(...pris.map(p=>p.count), 1);
+  const pricols = { urgente:'#ef4444', alta:'#f97316', normal:'#00d4ff', baja:'#aaa' };
+  document.getElementById('chartPriority').innerHTML = pris.map(p=>`
+    <div class="bar-item">
+      <span class="lbl" style="text-transform:capitalize">${p.priority}</span>
+      <div class="track"><div class="fill" style="width:${(p.count/maxP)*100}%;background:${pricols[p.priority]||'#00d4ff'}"></div></div>
+      <span class="cnt">${p.count}</span>
+    </div>`).join('');
+}
+
+async function loadCategories() {
+  const d = await apiGet('/api/task-categories');
+  categories = d.items || [];
+  const sel = document.getElementById('filterCategory');
+  const fsel = document.getElementById('fCategory');
+  categories.forEach(c => {
+    const o1 = new Option(`${c.icon} ${c.name}`, c.id);
+    const o2 = new Option(`${c.icon} ${c.name}`, c.id);
+    sel.appendChild(o1);
+    fsel.appendChild(o2);
+  });
+}
+
+async function loadTasks() {
+  const q  = document.getElementById('searchInput').value;
+  const st = document.getElementById('filterStatus').value;
+  const pr = document.getElementById('filterPriority').value;
+  const ca = document.getElementById('filterCategory').value;
+  let url = '/api/tasks?limit=200';
+  if (q)  url += `&q=${encodeURIComponent(q)}`;
+  if (st) url += `&status=${st}`;
+  if (pr) url += `&priority=${pr}`;
+  if (ca) url += `&category_id=${ca}`;
+  const d = await apiGet(url);
+  tasks = d.items || [];
+  renderTasks();
+}
+
+function renderTasks() {
+  if (viewMode === 'board') renderBoard();
+  else renderList();
+}
+
+function renderBoard() {
+  const groups = { pendiente: [], en_progreso: [], completada: [] };
+  tasks.forEach(t => { if (groups[t.status]) groups[t.status].push(t); });
+
+  ['pendiente','en_progreso','completada'].forEach(s => {
+    const col = document.getElementById(s === 'en_progreso' ? 'colProgreso' : s === 'pendiente' ? 'colPendiente' : 'colCompletada');
+    const cnt = document.getElementById(s === 'en_progreso' ? 'cntProgreso' : s === 'pendiente' ? 'cntPendiente' : 'cntCompletada');
+    cnt.textContent = groups[s].length;
+    col.innerHTML = groups[s].map(t => `
+      <div class="task-card ${t.status}" onclick="openViewModal(${t.id})">
+        <div class="task-title">${escHtml(t.title)}</div>
+        <div class="task-meta">
+          <span class="pri-badge ${priClass(t.priority)}">${t.priority}</span>
+          ${t.category_name ? `<span class="cat-badge" style="background:${t.category_color||'#00d4ff'}22;color:${t.category_color||'#00d4ff'}">${t.category_icon||'📋'} ${escHtml(t.category_name)}</span>` : ''}
+          ${t.due_date ? `<span class="due-date ${isOverdue(t.due_date,t.status)?'overdue':''}">📅 ${fmtDate(t.due_date)}</span>` : ''}
+          ${t.assigned_email ? `<span class="assign-avatar" title="${escHtml(t.assigned_email)}">${t.assigned_email[0].toUpperCase()}</span>` : ''}
+        </div>
+        ${t.progress > 0 ? `<div class="progress-bar"><div class="progress-fill" style="width:${t.progress}%"></div></div>` : ''}
+      </div>`).join('') || `<p style="color:var(--muted);font-size:.8rem;text-align:center;padding:20px 0">Sin tareas</p>`;
+  });
+}
+
+function renderList() {
+  document.getElementById('taskListBody').innerHTML = tasks.map(t => `
+    <tr onclick="openViewModal(${t.id})">
+      <td><strong>${escHtml(t.title)}</strong></td>
+      <td>${t.category_name ? `<span class="cat-badge" style="background:${t.category_color||'#00d4ff'}22;color:${t.category_color||'#00d4ff'}">${t.category_icon||'📋'} ${escHtml(t.category_name)}</span>` : '—'}</td>
+      <td><span class="pri-badge p-normal" style="background:rgba(255,255,255,.08)">${statusLabel(t.status)}</span></td>
+      <td><span class="pri-badge ${priClass(t.priority)}">${t.priority}</span></td>
+      <td>${t.assigned_email ? `<span class="assign-avatar" title="${escHtml(t.assigned_email)}">${t.assigned_email[0].toUpperCase()}</span> <small>${escHtml(t.assigned_email)}</small>` : '—'}</td>
+      <td class="${isOverdue(t.due_date,t.status)?'overdue':''}">${fmtDate(t.due_date)||'—'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="progress-bar" style="flex:1;height:6px"><div class="progress-fill" style="width:${t.progress||0}%"></div></div>
+          <small style="color:var(--muted)">${t.progress||0}%</small>
+        </div>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Sin tareas</td></tr>';
+}
+
+function escHtml(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+// ── Modal Nueva/Editar ────────────────────────────────────────────────────────
+let editingId = null;
+document.getElementById('btnNewTask').onclick = () => openEditModal(null);
+document.getElementById('btnModalClose').onclick = () => closeModal('taskModal');
+document.getElementById('fProgress').oninput = () => {
+  document.getElementById('progressVal').textContent = document.getElementById('fProgress').value;
+};
+document.getElementById('fStatus').onchange = () => {
+  const s = document.getElementById('fStatus').value;
+  document.getElementById('progressGroup').style.display = s === 'en_progreso' ? 'block' : 'none';
+};
+
+function openEditModal(task) {
+  editingId = task?.id || null;
+  document.getElementById('modalTitle').textContent = task ? 'Editar Tarea' : 'Nueva Tarea';
+  document.getElementById('fTitle').value    = task?.title || '';
+  document.getElementById('fDesc').value     = task?.description || '';
+  document.getElementById('fStatus').value   = task?.status || 'pendiente';
+  document.getElementById('fPriority').value = task?.priority || 'normal';
+  document.getElementById('fCategory').value = task?.category_id || '';
+  document.getElementById('fDue').value      = task?.due_date?.slice(0,10) || '';
+  document.getElementById('fAssigned').value = task?.assigned_email || '';
+  document.getElementById('fProgress').value = task?.progress || 0;
+  document.getElementById('progressVal').textContent = task?.progress || 0;
+  document.getElementById('progressGroup').style.display = task?.status === 'en_progreso' ? 'block' : 'none';
+  document.getElementById('taskModal').style.display = 'flex';
+}
+
+document.getElementById('btnModalSave').onclick = async () => {
+  const body = {
+    title: document.getElementById('fTitle').value.trim(),
+    description: document.getElementById('fDesc').value.trim(),
+    status: document.getElementById('fStatus').value,
+    priority: document.getElementById('fPriority').value,
+    category_id: document.getElementById('fCategory').value || null,
+    due_date: document.getElementById('fDue').value || null,
+    assigned_email: document.getElementById('fAssigned').value.trim() || null,
+    progress: Number(document.getElementById('fProgress').value),
+  };
+  if (!body.title) { alert('El título es requerido'); return; }
+  const btn = document.getElementById('btnModalSave');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    if (editingId) await apiPatch(`/api/tasks/${editingId}`, body);
+    else await apiPost('/api/tasks', body);
+    closeModal('taskModal');
+    await loadTasks();
+    await loadStats();
+  } finally { btn.disabled = false; btn.textContent = 'Guardar'; }
+};
+
+// ── Modal Ver Tarea ───────────────────────────────────────────────────────────
+document.getElementById('btnViewClose').onclick  = () => closeModal('viewModal');
+document.getElementById('btnCompleteTask').onclick = async () => {
+  if (!currentTaskId) return;
+  await apiPatch(`/api/tasks/${currentTaskId}`, { status:'completada', progress:100 });
+  closeModal('viewModal');
+  await loadTasks();
+  await loadStats();
+};
+document.getElementById('btnEditTask').onclick = () => {
+  closeModal('viewModal');
+  const t = tasks.find(x=>x.id===currentTaskId);
+  if (t) openEditModal(t);
+};
+document.getElementById('btnDeleteTask').onclick = async () => {
+  if (!currentTaskId || !confirm('¿Eliminar esta tarea?')) return;
+  await apiDelete(`/api/tasks/${currentTaskId}`);
+  closeModal('viewModal');
+  await loadTasks();
+  await loadStats();
+};
+document.getElementById('btnAddComment').onclick = async () => {
+  const input = document.getElementById('vmCommentInput');
+  const text = input.value.trim();
+  if (!text || !currentTaskId) return;
+  await apiPost(`/api/tasks/${currentTaskId}/comments`, { text });
+  input.value = '';
+  openViewModal(currentTaskId);
+};
+
+async function openViewModal(id) {
+  currentTaskId = id;
+  const d = await apiGet(`/api/tasks/${id}`);
+  const t = d.task;
+  const comments = d.comments || [];
+  if (!t) return;
+  document.getElementById('vmTitle').textContent = t.title;
+  document.getElementById('vmDesc').textContent  = t.description || 'Sin descripción.';
+  document.getElementById('vmCatBadge').innerHTML = t.category_name
+    ? `<span class="cat-badge" style="background:${t.category_color||'#00d4ff'}22;color:${t.category_color||'#00d4ff'}">${t.category_icon||'📋'} ${escHtml(t.category_name)}</span>` : '';
+  document.getElementById('vmProgress').style.width = (t.progress||0)+'%';
+  document.getElementById('vmMeta').innerHTML = `
+    <span class="pri-badge ${priClass(t.priority)}">${t.priority}</span>
+    <span class="pri-badge" style="background:rgba(255,255,255,.08)">${statusLabel(t.status)}</span>
+    ${t.due_date ? `<span class="due-date ${isOverdue(t.due_date,t.status)?'overdue':''}">📅 ${fmtDate(t.due_date)}</span>` : ''}
+    ${t.assigned_email ? `<span style="font-size:.8rem;color:var(--muted)">👤 ${escHtml(t.assigned_email)}</span>` : ''}
+    <span style="font-size:.8rem;color:var(--muted)">📈 ${t.progress||0}%</span>`;
+  document.getElementById('vmComments').innerHTML = comments.length
+    ? comments.map(c=>`<div class="comment-box"><div class="comment-meta">👤 <strong>${escHtml(c.user_name||c.user_email)}</strong> · ${fmtDate(c.created_at)}</div>${escHtml(c.text)}</div>`).join('')
+    : '<p style="color:var(--muted);font-size:.82rem">Sin comentarios aún.</p>';
+  document.getElementById('btnCompleteTask').style.display = t.status === 'completada' ? 'none' : 'inline-flex';
+  document.getElementById('viewModal').style.display = 'flex';
+}
+
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// ── View tabs ─────────────────────────────────────────────────────────────────
+document.getElementById('tabBoard').onclick = () => {
+  viewMode = 'board';
+  document.getElementById('tabBoard').classList.add('active');
+  document.getElementById('tabList').classList.remove('active');
+  document.getElementById('boardWrap').classList.add('active');
+  document.getElementById('listWrap').classList.remove('active');
+  renderTasks();
+};
+document.getElementById('tabList').onclick = () => {
+  viewMode = 'list';
+  document.getElementById('tabList').classList.add('active');
+  document.getElementById('tabBoard').classList.remove('active');
+  document.getElementById('listWrap').classList.add('active');
+  document.getElementById('boardWrap').classList.remove('active');
+  renderTasks();
+};
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+let filterTimer;
+['searchInput','filterStatus','filterPriority','filterCategory'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    clearTimeout(filterTimer);
+    filterTimer = setTimeout(loadTasks, 300);
+  });
+});
+document.getElementById('btnRefresh').onclick = () => { loadStats(); loadTasks(); };
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+async function boot() {
+  // Leer token del objeto de sesion (nxs_auth) o del key directo
+  const authData = JSON.parse(localStorage.getItem('nxs_auth') || 'null');
+  token = authData?.token || localStorage.getItem('nxs_token') || null;
+  if (!token) { window.location.href = 'login.html'; return; }
+  await loadCategories();
+  await Promise.all([loadStats(), loadTasks()]);
+}
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KB Admin — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .kb-layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+    @media(max-width:700px){.kb-layout{grid-template-columns:1fr}}
+    .kb-sidebar-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;position:sticky;top:20px}
+    .art-item{padding:10px 12px;border-radius:8px;cursor:pointer;transition:.2s;font-size:.85rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+    .art-item:hover{background:rgba(255,255,255,.06)}
+    .art-item.active{background:rgba(0,212,255,.1);border-left:2px solid #00d4ff}
+    .art-item .pub-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .art-item .pub-dot.on{background:#22c55e}
+    .art-item .pub-dot.off{background:rgba(255,255,255,.2)}
+    .editor-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;margin-bottom:5px;font-size:.82rem;color:var(--muted)}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.88rem;box-sizing:border-box}
+    .form-group textarea{font-family:monospace;font-size:.82rem;resize:vertical;min-height:320px;line-height:1.6}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:#00d4ff}
+    .editor-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+    .tb-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:.2s}
+    .tb-btn:hover{background:rgba(0,212,255,.15);border-color:#00d4ff;color:#00d4ff}
+    .preview-area{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:16px;min-height:200px;font-size:.88rem;line-height:1.8;display:none}
+    .preview-area h2{color:#00d4ff;font-size:1.1rem;margin:16px 0 8px}
+    .preview-area h3{color:rgba(0,212,255,.8);margin:12px 0 6px}
+    .preview-area strong{color:#fff}
+    .preview-area code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-family:monospace}
+    .preview-area table{width:100%;border-collapse:collapse;margin:12px 0}
+    .preview-area th{background:rgba(0,212,255,.1);padding:6px 10px;font-size:.82rem}
+    .preview-area td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.82rem}
+    .preview-area ul,.preview-area ol{padding-left:18px;margin:8px 0}
+    .action-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .status-toggle{display:flex;align-items:center;gap:8px;font-size:.82rem;cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
+    .status-toggle:hover{border-color:#00d4ff}
+    .cat-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;font-size:.82rem;margin-bottom:4px;background:rgba(255,255,255,.03)}
+    .empty-editor{text-align:center;padding:60px 20px;color:var(--muted)}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Contenido ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="kb-admin.html" style="color:#00d4ff">KB Admin</a>
+          <a href="knowledge.html">Ver KB pública</a>
+          <a href="ai-tools.html">IA Tools</a>
+        </div>
+      </div>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="tag">📚 KB Admin</span>
+      <h2 class="reveal">Base de <span class="gradient-label">Conocimiento</span></h2>
+      <p class="muted">Gestiona artículos y categorías visibles para tus clientes.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn ghost" id="manageCatsBtn">📂 Categorías</button>
+      <button class="btn primary" id="newArticleBtn">+ Nuevo artículo</button>
+    </div>
+  </div>
+
+  <div class="kb-layout">
+    <!-- Sidebar: article list -->
+    <div class="kb-sidebar-panel">
+      <div style="margin-bottom:10px">
+        <input type="text" id="artSearch" placeholder="Buscar artículo..." style="width:100%;padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.82rem;box-sizing:border-box" />
+      </div>
+      <div style="display:flex;gap:4px;margin-bottom:10px">
+        <button class="tb-btn active" id="filterAll" onclick="setFilter('all',this)">Todos</button>
+        <button class="tb-btn" id="filterPub" onclick="setFilter('pub',this)">Publicados</button>
+        <button class="tb-btn" id="filterDraft" onclick="setFilter('draft',this)">Borradores</button>
+      </div>
+      <div id="artList"><div class="muted" style="font-size:.8rem;padding:10px">Cargando...</div></div>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor-panel" id="editorPanel">
+      <div class="empty-editor" id="emptyEditor">
+        <div style="font-size:3rem;margin-bottom:12px">📝</div>
+        <p>Selecciona un artículo o crea uno nuevo.</p>
+        <button class="btn primary" onclick="newArticle()" style="margin-top:12px">+ Nuevo artículo</button>
+      </div>
+      <div id="editorContent" style="display:none">
+        <div class="action-bar">
+          <button class="btn primary" id="saveBtn">💾 Guardar</button>
+          <button class="btn ghost" id="previewToggle">👁 Vista previa</button>
+          <label class="status-toggle" id="pubToggle">
+            <span class="pub-dot" id="pubDot" style="width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.2)"></span>
+            <span id="pubLabel">Borrador</span>
+          </label>
+          <button class="btn ghost" id="deleteArticleBtn" style="margin-left:auto;color:#ff4757;border-color:rgba(255,71,87,.3)">🗑 Eliminar</button>
+        </div>
+
+        <div class="form-group"><label>Título *</label><input type="text" id="aTitle" placeholder="Título del artículo" /></div>
+        <div class="form-group"><label>Categoría</label>
+          <select id="aCat"></select>
+        </div>
+
+        <div class="editor-toolbar">
+          <button class="tb-btn" onclick="insertMd('## ','')">H2</button>
+          <button class="tb-btn" onclick="insertMd('### ','')">H3</button>
+          <button class="tb-btn" onclick="insertMd('**','**')"><b>B</b></button>
+          <button class="tb-btn" onclick="insertMd('*','*')"><i>I</i></button>
+          <button class="tb-btn" onclick="insertMd('`','`')">Code</button>
+          <button class="tb-btn" onclick="insertMd('- ','')">Lista</button>
+          <button class="tb-btn" onclick="insertMd('1. ','')">Numerada</button>
+          <button class="tb-btn" onclick="insertTable()">Tabla</button>
+          <button class="tb-btn" onclick="insertMd('\n---\n','')">Divider</button>
+          <button class="tb-btn" onclick="genAIContent()" style="background:rgba(121,38,255,.15);border-color:rgba(121,38,255,.4);color:#9b5bff">🤖 IA</button>
+        </div>
+
+        <div class="form-group">
+          <label>Contenido (Markdown)</label>
+          <textarea id="aContent" placeholder="Escribe el contenido en Markdown...
+## Sección 1
+Contenido aquí...
+
+## Sección 2
+- Punto 1
+- Punto 2"></textarea>
+        </div>
+
+        <div class="preview-area" id="previewArea"></div>
+
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn primary" id="saveBtn2">💾 Guardar cambios</button>
+          <a href="knowledge.html" target="_blank" class="btn ghost">🌐 Ver KB pública</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Categories modal -->
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center" id="catsModal" style="display:none">
+  <div style="background:#161626;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:28px;max-width:420px;width:100%">
+    <h4 style="margin-bottom:16px">📂 Gestionar categorías</h4>
+    <div id="catList" style="margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="newCatName" placeholder="Nombre" style="flex:1;padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.85rem" />
+      <input type="text" id="newCatIcon" placeholder="🌟" style="width:54px;padding:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.85rem;text-align:center" />
+      <button class="btn primary" id="addCatBtn">Añadir</button>
+    </div>
+    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="document.getElementById('catsModal').style.display='none'">Cerrar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+let articles = [], categories = [], editingId = null, isPublished = false, filterMode = 'all';
+
+function md(text) {
+  return text
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code>$1</code>').replace(/^[-*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs,'<ul>$1</ul>').replace(/\n\n/g,'</p><p>');
+}
+
+async function load() {
+  const [catRes, artRes] = await Promise.all([
+    NXS.apiGet('/api/kb/categories'),
+    NXS.apiGet('/api/kb/articles?published_only=0').catch(()=>NXS.apiGet('/api/kb/articles'))
+  ]);
+  categories = catRes.items || [];
+  articles   = artRes.items || [];
+  renderList(); populateCatSelect();
+}
+
+function setFilter(mode, btn) {
+  filterMode = mode;
+  document.querySelectorAll('#filterAll,#filterPub,#filterDraft').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const q = document.getElementById('artSearch').value.toLowerCase();
+  let items = articles;
+  if (filterMode==='pub')   items = items.filter(a=>a.is_published);
+  if (filterMode==='draft') items = items.filter(a=>!a.is_published);
+  if (q) items = items.filter(a=>a.title.toLowerCase().includes(q));
+  const list = document.getElementById('artList');
+  list.innerHTML = items.length ? items.map(a=>`
+    <div class="art-item ${editingId===a.id?'active':''}" onclick="openArticle(${a.id})">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${a.title}</span>
+      <span class="pub-dot ${a.is_published?'on':'off'}" style="margin-left:8px;width:7px;height:7px;border-radius:50%;background:${a.is_published?'#22c55e':'rgba(255,255,255,.2)'}"></span>
+    </div>`).join('') : '<p class="muted" style="font-size:.8rem;padding:8px">Sin artículos.</p>';
+}
+
+function populateCatSelect() {
+  document.getElementById('aCat').innerHTML = '<option value="">Sin categoría</option>' +
+    categories.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+}
+
+function openArticle(id) {
+  const a = articles.find(x=>x.id===id);
+  if (!a) return;
+  editingId = id;
+  isPublished = !!a.is_published;
+  document.getElementById('emptyEditor').style.display='none';
+  document.getElementById('editorContent').style.display='';
+  document.getElementById('aTitle').value = a.title||'';
+  document.getElementById('aCat').value = a.category_id||'';
+  document.getElementById('aContent').value = a.content||'';
+  document.getElementById('previewArea').style.display='none';
+  updatePubToggle();
+  renderList();
+}
+
+function newArticle() {
+  editingId = null; isPublished = false;
+  document.getElementById('emptyEditor').style.display='none';
+  document.getElementById('editorContent').style.display='';
+  document.getElementById('aTitle').value='';
+  document.getElementById('aCat').value='';
+  document.getElementById('aContent').value='';
+  document.getElementById('previewArea').style.display='none';
+  updatePubToggle();
+}
+
+function updatePubToggle() {
+  document.getElementById('pubDot').style.background = isPublished?'#22c55e':'rgba(255,255,255,.2)';
+  document.getElementById('pubLabel').textContent = isPublished?'Publicado':'Borrador';
+}
+
+document.getElementById('pubToggle').addEventListener('click', () => {
+  isPublished = !isPublished; updatePubToggle();
+});
+
+async function save() {
+  const title = document.getElementById('aTitle').value.trim();
+  const content = document.getElementById('aContent').value.trim();
+  const category_id = document.getElementById('aCat').value ? Number(document.getElementById('aCat').value) : null;
+  if (!title || !content) return showToast('Título y contenido requeridos');
+  try {
+    if (editingId) {
+      await NXS.apiPatch(`/api/kb/articles/${editingId}`, { title, content, category_id, is_published: isPublished });
+      const a = articles.find(x=>x.id===editingId);
+      if (a) { a.title=title; a.content=content; a.category_id=category_id; a.is_published=isPublished; }
+    } else {
+      const { id } = await NXS.apiPost('/api/kb/articles', { title, content, category_id, is_published: isPublished });
+      editingId = id;
+      articles.push({ id, title, content, category_id, is_published: isPublished, views:0, helpful_yes:0 });
+    }
+    renderList(); showToast('✅ Artículo guardado');
+  } catch { showToast('Error guardando artículo'); }
+}
+
+document.getElementById('saveBtn').addEventListener('click', save);
+document.getElementById('saveBtn2').addEventListener('click', save);
+document.getElementById('newArticleBtn').addEventListener('click', newArticle);
+document.getElementById('artSearch').addEventListener('input', renderList);
+
+document.getElementById('deleteArticleBtn').addEventListener('click', async () => {
+  if (!editingId) return;
+  if (!confirm('¿Eliminar este artículo?')) return;
+  await NXS.apiDelete(`/api/kb/articles/${editingId}`);
+  articles = articles.filter(a=>a.id!==editingId);
+  editingId = null;
+  document.getElementById('emptyEditor').style.display='';
+  document.getElementById('editorContent').style.display='none';
+  renderList(); showToast('Artículo eliminado');
+});
+
+let previewOn = false;
+document.getElementById('previewToggle').addEventListener('click', () => {
+  previewOn = !previewOn;
+  const area = document.getElementById('previewArea');
+  const textarea = document.getElementById('aContent');
+  if (previewOn) { area.style.display=''; area.innerHTML = md(textarea.value); textarea.style.display='none'; document.getElementById('previewToggle').textContent='✏️ Editor'; }
+  else { area.style.display='none'; textarea.style.display=''; document.getElementById('previewToggle').textContent='👁 Vista previa'; }
+});
+
+function insertMd(prefix, suffix) {
+  const ta = document.getElementById('aContent');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s,e);
+  ta.value = ta.value.slice(0,s) + prefix + sel + suffix + ta.value.slice(e);
+  ta.focus(); ta.selectionStart = s+prefix.length; ta.selectionEnd = s+prefix.length+sel.length;
+}
+function insertTable() {
+  const ta = document.getElementById('aContent');
+  const tmpl = '\n| Columna 1 | Columna 2 | Columna 3 |\n|-----------|-----------|------------|\n| Dato 1    | Dato 2    | Dato 3     |\n';
+  const s = ta.selectionStart;
+  ta.value = ta.value.slice(0,s) + tmpl + ta.value.slice(s);
+}
+
+async function genAIContent() {
+  const title = document.getElementById('aTitle').value.trim();
+  if (!title) return showToast('Escribe el título primero');
+  showToast('Generando con IA...');
+  try {
+    const { content } = await NXS.apiPost('/api/ai/generate-content', { type:'faq', topic: title, tone:'profesional', length:'medium' });
+    document.getElementById('aContent').value = content;
+    showToast('✅ Contenido generado con IA');
+  } catch { showToast('Error con IA'); }
+}
+
+// Categories modal
+document.getElementById('manageCatsBtn').addEventListener('click', () => {
+  renderCatList();
+  document.getElementById('catsModal').style.display='flex';
+});
+function renderCatList() {
+  document.getElementById('catList').innerHTML = categories.map(c=>`
+    <div class="cat-item"><span>${c.icon} ${c.name} <span class="muted" style="font-size:.75rem">(${c.article_count||0} arts)</span></span></div>`).join('') || '<p class="muted" style="font-size:.82rem">Sin categorías.</p>';
+}
+document.getElementById('addCatBtn').addEventListener('click', async () => {
+  const name = document.getElementById('newCatName').value.trim();
+  const icon = document.getElementById('newCatIcon').value.trim()||'📄';
+  if (!name) return showToast('Nombre requerido');
+  try {
+    await NXS.apiPost('/api/kb/categories', { name, icon });
+    document.getElementById('newCatName').value=''; document.getElementById('newCatIcon').value='';
+    await load(); renderCatList(); showToast('Categoría creada');
+  } catch { showToast('Error'); }
+});
+
+if (!NXS.getToken()) window.location.href='login.html';
+else load();
+</script>
+</body>
+</html>

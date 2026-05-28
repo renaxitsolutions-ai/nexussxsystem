@@ -1,0 +1,493 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculadora de Precios — Nexuss X Systems</title>
+  <meta name="description" content="Calcula el precio de tu proyecto web con nuestra calculadora interactiva. Obtén una cotización instantánea sin compromiso." />
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body data-requires-auth="true">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html" data-i18n="nav_home">Home</a>
+          <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+          <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+          <div class="nav-dropdown" id="ddRecursos">
+            <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="blog.html">Blog</a>
+              <a href="casos.html">Casos de exito</a>
+              <a href="calculadora.html">Calculadora</a>
+              <a href="faq.html">FAQ</a>
+              <a href="sobre.html">Sobre nosotros</a>
+            </div>
+          </div>
+          <div class="nav-dropdown" id="ddPanel">
+            <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="timeline.html">Mi proyecto</a>
+              <a href="tickets.html">Soporte</a>
+              <a href="crm.html">CRM</a>
+              <a href="referidos.html">Referidos</a>
+            </div>
+          </div>
+          <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+          <a href="admin.html" data-i18n="nav_admin">Admin</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+          <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="tag" style="margin-bottom:10px;display:inline-block">✦ Precio instantáneo</span>
+          <h2 class="reveal">Calculadora de <span class="gradient-label">Precios</span></h2>
+          <p class="muted">Selecciona lo que necesitas y obtén tu cotización al instante. Sin compromiso, sin letra pequeña.</p>
+        </div>
+      </div>
+
+      <div style="display:grid;gap:24px;grid-template-columns:1fr 340px;margin-top:24px" id="calcLayout">
+        <!-- Opciones -->
+        <div>
+          <!-- Tipo de proyecto -->
+          <div class="calc-group reveal">
+            <h4>🏗️ Tipo de proyecto</h4>
+            <label class="calc-option selected" data-price="2500" data-key="tipo">
+              <input type="radio" name="tipo" value="landing" checked />
+              <span>Landing page de alta conversión</span>
+              <span class="calc-price-tag">DOP 2,500</span>
+            </label>
+            <label class="calc-option" data-price="4500" data-key="tipo">
+              <input type="radio" name="tipo" value="ventas" />
+              <span>Página de ventas completa</span>
+              <span class="calc-price-tag">DOP 4,500</span>
+            </label>
+            <label class="calc-option" data-price="7500" data-key="tipo">
+              <input type="radio" name="tipo" value="panel" />
+              <span>Panel de gestión / Dashboard</span>
+              <span class="calc-price-tag">DOP 7,500</span>
+            </label>
+            <label class="calc-option" data-price="9000" data-key="tipo">
+              <input type="radio" name="tipo" value="ecommerce" />
+              <span>Tienda online completa</span>
+              <span class="calc-price-tag">DOP 9,000</span>
+            </label>
+            <label class="calc-option" data-price="12000" data-key="tipo">
+              <input type="radio" name="tipo" value="app" />
+              <span>Aplicación web a medida</span>
+              <span class="calc-price-tag">DOP 12,000+</span>
+            </label>
+          </div>
+
+          <!-- Extras -->
+          <div class="calc-group reveal" style="margin-top:16px">
+            <h4>⚡ Extras y complementos</h4>
+            <label class="calc-option" data-price="1500" data-key="extra_chatbot">
+              <input type="checkbox" value="chatbot" />
+              <span>Chatbot con IA integrado</span>
+              <span class="calc-price-tag">+DOP 1,500</span>
+            </label>
+            <label class="calc-option" data-price="800" data-key="extra_seo">
+              <input type="checkbox" value="seo" />
+              <span>Optimización SEO avanzada</span>
+              <span class="calc-price-tag">+DOP 800</span>
+            </label>
+            <label class="calc-option" data-price="600" data-key="extra_multilang">
+              <input type="checkbox" value="multilang" />
+              <span>Multiidioma (hasta 3 idiomas)</span>
+              <span class="calc-price-tag">+DOP 600</span>
+            </label>
+            <label class="calc-option" data-price="1200" data-key="extra_pagos">
+              <input type="checkbox" value="pagos" />
+              <span>Integración de pasarela de pagos</span>
+              <span class="calc-price-tag">+DOP 1,200</span>
+            </label>
+            <label class="calc-option" data-price="900" data-key="extra_analytics">
+              <input type="checkbox" value="analytics" />
+              <span>Dashboard de analytics</span>
+              <span class="calc-price-tag">+DOP 900</span>
+            </label>
+            <label class="calc-option" data-price="500" data-key="extra_dom">
+              <input type="checkbox" value="dom" />
+              <span>Dominio + Hosting 1 año</span>
+              <span class="calc-price-tag">+DOP 500</span>
+            </label>
+          </div>
+
+          <!-- Marketing -->
+          <div class="calc-group reveal" style="margin-top:16px">
+            <h4>📱 Marketing digital (mensual)</h4>
+            <label class="calc-option" data-price="0" data-key="marketing">
+              <input type="radio" name="marketing" value="none" checked />
+              <span>Sin plan de marketing</span>
+              <span class="calc-price-tag">DOP 0/mes</span>
+            </label>
+            <label class="calc-option" data-price="2000" data-key="marketing">
+              <input type="radio" name="marketing" value="basico" />
+              <span>Plan básico (redes + 8 posts/mes)</span>
+              <span class="calc-price-tag">DOP 2,000/mes</span>
+            </label>
+            <label class="calc-option" data-price="4000" data-key="marketing">
+              <input type="radio" name="marketing" value="pro" />
+              <span>Plan pro (redes + video + ads)</span>
+              <span class="calc-price-tag">DOP 4,000/mes</span>
+            </label>
+          </div>
+
+          <!-- Urgencia -->
+          <div class="calc-group reveal" style="margin-top:16px">
+            <h4>⏱️ Tiempo de entrega</h4>
+            <label class="calc-option" data-price="0" data-key="urgencia">
+              <input type="radio" name="urgencia" value="normal" checked />
+              <span>Normal (2-3 semanas)</span>
+              <span class="calc-price-tag">Sin recargo</span>
+            </label>
+            <label class="calc-option" data-price="800" data-key="urgencia">
+              <input type="radio" name="urgencia" value="rapido" />
+              <span>Rápido (1 semana)</span>
+              <span class="calc-price-tag">+DOP 800</span>
+            </label>
+            <label class="calc-option" data-price="1800" data-key="urgencia">
+              <input type="radio" name="urgencia" value="urgente" />
+              <span>Urgente (48-72 horas)</span>
+              <span class="calc-price-tag">+DOP 1,800</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Resumen -->
+        <div>
+          <div class="calc-summary reveal">
+            <div style="font-size:.82rem;color:var(--muted);margin-bottom:6px">💰 Tu cotización</div>
+            <div class="total-price" id="calcTotal">DOP 2,500</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:16px">precio estimado</div>
+
+            <div id="calcLines" style="margin-bottom:16px"></div>
+
+            <a href="contacto.html" class="btn primary" style="width:100%;justify-content:center;margin-bottom:10px">
+              📩 Solicitar propuesta formal
+            </a>
+            <a href="https://wa.me/18293689630?text=Hola,%20me%20interesa%20solicitar%20una%20propuesta" target="_blank" class="btn whatsapp" style="width:100%;justify-content:center">
+              💬 Hablar por WhatsApp
+            </a>
+            <button id="downloadPdf" class="btn" style="width:100%;justify-content:center;margin-top:10px">
+              📄 Descargar PDF
+            </button>
+
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+              <div style="font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:6px">✅ Incluye revisiones ilimitadas</div>
+              <div style="font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:6px">✅ Soporte post-entrega 30 días</div>
+              <div style="font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px">✅ Sin costos ocultos</div>
+            </div>
+
+            <div id="discountBox" style="display:none;margin-top:14px">
+              <div class="field">
+                <label>Código de descuento</label>
+                <input type="text" id="discountInput" placeholder="XXXXXXXX" style="text-transform:uppercase" />
+              </div>
+              <button class="btn" id="applyDiscount" style="margin-top:8px;width:100%;justify-content:center">Aplicar</button>
+              <div id="discountMsg" style="font-size:.82rem;margin-top:6px"></div>
+            </div>
+            <button style="background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;margin-top:10px;text-decoration:underline" onclick="document.getElementById('discountBox').style.display='block';this.style.display='none'">
+              ¿Tienes un código de descuento?
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ QUE INCLUYE ══ -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="reveal">Todo lo que <span class="gradient-label">incluye</span> tu proyecto</h2>
+        <p class="muted">Independientemente del plan que elijas, estos son los estándares mínimos que garantizamos.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:24px">
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">📱</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Diseño responsive</div>
+            <div class="muted" style="font-size:.82rem">Compatible con móviles, tablets y escritorio. Probado en 20+ dispositivos.</div>
+          </div>
+        </div>
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">🚀</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Alta velocidad</div>
+            <div class="muted" style="font-size:.82rem">Google PageSpeed mínimo 90 puntos. Carga en menos de 2 segundos.</div>
+          </div>
+        </div>
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">🔍</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">SEO básico</div>
+            <div class="muted" style="font-size:.82rem">Meta tags, sitemap, alt texts y estructura HTML semántica correcta.</div>
+          </div>
+        </div>
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">🔐</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Seguridad HTTPS</div>
+            <div class="muted" style="font-size:.82rem">Certificado SSL incluido. Protección contra ataques básicos.</div>
+          </div>
+        </div>
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">🔄</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Revisiones ilimitadas</div>
+            <div class="muted" style="font-size:.82rem">Sin límite de rondas de feedback en la fase de diseño.</div>
+          </div>
+        </div>
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">📖</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Manual de uso</div>
+            <div class="muted" style="font-size:.82rem">Video o guía de cómo gestionar y actualizar tu proyecto.</div>
+          </div>
+        </div>
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">🛡️</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Soporte post-entrega</div>
+            <div class="muted" style="font-size:.82rem">30 días de soporte incluido tras el lanzamiento para ajustes menores.</div>
+          </div>
+        </div>
+        <div class="card reveal" style="padding:20px;display:flex;align-items:flex-start;gap:12px">
+          <span style="font-size:1.5rem;flex-shrink:0">💻</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Código 100% tuyo</div>
+            <div class="muted" style="font-size:.82rem">Entregamos el código fuente completo. Sin licencias ni dependencias forzadas.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ COMPARATIVA AGENCIAS ══ -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="reveal">¿Por qué nuestros precios <span class="gradient-label">tienen sentido</span>?</h2>
+        <p class="muted">Comparación honesta del valor que recibes en cada opción del mercado.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px">
+        <div class="card reveal" style="padding:24px;opacity:0.7">
+          <div style="font-size:1.5rem;margin-bottom:10px">🐌</div>
+          <h4 style="margin:0 0 8px">Agencia tradicional</h4>
+          <div style="font-size:1.4rem;font-weight:700;color:#ff6b91;margin-bottom:8px">USD 5,000–20,000</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:.85rem;color:var(--muted)">
+            <li>⏳ 3–6 meses de entrega</li>
+            <li>🏢 Costo de overhead incluido</li>
+            <li>📞 Poco acceso al equipo</li>
+            <li>📋 Contratos largos</li>
+          </ul>
+        </div>
+        <div class="card reveal" style="padding:24px;opacity:0.75">
+          <div style="font-size:1.5rem;margin-bottom:10px">🎲</div>
+          <h4 style="margin:0 0 8px">Freelancer genérico</h4>
+          <div style="font-size:1.4rem;font-weight:700;color:#f59e0b;margin-bottom:8px">Variable</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:.85rem;color:var(--muted)">
+            <li>⚠️ Calidad impredecible</li>
+            <li>⚠️ Puede desaparecer</li>
+            <li>❌ Sin proceso formal</li>
+            <li>❌ Sin garantías reales</li>
+          </ul>
+        </div>
+        <div class="card reveal" style="padding:24px;border:1px solid rgba(0,212,255,0.3);background:linear-gradient(135deg,rgba(0,212,255,0.05),transparent)">
+          <div style="font-size:1.5rem;margin-bottom:10px">🚀</div>
+          <h4 style="margin:0 0 8px;color:#00d4ff">Nexuss X Systems</h4>
+          <div style="font-size:1.4rem;font-weight:700;color:#00d4ff;margin-bottom:8px">DOP 2,500–12,000</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:.85rem">
+            <li style="color:#65f0b1">✅ 7–30 días de entrega</li>
+            <li style="color:#65f0b1">✅ Precio fijo garantizado</li>
+            <li style="color:#65f0b1">✅ Acceso directo al equipo</li>
+            <li style="color:#65f0b1">✅ Soporte real post-entrega</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="cta-band reveal">
+        <h2>¿No encuentras lo que necesitas?</h2>
+        <p class="muted">Cuéntanos tu idea y creamos una propuesta completamente personalizada.</p>
+        <div class="cta-actions">
+          <a class="btn primary" href="contacto.html">Contactar ahora</a>
+          <a class="btn whatsapp" href="https://wa.me/18293689630" target="_blank">💬 WhatsApp</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Systems</span></div>
+      <div class="muted" style="font-size:.82rem">Soluciones digitales de alto impacto · LATAM</div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Systems</div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="nexus.js"></script>
+  <script>
+    // Responsive layout
+    function fixLayout() {
+      const layout = document.getElementById('calcLayout');
+      if (window.innerWidth < 800) {
+        layout.style.gridTemplateColumns = '1fr';
+      } else {
+        layout.style.gridTemplateColumns = '1fr 340px';
+      }
+    }
+    window.addEventListener('resize', fixLayout);
+    fixLayout();
+    // Calculator logic
+    const prices = {};
+    let discountPct = 0;
+
+    function calcTotal() {
+      let base = 0;
+      let lines = [];
+
+      // Radio: tipo
+      const tipo = document.querySelector('input[name="tipo"]:checked');
+      if (tipo) {
+        const label = tipo.closest('.calc-option');
+        const p = Number(label.dataset.price);
+        base += p;
+        lines.push({ label: label.querySelector('span').textContent, price: p });
+      }
+
+      // Radio: marketing
+      const mkt = document.querySelector('input[name="marketing"]:checked');
+      if (mkt && mkt.value !== 'none') {
+        const label = mkt.closest('.calc-option');
+        const p = Number(label.dataset.price);
+        base += p;
+        lines.push({ label: label.querySelector('span').textContent + ' /mes', price: p });
+      }
+
+      // Radio: urgencia
+      const urg = document.querySelector('input[name="urgencia"]:checked');
+      if (urg && Number(urg.closest('.calc-option').dataset.price) > 0) {
+        const label = urg.closest('.calc-option');
+        const p = Number(label.dataset.price);
+        base += p;
+        lines.push({ label: label.querySelector('span').textContent, price: p });
+      }
+
+      // Checkboxes: extras
+      document.querySelectorAll('.calc-option input[type=checkbox]:checked').forEach(cb => {
+        const label = cb.closest('.calc-option');
+        const p = Number(label.dataset.price);
+        base += p;
+        lines.push({ label: label.querySelector('span').textContent, price: p });
+      });
+
+      // Discount
+      let discount = 0;
+      if (discountPct > 0) {
+        discount = Math.round(base * discountPct / 100);
+        lines.push({ label: `Descuento ${discountPct}%`, price: -discount });
+      }
+
+      const total = base - discount;
+
+      document.getElementById('calcTotal').textContent = 'DOP ' + total.toLocaleString('es-DO');
+
+      const linesEl = document.getElementById('calcLines');
+      linesEl.innerHTML = lines.map(l =>
+        `<div class="calc-line"><span>${l.label}</span><span style="color:${l.price < 0 ? '#65f0b1' : 'var(--ink)'}">${l.price < 0 ? '-' : ''}DOP ${Math.abs(l.price).toLocaleString('es-DO')}</span></div>`
+      ).join('');
+
+      return { lines, total };
+    }
+
+    // Bind radio/checkbox changes con animación
+    document.querySelectorAll('.calc-option').forEach(opt => {
+      const inp = opt.querySelector('input');
+      inp.addEventListener('change', () => {
+        if (inp.type === 'radio') {
+          document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r => r.closest('.calc-option').classList.remove('selected'));
+        }
+        const wasSelected = opt.classList.contains('selected');
+        opt.classList.toggle('selected', inp.checked);
+        // Animación de pulso al seleccionar
+        if (inp.checked && !wasSelected) {
+          opt.style.transform = 'scale(1.02)';
+          setTimeout(() => { opt.style.transform = ''; }, 200);
+        }
+        animateTotal();
+        calcTotal();
+      });
+    });
+
+    // Animación del precio total
+    function animateTotal() {
+      const el = document.getElementById('calcTotal');
+      el.style.transform = 'scale(1.08)';
+      el.style.transition = 'transform 0.2s cubic-bezier(0.34,1.56,0.64,1)';
+      setTimeout(() => { el.style.transform = ''; }, 250);
+    }
+
+    calcTotal();
+
+    // Discount code
+    document.getElementById('applyDiscount').addEventListener('click', async () => {
+      const code = document.getElementById('discountInput').value.trim().toUpperCase();
+      const msg = document.getElementById('discountMsg');
+      if (!code) return;
+      try {
+        const r = await fetch(`${NXS.API_BASE}/api/referrals/${code}`);
+        if (!r.ok) throw new Error();
+        const data = await r.json();
+        discountPct = data.discount;
+        msg.textContent = `✅ Código válido: ${data.discount}% de descuento aplicado`;
+        msg.style.color = '#65f0b1';
+        calcTotal();
+      } catch (_) {
+        msg.textContent = '❌ Código inválido';
+        msg.style.color = '#ff6b91';
+      }
+    });
+
+    // PDF download (simple print)
+    document.getElementById('downloadPdf').addEventListener('click', () => {
+      const { lines, total } = calcTotal();
+      const w = window.open('', '_blank');
+      w.document.write(`
+        <html><head><title>Cotización Nexuss X Systems</title>
+        <style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;color:#111}
+        h1{color:#0070d8}table{width:100%;border-collapse:collapse;margin:20px 0}
+        td,th{padding:10px;border:1px solid #ddd;text-align:left}th{background:#f0f4ff}
+        .total{font-size:1.4rem;color:#0070d8;font-weight:700}.footer{color:#888;font-size:.82rem;margin-top:30px}</style>
+        </head><body>
+        <h1>Nexuss X Systems</h1>
+        <p>Cotización generada: ${new Date().toLocaleDateString('es-DO', {day:'2-digit',month:'long',year:'numeric'})}</p>
+        <table><tr><th>Concepto</th><th>Precio</th></tr>
+        ${lines.map(l => `<tr><td>${l.label}</td><td>${l.price < 0 ? '-' : ''}DOP ${Math.abs(l.price).toLocaleString('es-DO')}</td></tr>`).join('')}
+        <tr><td><b>TOTAL ESTIMADO</b></td><td class="total">DOP ${total.toLocaleString('es-DO')}</td></tr>
+        </table>
+        <p>📧 Contacto: nexussxsistem@gmail.com<br>💬 WhatsApp: +1 829 368 9630</p>
+        <p class="footer">Esta cotización es un estimado. El precio final se confirma tras reunión de requerimientos.<br>© 2026 Nexuss X Systems — Todos los derechos reservados.</p>
+        </body></html>
+      `);
+      w.document.close();
+      w.print();
+    });
+  </script>
+</body>
+</html>
+
+

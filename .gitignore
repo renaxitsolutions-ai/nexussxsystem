@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+server/node_modules/
+
+# Variables de entorno (NUNCA subir — contienen claves secretas)
+.env
+server/.env
+*.env
+
+# Base de datos SQLite (se crea sola al iniciar)
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+
+# Archivos subidos por usuarios
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Backup de versión anterior
+_v1_backup/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp

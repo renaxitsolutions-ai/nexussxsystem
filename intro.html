@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>NexusXSystems</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#000; overflow:hidden; width:100vw; height:100vh; }
+canvas { display:block; }
+#startBtn {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:linear-gradient(135deg,#00eeff,#7700ff);
+  color:#fff; border:none; padding:20px 48px;
+  font-size:22px; font-family:'Arial Black',Arial; cursor:pointer;
+  border-radius:12px; z-index:999; letter-spacing:3px;
+  box-shadow:0 0 40px #00eeff88, 0 0 80px #7700ff44;
+  text-transform:uppercase; transition:box-shadow .2s,transform .2s;
+}
+#startBtn:hover { box-shadow:0 0 60px #00eeffcc, 0 0 120px #7700ff88; transform:translate(-50%,-50%) scale(1.04); }
+#skipBtn {
+  position:fixed; bottom:28px; right:32px;
+  background:rgba(0,0,0,.55); color:rgba(200,220,255,.75);
+  border:1px solid rgba(0,200,255,.35); padding:9px 22px;
+  font-size:13px; font-family:'Arial',sans-serif; cursor:pointer;
+  border-radius:8px; z-index:999; letter-spacing:2px;
+  display:none; transition:background .2s,color .2s;
+}
+#skipBtn:hover { background:rgba(0,200,255,.15); color:#fff; }
+</style>
+</head>
+<body>
+<button id="startBtn">&#9654; INICIAR</button>
+<button id="skipBtn">OMITIR &#8250;&#8250;</button>
+<canvas id="c"></canvas>
+<script>
+const REDIRECT_URL = 'index.html';
+
+// ════════════════════════════════════════════════════
+//  SINTETIZADOR — Web Audio API (sin archivos externos)
+// ════════════════════════════════════════════════════
+let audioCtrl = null;
+
+function startMusic() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Cadena master: gain → compresor → salida
+    const comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.ratio.value = 6;
+    comp.attack.value    = 0.003; comp.release.value = 0.25;
+    comp.connect(ac.destination);
+
+    const master = ac.createGain();
+    master.gain.value = 0.55;
+    master.connect(comp);
+
+    // ── Nota de oscilador ──
+    function osc(type, hz, t, dur, vol) {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = type;
+      o.frequency.value = hz;
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.008);
+      g.gain.setValueAtTime(vol, t + dur * 0.65);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t + dur + 0.01);
+    }
+
+    // ── Kick ──
+    function kick(t) {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(190, t);
+      o.frequency.exponentialRampToValueAtTime(38, t + 0.13);
+      g.gain.setValueAtTime(0.95, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t + 0.32);
+    }
+
+    // ── Snare ──
+    function snare(t) {
+      const dur = 0.13;
+      const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+      const hpf = ac.createBiquadFilter();
+      hpf.type = 'highpass'; hpf.frequency.value = 1100;
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0.48, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      src.connect(hpf); hpf.connect(g); g.connect(master);
+      src.start(t); src.stop(t + dur);
+    }
+
+    // ── Hi-hat ──
+    function hat(t, vol) {
+      const dur = 0.038;
+      const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+      const hpf = ac.createBiquadFilter();
+      hpf.type = 'highpass'; hpf.frequency.value = 9500;
+      const g = ac.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      src.connect(hpf); hpf.connect(g); g.connect(master);
+      src.start(t); src.stop(t + dur + 0.01);
+    }
+
+    // ── Open hat ──
+    function ohat(t) {
+      const dur = 0.18;
+      const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+      const hpf = ac.createBiquadFilter();
+      hpf.type = 'bandpass'; hpf.frequency.value = 8000; hpf.Q.value = 0.7;
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0.14, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      src.connect(hpf); hpf.connect(g); g.connect(master);
+      src.start(t); src.stop(t + dur);
+    }
+
+    // ── Frecuencias (C mayor pentatónico + bajo) ──
+    const N = {
+      C2:65.41, G2:98.00, A2:110.00,
+      C3:130.81, E3:164.81, G3:196.00, A3:220.00,
+      C4:261.63, D4:293.66, E4:329.63, G4:392.00, A4:440.00, B4:493.88,
+      C5:523.25, E5:659.25, G5:783.99
+    };
+
+    const BPM = 174;
+    const s   = (60 / BPM) / 4; // duración de 1 semicorchea (16vo)
+    const BAR = s * 16;          // 1 compás = 16 semicorcheas
+
+    // ── Patrones (2 compases = 32 pasos) ──
+    const kickP  = [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
+                    1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
+    const snareP = [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
+                    0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0];
+    const hatP   = [1,0,1,0, 0,0,1,0, 1,0,1,0, 0,0,1,0,
+                    1,0,1,0, 0,0,1,0, 1,0,1,0, 0,1,1,0];
+    const ohatP  = [0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,0,1,
+                    0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,0,1];
+
+    // Línea de bajo (2 compases)
+    const bassSeq = [
+      N.C2, 0,    0,    0,    N.C2, 0,    N.C2, 0,
+      N.G2, 0,    0,    0,    N.G2, 0,    0,    0,
+      N.A2, 0,    0,    0,    N.A2, 0,    N.A2, 0,
+      N.G2, 0,    N.E3, 0,    N.C2, 0,    0,    0
+    ];
+
+    // Melodía lead (2 compases)
+    const leadSeq = [
+      N.C5, 0,    N.G4, 0,    N.E4, 0,    N.G4, 0,
+      N.C5, 0,    N.E5, 0,    N.G4, 0,    N.C5, 0,
+      N.A4, 0,    N.G4, 0,    N.E4, 0,    N.G4, 0,
+      N.A4, 0,    N.C5, 0,    N.G4, 0,    N.E4, 0
+    ];
+
+    // Acordes en tiempos fuertes
+    const chordSeq = [
+      // compás 1: Do mayor
+      { i:0,  ns:[N.C4, N.E4, N.G4] },
+      { i:8,  ns:[N.G3, N.B4, N.D4] },
+      // compás 2: La menor → Sol mayor
+      { i:16, ns:[N.A3, N.C4, N.E4] },
+      { i:24, ns:[N.G3, N.B4, N.D4] },
+    ];
+
+    const STEPS = 32;
+
+    // ── Programador de audio (look-ahead scheduling) ──
+    let nextStepTime = ac.currentTime + 0.05;
+    let stepIdx      = 0;
+    let running      = true;
+
+    function scheduleStep() {
+      const AHEAD = 0.35;
+      while (running && nextStepTime < ac.currentTime + AHEAD) {
+        const i = stepIdx % STEPS;
+        const t = nextStepTime;
+
+        if (kickP[i])  kick(t);
+        if (snareP[i]) snare(t);
+        if (hatP[i])   hat(t, i % 4 === 0 ? 0.20 : 0.11);
+        if (ohatP[i])  ohat(t);
+
+        if (bassSeq[i]) osc('sawtooth', bassSeq[i], t, s * 1.9, 0.24);
+        if (leadSeq[i]) osc('square',   leadSeq[i], t, s * 0.82, 0.13);
+
+        // Acordes en pasos específicos
+        chordSeq.forEach(c => {
+          if (i === c.i) {
+            c.ns.forEach((hz, ci) =>
+              osc('square', hz, t, s * 3.5, 0.045 - ci * 0.005)
+            );
+          }
+        });
+
+        nextStepTime += s;
+        stepIdx++;
+      }
+    }
+
+    const tid = setInterval(scheduleStep, 40);
+    scheduleStep();
+
+    return {
+      stop() {
+        running = false;
+        clearInterval(tid);
+        master.gain.setValueAtTime(master.gain.value, ac.currentTime);
+        master.gain.linearRampToValueAtTime(0, ac.currentTime + 0.7);
+        setTimeout(() => { try { ac.close(); } catch(e){} }, 800);
+      }
+    };
+
+  } catch (e) {
+    console.warn('[Audio] Web Audio API no disponible:', e);
+    return null;
+  }
+}
+
+// ════════════════════════════════════════════════════
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const music  = document.getElementById('music');
+const W = canvas.width  = window.innerWidth;
+const H = canvas.height = window.innerHeight;
+
+// ════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════
+const lerp    = (a,b,t)=>a+(b-a)*t;
+const clamp   = (v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const easeOut = t=>1-(1-t)*(1-t);
+const easeIn  = t=>t*t;
+const easeIO  = t=>t<.5?2*t*t:1-2*(1-t)*(1-t);
+const rand    = (lo,hi)=>lo+Math.random()*(hi-lo);
+
+// ════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════
+let phase='idle', phaseT=0, prevTS=0, startTS=0;
+let gameScroll=0, percent=0;
+let shakeX=0, shakeY=0, shakeMag=0;
+
+// ── Cubo ──────────────────────────────────────────
+const GY = H*0.72;
+const cube = { x:W*.22, y:GY-48, size:46, vy:0, onGround:true, rot:0, trail:[] };
+
+// ── Obstaculos & particulas ───────────────────────
+let obstacles=[], obsCooldown=1.4;
+let particles=[];
+
+// ── Estrellas (paralax 3 capas) ───────────────────
+const makeStars = (n,spd,sz,a) =>
+  Array.from({length:n},()=>({x:rand(0,W),y:rand(0,GY),spd,sz,a}));
+const stars = [makeStars(60,0.4,1,0.25), makeStars(35,1.0,1.5,0.45), makeStars(15,2.2,2.5,0.7)];
+
+// ── Fondo: bloques flotantes ───────────────────────
+const bgBlocks = Array.from({length:14},()=>({
+  x:rand(0,W), y:rand(H*.05,GY*.7),
+  w:rand(30,80), h:rand(14,32),
+  spd:rand(0.5,2.5), alpha:rand(0.04,0.12)
+}));
+
+// ── Hexagonos reveal ──────────────────────────────
+const hexPts=[];
+for(let r=0;r<7;r++) for(let c=0;c<12;c++){
+  hexPts.push({ x:(c+(r%2)*.5)*W/11, y:r*H/6,
+    phase:rand(0,Math.PI*2), spd:rand(.4,1.2) });
+}
+
+// ── Frases con typing ─────────────────────────────
+const PHRASES = [
+  "Innovacion sin limites.",
+  "Tecnologia que transforma.",
+  "El futuro comienza aqui.",
+  "Bienvenido al siguiente nivel.",
+];
+let phraseIdx=0, typedLen=0, typeCooldown=0;
+let phraseAlpha=0, phraseState='typing';
+let phraseHoldT=0, phraseFadeT=0;
+let allPhrasesShown = false;
+
+// ── Glitch ────────────────────────────────────────
+let glitchT=0, glitchActive=false;
+let glitchSlices=[];
+function makeGlitch(){
+  glitchSlices=[];
+  const n=rand(4,10)|0;
+  for(let i=0;i<n;i++){
+    glitchSlices.push({ y:rand(0,H), h:rand(4,30), dx:rand(-30,30), r:rand(0,1) });
+  }
+}
+
+// ── Contador de salida ────────────────────────────
+let exitCountdown  = -1;   // segundos (arranca en 3)
+let countdownDigit = 3;    // dígito visible actual
+let digitFlash     = 0;    // intensidad del flash al cambiar
+
+// ── Lluvia neón ───────────────────────────────────
+const NEON_COLS = ['#00eeff','#7700ff','#ff00ff','#00aaff','#ff00aa','#ffffff','#44ffcc','#aa00ff'];
+let neonRain = [];
+
+function spawnNeonDrop() {
+  const col = NEON_COLS[Math.floor(Math.random() * NEON_COLS.length)];
+  neonRain.push({
+    x:     rand(0, W),
+    y:     rand(-H * 0.25, -8),
+    vy:    rand(200, 640),
+    len:   rand(20, 95),
+    w:     rand(1.2, 3.4),
+    col,
+    alpha: rand(0.5, 1.0),
+    life:  1,
+  });
+}
+
+function updateNeonRain(dt) {
+  neonRain.forEach(p => { p.y += p.vy * dt; if(p.y > H + p.len) p.life = 0; });
+  neonRain = neonRain.filter(p => p.life > 0);
+}
+
+function drawNeonRain() {
+  ctx.save();
+  neonRain.forEach(p => {
+    const fade = clamp(1 - (p.y / H), 0, 1); // se desvanece llegando al fondo
+    ctx.globalAlpha = p.alpha * (0.4 + fade * 0.6);
+    ctx.strokeStyle = p.col;
+    ctx.lineWidth   = p.w;
+    ctx.shadowColor = p.col;
+    ctx.shadowBlur  = 12;
+    ctx.lineCap     = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x, p.y - p.len);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════
+//  PARTICLES
+// ════════════════════════════════════════════════════
+function emit(x,y,col,n=8,spd=220){
+  for(let i=0;i<n;i++){
+    const a=rand(0,Math.PI*2);
+    const s=rand(spd*.3,spd);
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-spd*.4,
+      life:1,col,sz:rand(3,9),grav:rand(200,500)});
+  }
+}
+function emitRing(x,y,col,n=20){
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2;
+    const s=rand(180,380);
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,
+      life:1,col,sz:rand(2,6),grav:0});
+  }
+}
+function updateParticles(dt){
+  particles.forEach(p=>{
+    p.x+=p.vx*dt; p.y+=p.vy*dt;
+    p.vy+=p.grav*dt; p.life-=dt*1.6;
+  });
+  particles=particles.filter(p=>p.life>0);
+}
+function drawParticles(alpha=1){
+  ctx.save();
+  particles.forEach(p=>{
+    ctx.globalAlpha=p.life*alpha;
+    ctx.fillStyle=p.col;
+    ctx.shadowColor=p.col; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.sz/2,0,Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════
+//  DRAW HELPERS
+// ════════════════════════════════════════════════════
+function drawBackground(){
+  const bg=ctx.createLinearGradient(0,0,0,GY);
+  bg.addColorStop(0,'#050015'); bg.addColorStop(1,'#150050');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,GY);
+
+  stars.forEach(layer=>{
+    layer.forEach(s=>{
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.sz,0,Math.PI*2);
+      ctx.fillStyle=`rgba(180,190,255,${s.a})`; ctx.fill();
+    });
+  });
+
+  bgBlocks.forEach(b=>{
+    ctx.fillStyle=`rgba(80,0,200,${b.alpha})`;
+    ctx.strokeStyle=`rgba(120,0,255,${b.alpha*2})`;
+    ctx.lineWidth=1;
+    ctx.fillRect(b.x,b.y,b.w,b.h);
+    ctx.strokeRect(b.x,b.y,b.w,b.h);
+  });
+
+  ctx.save();
+  for(let i=0;i<10;i++){
+    const yy=H*.04+i*(GY*.096);
+    const xx=((gameScroll*(1.4+i*.08))%(W+300))-200;
+    const len=rand(60,160);
+    const alpha=rand(.06,.16);
+    ctx.strokeStyle=`rgba(100,0,255,${alpha})`;
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(xx,yy); ctx.lineTo(xx-len,yy); ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.fillStyle='#1a00aa';
+  ctx.fillRect(0,GY,W,H-GY);
+
+  const tile=46, off=gameScroll%tile;
+  ctx.strokeStyle='rgba(80,0,255,0.6)'; ctx.lineWidth=1.5;
+  for(let x=-off;x<W+tile;x+=tile){
+    ctx.beginPath(); ctx.moveTo(x,GY); ctx.lineTo(x,H); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(0,GY); ctx.lineTo(W,GY); ctx.stroke();
+
+  const gw=ctx.createLinearGradient(0,GY-8,0,GY+24);
+  gw.addColorStop(0,'rgba(120,0,255,.7)'); gw.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=gw; ctx.fillRect(0,GY-8,W,32);
+}
+
+function drawCube(){
+  cube.trail.forEach((tr,i)=>{
+    const a=(i/cube.trail.length)*0.4;
+    ctx.save();
+    ctx.globalAlpha=a;
+    ctx.translate(tr.x+cube.size/2,tr.y+cube.size/2);
+    ctx.rotate(tr.rot);
+    ctx.fillStyle='#00eeff'; ctx.shadowColor='#00eeff'; ctx.shadowBlur=10;
+    ctx.fillRect(-cube.size/2,-cube.size/2,cube.size,cube.size);
+    ctx.restore();
+  });
+
+  ctx.save();
+  ctx.shadowColor='#00eeff'; ctx.shadowBlur=22;
+  ctx.translate(cube.x+cube.size/2, cube.y+cube.size/2);
+  ctx.rotate(cube.rot);
+
+  const g=ctx.createLinearGradient(-cube.size/2,-cube.size/2,cube.size/2,cube.size/2);
+  g.addColorStop(0,'#00ffff'); g.addColorStop(1,'#0055ff');
+  ctx.fillStyle=g; ctx.fillRect(-23,-23,46,46);
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=2.5; ctx.strokeRect(-23,-23,46,46);
+  ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(-15,-15); ctx.lineTo(15,15);
+  ctx.moveTo(15,-15); ctx.lineTo(-15,15);
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,4,0,Math.PI*2);
+  ctx.fillStyle='#ffffff'; ctx.fill();
+  ctx.restore();
+}
+
+function drawObstacles(){
+  obstacles.forEach(o=>{
+    if(o.type==='spike'){
+      ctx.save();
+      ctx.shadowColor='#ff3333'; ctx.shadowBlur=14;
+      ctx.fillStyle='#ff2200';
+      ctx.beginPath();
+      ctx.moveTo(o.x,o.y+o.h); ctx.lineTo(o.x+o.w/2,o.y); ctx.lineTo(o.x+o.w,o.y+o.h);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle='#ff6644'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.shadowColor='#9900ff'; ctx.shadowBlur=12;
+      ctx.fillStyle='#3300bb'; ctx.fillRect(o.x,o.y,o.w,o.h);
+      ctx.strokeStyle='#aa44ff'; ctx.lineWidth=2; ctx.strokeRect(o.x,o.y,o.w,o.h);
+      for(let yy=o.y;yy<o.y+o.h;yy+=23){
+        ctx.strokeStyle='rgba(160,80,255,.25)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(o.x,yy); ctx.lineTo(o.x+o.w,yy); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  });
+}
+
+function drawUI(){
+  const bx=W*.18,by=20,bw=W*.64,bh=11;
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,.5)';
+  ctx.roundRect(bx-2,by-2,bw+4,bh+4,5); ctx.fill();
+  const pg=ctx.createLinearGradient(bx,0,bx+bw,0);
+  pg.addColorStop(0,'#00eeff'); pg.addColorStop(1,'#cc00ff');
+  ctx.fillStyle=pg; ctx.shadowColor='#00eeff'; ctx.shadowBlur=10;
+  ctx.roundRect(bx,by,bw*(percent/100),bh,4); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1.5; ctx.shadowBlur=0;
+  ctx.roundRect(bx,by,bw,bh,4); ctx.stroke();
+
+  ctx.font='bold 22px Arial'; ctx.fillStyle='#fff';
+  ctx.shadowColor='#00eeff'; ctx.shadowBlur=10;
+  ctx.textAlign='center';
+  ctx.fillText(Math.floor(percent)+'%', W/2, by+38);
+
+  ctx.font='bold 14px Arial'; ctx.fillStyle='rgba(200,180,255,.7)';
+  ctx.textAlign='left'; ctx.shadowBlur=0;
+  ctx.fillText('Blast Processing', 18, 42);
+  ctx.textAlign='right';
+  ctx.fillText('NexusXSystems', W-18, 42);
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════
+//  GLITCH EFFECT
+// ════════════════════════════════════════════════════
+function applyGlitch(intensity=1){
+  if(!glitchActive) return;
+  const imgData=ctx.getImageData(0,0,W,H);
+  glitchSlices.forEach(s=>{
+    const dx=(s.dx*intensity)|0;
+    if(dx===0) return;
+    const y=(s.y)|0, h=(s.h)|0;
+    if(y<0||y+h>H) return;
+    const slice=ctx.getImageData(Math.max(0,dx<0?-dx:0),y,dx<0?W+dx:W-dx,h);
+    ctx.putImageData(slice,dx<0?0:dx,y);
+  });
+  const ca=ctx.getImageData(0,0,W,H);
+  const d=ca.data;
+  const shift=(6*intensity)|0;
+  for(let i=0;i<d.length;i+=4){
+    const px=(i/4)|0, px2=px+shift;
+    if(px2*4+2<d.length){ d[i]=d[px2*4]; }
+    if(px-shift>=0){ d[(px-shift)*4+2]=d[i+2]; }
+  }
+  ctx.putImageData(ca,0,0);
+}
+
+// ════════════════════════════════════════════════════
+//  PHASE: CLOSE
+// ════════════════════════════════════════════════════
+function drawClose(p){
+  const dissolveAlpha=clamp(p*3,0,1);
+  if(dissolveAlpha>0 && dissolveAlpha<1){
+    const blockSize=8;
+    ctx.save();
+    for(let y=0;y<H;y+=blockSize){
+      for(let x=0;x<W;x+=blockSize){
+        if(Math.random()<dissolveAlpha*.7){
+          ctx.fillStyle=`rgba(0,0,0,${dissolveAlpha})`;
+          ctx.fillRect(x,y,blockSize,blockSize);
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  ctx.save();
+  ctx.globalAlpha=clamp(p*2,0,.35);
+  for(let y=0;y<H;y+=4){ ctx.fillStyle='rgba(0,0,0,1)'; ctx.fillRect(0,y,W,2); }
+  ctx.restore();
+
+  const ease=easeIn(p);
+  const cw=(W/2)*ease;
+  ctx.save();
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,cw,H);
+  ctx.fillRect(W-cw,0,cw,H);
+  if(cw>10){
+    const gl=ctx.createLinearGradient(cw-30,0,cw,0);
+    gl.addColorStop(0,'rgba(0,200,255,0)'); gl.addColorStop(1,'rgba(0,220,255,.9)');
+    ctx.fillStyle=gl; ctx.fillRect(cw-30,0,30,H);
+    const gr=ctx.createLinearGradient(W-cw,0,W-cw+30,0);
+    gr.addColorStop(0,'rgba(0,220,255,.9)'); gr.addColorStop(1,'rgba(0,200,255,0)');
+    ctx.fillStyle=gr; ctx.fillRect(W-cw,0,30,H);
+  }
+  ctx.restore();
+  if(p>.85){
+    const fA=(p-.85)/.15;
+    ctx.save(); ctx.fillStyle=`rgba(0,220,255,${fA*.4})`; ctx.fillRect(0,0,W,H); ctx.restore();
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  PHASE: REVEAL — NexusXSystems
+// ════════════════════════════════════════════════════
+function drawReveal(dt){
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+
+  const gt=phaseT;
+
+  // Grid
+  ctx.save();
+  ctx.strokeStyle='rgba(0,100,255,.12)'; ctx.lineWidth=1;
+  const gs=60;
+  for(let x=0;x<W+gs;x+=gs){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0;y<H+gs;y+=gs){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.restore();
+
+  // Hexagonos
+  ctx.save();
+  hexPts.forEach(h=>{
+    const pulse=0.04+0.03*Math.sin(gt*h.spd+h.phase);
+    ctx.strokeStyle=`rgba(0,200,255,${pulse})`; ctx.lineWidth=1;
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const a=i*Math.PI/3, r=28;
+      i===0?ctx.moveTo(h.x+r*Math.cos(a),h.y+r*Math.sin(a)):ctx.lineTo(h.x+r*Math.cos(a),h.y+r*Math.sin(a));
+    }
+    ctx.closePath(); ctx.stroke();
+  });
+  ctx.restore();
+
+  if(Math.random()<0.15) emit(rand(0,W),rand(0,H),'#00eeff',2,100);
+  updateParticles(dt);
+  drawParticles(0.5);
+
+  // Logo
+  const showP=clamp(phaseT/1.2,0,1);
+  if(showP>0){
+    const scale=0.5+easeOut(showP)*.5;
+    ctx.save();
+    ctx.globalAlpha=easeOut(showP);
+    ctx.translate(W/2, H/2-70);
+    ctx.scale(scale,scale);
+    ctx.shadowColor='#00eeff'; ctx.shadowBlur=60;
+    ctx.font='bold 94px "Arial Black",Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    const tg=ctx.createLinearGradient(-350,0,350,0);
+    tg.addColorStop(0,'#00eeff'); tg.addColorStop(0.4,'#ffffff');
+    tg.addColorStop(0.6,'#ffffff'); tg.addColorStop(1,'#aa00ff');
+    ctx.fillStyle=tg;
+    ctx.fillText('NexussX',0,-48);
+    ctx.font='bold 62px "Arial Black",Arial';
+    ctx.shadowColor='#aa00ff'; ctx.shadowBlur=40;
+    const tg2=ctx.createLinearGradient(-250,0,250,0);
+    tg2.addColorStop(0,'#7700ff'); tg2.addColorStop(1,'#00aaff');
+    ctx.fillStyle=tg2;
+    ctx.fillText('Sistems',0,30);
+    if(showP>.7){
+      const lp=clamp((showP-.7)/.3,0,1);
+      const lw=easeOut(lp)*380;
+      const lg=ctx.createLinearGradient(-lw,0,lw,0);
+      lg.addColorStop(0,'rgba(0,200,255,0)');
+      lg.addColorStop(.5,'rgba(0,220,255,.9)');
+      lg.addColorStop(1,'rgba(0,200,255,0)');
+      ctx.strokeStyle=lg; ctx.lineWidth=2.5; ctx.shadowBlur=12;
+      ctx.beginPath(); ctx.moveTo(-lw,62); ctx.lineTo(lw,62); ctx.stroke();
+    }
+    if(glitchActive){ ctx.fillStyle='rgba(255,0,80,.12)'; ctx.fillRect(-400,-80,800,160); }
+    ctx.restore();
+
+    if(showP>.6){
+      const bp=clamp((showP-.6)/.4,0,1);
+      const pulse=0.4+0.3*Math.sin(gt*3);
+      ctx.save();
+      ctx.globalAlpha=easeOut(bp)*pulse;
+      ctx.strokeStyle='rgba(0,220,255,.6)'; ctx.lineWidth=1.5;
+      const rx=W/2-420, ry=H/2-160, rw=840, rh=170;
+      ctx.strokeRect(rx,ry,rw,rh);
+      ctx.strokeStyle='rgba(150,0,255,.4)';
+      ctx.strokeRect(rx+4,ry+4,rw-8,rh-8);
+      const cLen=28, cW=3;
+      const corners=[[rx,ry],[rx+rw,ry],[rx,ry+rh],[rx+rw,ry+rh]];
+      const dirs=[[1,1],[-1,1],[1,-1],[-1,-1]];
+      corners.forEach(([cx,cy], i)=>{
+        const [dx,dy] = dirs[i];
+        ctx.strokeStyle='#00eeff'; ctx.lineWidth=cW; ctx.shadowColor='#00eeff'; ctx.shadowBlur=10;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+dx*cLen,cy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy+dy*cLen); ctx.stroke();
+      });
+      ctx.restore();
+    }
+  }
+
+  // ── Frases (empiezan a phaseT > 0.8, sin fade-in para máxima visibilidad) ──
+  if(phaseT > 0.8 && !allPhrasesShown && phraseIdx < PHRASES.length){
+    const phrase = PHRASES[phraseIdx];
+    typeCooldown -= dt;
+
+    if(phraseState === 'typing'){
+      if(typeCooldown <= 0 && typedLen < phrase.length){
+        typedLen++;
+        typeCooldown = 0.030;
+        if(typedLen === phrase.length){ phraseState = 'hold'; phraseHoldT = 0; }
+      }
+    } else if(phraseState === 'hold'){
+      phraseHoldT += dt;
+      if(phraseHoldT > 0.6){ phraseState = 'fade'; phraseFadeT = 0; }
+    } else if(phraseState === 'fade'){
+      phraseFadeT += dt;
+      if(phraseFadeT > 0.25){
+        phraseIdx++;
+        if(phraseIdx >= PHRASES.length){
+          allPhrasesShown = true;
+          exitCountdown   = 3;
+          countdownDigit  = 3;
+          digitFlash      = 1;
+        }
+        typedLen = 0; phraseState = 'typing'; typeCooldown = 0;
+      }
+    }
+
+    // Dibujar — siempre a opacidad 1 para que sea visible
+    if(phraseIdx < PHRASES.length){
+      const pFade    = phraseState === 'fade' ? clamp(1 - phraseFadeT/0.25, 0, 1) : 1;
+      const displayed = PHRASES[phraseIdx].substring(0, typedLen);
+      const cursor    = phraseState === 'typing' && Math.floor(gt * 4) % 2 === 0 ? '_' : ' ';
+
+      const PY = H * 0.78; // posición fija al 78% de altura (siempre visible)
+
+      // Panel oscuro de fondo para contraste garantizado
+      ctx.save();
+      ctx.globalAlpha = pFade * 0.75;
+      const panelGrad = ctx.createLinearGradient(0, PY - 30, 0, PY + 30);
+      panelGrad.addColorStop(0, 'rgba(0,0,10,0)');
+      panelGrad.addColorStop(0.5, 'rgba(0,0,20,0.92)');
+      panelGrad.addColorStop(1, 'rgba(0,0,10,0)');
+      ctx.fillStyle = panelGrad;
+      ctx.fillRect(0, PY - 30, W, 60);
+      ctx.restore();
+
+      // Texto principal — blanco grande con glow cyan
+      ctx.save();
+      ctx.globalAlpha = pFade;
+      ctx.font = 'bold 32px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = '#00eeff';
+      ctx.shadowBlur  = 24;
+      ctx.fillStyle   = '#ffffff';
+      ctx.fillText(displayed + cursor, W / 2, PY);
+
+      // Líneas laterales neón
+      const tw = ctx.measureText(displayed).width + 30;
+      ctx.strokeStyle = '#00eeff';
+      ctx.lineWidth   = 1.5;
+      ctx.shadowBlur  = 10;
+      ctx.beginPath(); ctx.moveTo(W/2 - tw/2 - 18, PY); ctx.lineTo(W/2 - tw/2,      PY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(W/2 + tw/2,      PY); ctx.lineTo(W/2 + tw/2 + 18, PY); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // ── Countdown 3-2-1 + lluvia neón ────────────────
+  if(exitCountdown>0){
+    exitCountdown -= dt;
+
+    // Calcular dígito actual (3→2→1)
+    const newDigit = Math.ceil(exitCountdown);
+    if(newDigit !== countdownDigit && newDigit >= 1){
+      countdownDigit = newDigit;
+      digitFlash = 1; // dispara flash al cambiar número
+    }
+    if(digitFlash > 0) digitFlash = Math.max(0, digitFlash - dt * 6);
+
+    // Spawn de gotas neón — más densidad a medida que pasa el tiempo
+    const spawnRate = 3 + (3 - exitCountdown) * 8; // 3..27 gotas/seg
+    const spawnProb = spawnRate * dt;
+    if(Math.random() < spawnProb) spawnNeonDrop();
+    if(Math.random() < spawnProb * 0.5) spawnNeonDrop(); // doble ráfaga ocasional
+
+    // Actualizar y dibujar lluvia
+    updateNeonRain(dt);
+    drawNeonRain();
+
+    // Flash blanco al cambiar dígito
+    if(digitFlash > 0){
+      ctx.save();
+      ctx.globalAlpha = digitFlash * 0.18;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+
+    // Número grande de cuenta regresiva
+    const displayNum = Math.max(1, Math.ceil(exitCountdown));
+    const numScale   = 1 + digitFlash * 0.35; // se agranda al aparecer
+    const numAlpha   = clamp(exitCountdown > 0.4 ? 1 : exitCountdown / 0.4, 0, 1);
+
+    ctx.save();
+    ctx.globalAlpha = numAlpha;
+    ctx.translate(W/2, H/2 + 185);
+    ctx.scale(numScale, numScale);
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Sombra exterior pulsante
+    const pulse = 0.7 + 0.3 * Math.sin(phaseT * 8);
+    ctx.shadowColor = NEON_COLS[displayNum % NEON_COLS.length];
+    ctx.shadowBlur  = 40 + digitFlash * 60;
+
+    // Gradiente del número
+    const ng = ctx.createLinearGradient(-60, -60, 60, 60);
+    ng.addColorStop(0, '#00eeff');
+    ng.addColorStop(0.5, '#ffffff');
+    ng.addColorStop(1, '#aa00ff');
+    ctx.fillStyle = ng;
+    ctx.font = `bold ${Math.round(96 / numScale)}px "Arial Black", Arial`;
+    ctx.fillText(String(displayNum), 0, 0);
+    ctx.restore();
+
+    // Texto "ACCEDIENDO AL SISTEMA" con scanline
+    ctx.save();
+    ctx.globalAlpha = numAlpha * 0.85;
+    ctx.font        = '300 16px "Courier New", monospace';
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle   = 'rgba(0,220,255,.9)';
+    ctx.shadowColor = '#00eeff';
+    ctx.shadowBlur  = 12;
+    // Efecto parpadeo rápido tipo scanline
+    if(Math.floor(phaseT * 18) % 7 !== 0){
+      ctx.fillText('ACCEDIENDO AL SISTEMA...', W/2, H/2 + 248);
+    }
+
+    // Líneas decorativas a los lados del texto
+    const tw2 = ctx.measureText('ACCEDIENDO AL SISTEMA...').width;
+    ctx.strokeStyle = 'rgba(0,200,255,.5)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(W/2 - tw2/2 - 22, H/2 + 248); ctx.lineTo(W/2 - tw2/2 - 6, H/2 + 248); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W/2 + tw2/2 + 6, H/2 + 248); ctx.lineTo(W/2 + tw2/2 + 22, H/2 + 248); ctx.stroke();
+    ctx.restore();
+
+    if(exitCountdown <= 0){ goToSite(); }
+  }
+
+  // Scanlines
+  ctx.save();
+  ctx.globalAlpha=0.04;
+  for(let y=0;y<H;y+=3){ ctx.fillStyle='#000'; ctx.fillRect(0,y,W,1.5); }
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════
+//  GAME UPDATE
+// ════════════════════════════════════════════════════
+function updateGame(dt){
+  const spd=430;
+  gameScroll+=spd*dt;
+  percent=clamp(percent+dt*22,0,99);
+
+  stars.forEach(layer=>layer.forEach(s=>{
+    s.x-=s.spd*spd*dt*.012;
+    if(s.x<-5) s.x=W+5;
+  }));
+  bgBlocks.forEach(b=>{
+    b.x-=b.spd*dt*60;
+    if(b.x<-b.w) b.x=W+10;
+  });
+
+  const near=obstacles.find(o=>
+    o.x-(cube.x+cube.size)<140 && o.x-(cube.x+cube.size)>-20
+  );
+  if(near&&cube.onGround){
+    cube.vy=-800; cube.onGround=false;
+    emitRing(cube.x+cube.size/2, cube.y+cube.size, '#00eeff');
+    shakeMag=6;
+    emit(cube.x+cube.size/2, cube.y+cube.size, '#00eeff', 6, 160);
+  }
+
+  cube.vy+=2700*dt;
+  cube.y+=cube.vy*dt;
+  if(cube.y>=GY-cube.size){ cube.y=GY-cube.size; cube.vy=0; cube.onGround=true; }
+  cube.rot+=(!cube.onGround?1:0)*dt*5.8;
+  if(cube.onGround) cube.rot=Math.round(cube.rot/(Math.PI/2))*(Math.PI/2);
+
+  cube.trail.push({x:cube.x,y:cube.y,rot:cube.rot});
+  if(cube.trail.length>12) cube.trail.shift();
+
+  obstacles.forEach(o=>o.x-=spd*dt);
+  obstacles=obstacles.filter(o=>o.x>-120);
+
+  obsCooldown-=dt;
+  if(obsCooldown<=0){
+    const type=Math.random()<.55?'spike':'block';
+    if(type==='spike'){
+      const n=(rand(1,3.9)|0);
+      for(let i=0;i<n;i++) obstacles.push({type:'spike',x:W+60+i*38,y:GY-38,w:34,h:38});
+    } else {
+      const bh=((rand(1,2.9)|0))*46;
+      obstacles.push({type:'block',x:W+60,y:GY-bh,w:46,h:bh});
+    }
+    obsCooldown=1.0+rand(0,.8);
+  }
+
+  shakeMag*=0.88;
+  shakeX=rand(-1,1)*shakeMag;
+  shakeY=rand(-1,1)*shakeMag;
+  updateParticles(dt);
+}
+
+// ════════════════════════════════════════════════════
+//  REDIRECT
+// ════════════════════════════════════════════════════
+function goToSite(){
+  if(goToSite._called) return;
+  goToSite._called = true;
+
+  sessionStorage.setItem('nxs_intro_done','1');
+
+  // Fade out de la música
+  if(audioCtrl) audioCtrl.stop();
+
+  // Overlay negro y redirigir
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9999;opacity:0;transition:opacity .75s';
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    setTimeout(() => { window.location.href = REDIRECT_URL; }, 800);
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  MAIN LOOP
+// ════════════════════════════════════════════════════
+function loop(ts){
+  const dt=Math.min((ts-prevTS)/1000,.05);
+  prevTS=ts;
+  phaseT=(ts-startTS)/1000;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+
+  glitchT-=dt;
+  if(glitchT<=0){
+    glitchActive=!glitchActive;
+    if(glitchActive){ makeGlitch(); glitchT=rand(.06,.14); }
+    else glitchT=rand(1.5,4);
+  }
+
+  if(phase==='flash'){
+    drawBackground(); drawObstacles(); drawCube(); drawUI();
+    const fa=clamp(1-phaseT/0.35,0,1);
+    ctx.save(); ctx.fillStyle=`rgba(255,255,255,${fa})`; ctx.fillRect(0,0,W,H); ctx.restore();
+    if(phaseT>.35){ phase='gd'; startTS=ts; }
+
+  } else if(phase==='gd'){
+    updateGame(dt);
+    ctx.save(); ctx.translate(shakeX,shakeY);
+    drawBackground(); drawObstacles(); drawCube(); drawUI(); drawParticles();
+    ctx.restore();
+    if(phaseT>4.0){ phase='close'; startTS=ts; percent=100; }
+
+  } else if(phase==='close'){
+    const cp=phaseT/1.1;
+    ctx.save(); ctx.translate(shakeX*.3,shakeY*.3);
+    drawBackground(); drawObstacles(); drawCube(); drawUI(); drawParticles();
+    ctx.restore();
+    drawClose(cp);
+    if(cp>1){ phase='reveal'; startTS=ts; particles=[]; }
+
+  } else if(phase==='reveal'){
+    drawReveal(dt);
+    if(glitchActive) applyGlitch(.5);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// ════════════════════════════════════════════════════
+//  START
+// ════════════════════════════════════════════════════
+document.getElementById('startBtn').addEventListener('click', function(){
+  this.remove();
+  document.getElementById('skipBtn').style.display='block';
+  audioCtrl = startMusic();
+  phase='flash'; startTS=prevTS=performance.now();
+  requestAnimationFrame(loop);
+});
+
+document.getElementById('skipBtn').addEventListener('click', function(){
+  goToSite();
+});
+</script>
+</body>
+</html>

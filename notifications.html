@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notificaciones — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .notif-list{display:flex;flex-direction:column;gap:8px}
+    .notif-item{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;transition:.2s;cursor:pointer}
+    .notif-item:hover{border-color:rgba(0,212,255,0.2);background:rgba(255,255,255,0.06)}
+    .notif-item.unread{border-left:3px solid #00d4ff;background:rgba(0,212,255,0.04)}
+    .notif-item.unread:hover{border-left-color:#00d4ff}
+    .notif-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+    .notif-icon.info{background:rgba(0,212,255,0.15)}
+    .notif-icon.success{background:rgba(34,197,94,0.15)}
+    .notif-icon.warning{background:rgba(245,158,11,0.15)}
+    .notif-icon.error{background:rgba(239,68,68,0.15)}
+    .notif-body{flex:1;min-width:0}
+    .notif-title{font-weight:600;font-size:.9rem;margin-bottom:3px}
+    .notif-msg{color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .notif-time{color:var(--muted);font-size:.75rem;flex-shrink:0;margin-top:2px}
+    .notif-dot{width:8px;height:8px;background:#00d4ff;border-radius:50%;flex-shrink:0;margin-top:6px}
+    .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+    .filter-chip{padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;font-size:.82rem;transition:.2s}
+    .filter-chip:hover,.filter-chip.active{background:rgba(0,212,255,0.1);border-color:#00d4ff;color:#00d4ff}
+    .notif-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+    .notif-empty .icon{font-size:3rem;margin-bottom:12px}
+    .unread-badge{display:inline-flex;align-items:center;justify-content:center;background:#00d4ff;color:#000;width:22px;height:22px;border-radius:50%;font-size:.72rem;font-weight:700;margin-left:8px}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a><a href="tickets.html">Soporte</a>
+          <a href="referidos.html">Referidos</a>
+          <a href="notifications.html" style="color:#00d4ff">Notificaciones</a>
+          <a href="settings.html">Configuración</a>
+        </div>
+      </div>
+      <a href="contacto.html">Contacto</a>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="tag">🔔 Centro de notificaciones</span>
+      <h2 class="reveal">Tus <span class="gradient-label">Notificaciones</span> <span class="unread-badge" id="unreadBadge" style="display:none">0</span></h2>
+      <p class="muted">Mantente al día con todo lo que sucede en tu cuenta.</p>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn ghost" id="markAllBtn">✓ Marcar todas como leídas</button>
+      <button class="btn ghost" id="refreshBtn">↻ Actualizar</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-chip active" data-filter="all">Todas</button>
+    <button class="filter-chip" data-filter="unread">Sin leer</button>
+    <button class="filter-chip" data-filter="success">✅ Éxito</button>
+    <button class="filter-chip" data-filter="warning">⚠️ Alertas</button>
+    <button class="filter-chip" data-filter="error">🔴 Urgentes</button>
+    <button class="filter-chip" data-filter="info">ℹ️ Info</button>
+  </div>
+
+  <div class="notif-list" id="notifList">
+    <div class="notif-empty"><div class="icon">⏳</div><p>Cargando notificaciones...</p></div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+const ICONS = { info:'ℹ️', success:'✅', warning:'⚠️', error:'🚨' };
+let allNotifs = [];
+let currentFilter = 'all';
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
+  if (m < 1) return 'ahora';
+  if (m < 60) return `hace ${m}m`;
+  if (h < 24) return `hace ${h}h`;
+  if (d < 7) return `hace ${d}d`;
+  return new Date(dateStr).toLocaleDateString('es');
+}
+
+function render() {
+  const list = document.getElementById('notifList');
+  let items = allNotifs;
+  if (currentFilter === 'unread') items = items.filter(n => !n.is_read);
+  else if (currentFilter !== 'all') items = items.filter(n => n.type === currentFilter);
+
+  if (!items.length) {
+    list.innerHTML = `<div class="notif-empty"><div class="icon">${currentFilter==='unread'?'🎉':'🔔'}</div><p>${currentFilter==='unread'?'No tienes notificaciones sin leer 🎉':'No hay notificaciones en esta categoría.'}</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(n => `
+    <div class="notif-item ${n.is_read?'':'unread'}" onclick="markRead(${n.id}, this, '${n.link||''}')">
+      <div class="notif-icon ${n.type}">${ICONS[n.type]||'ℹ️'}</div>
+      <div class="notif-body">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-msg">${n.message||''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <span class="notif-time">${timeAgo(n.created_at)}</span>
+        ${!n.is_read ? '<div class="notif-dot"></div>' : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function load() {
+  try {
+    const { items, unread_count } = await NXS.apiGet('/api/notifications');
+    allNotifs = items || [];
+    const badge = document.getElementById('unreadBadge');
+    if (unread_count > 0) { badge.style.display=''; badge.textContent = unread_count; }
+    else badge.style.display = 'none';
+    render();
+  } catch { document.getElementById('notifList').innerHTML = '<div class="notif-empty"><div class="icon">❌</div><p>Error cargando notificaciones.</p></div>'; }
+}
+
+async function markRead(id, el, link) {
+  if (!el.classList.contains('unread')) { if(link) window.location.href=link; return; }
+  el.classList.remove('unread');
+  const n = allNotifs.find(n=>n.id===id);
+  if (n) n.is_read = 1;
+  await NXS.apiPatch(`/api/notifications/${id}/read`, {});
+  const badge = document.getElementById('unreadBadge');
+  const unread = allNotifs.filter(n=>!n.is_read).length;
+  if (unread > 0) badge.textContent = unread;
+  else badge.style.display = 'none';
+  if (link) window.location.href = link;
+}
+
+document.getElementById('markAllBtn').addEventListener('click', async () => {
+  await NXS.apiPost('/api/notifications/read-all', {});
+  allNotifs.forEach(n => n.is_read = 1);
+  document.getElementById('unreadBadge').style.display = 'none';
+  render(); showToast('Todas marcadas como leídas');
+});
+
+document.getElementById('refreshBtn').addEventListener('click', load);
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    currentFilter = chip.dataset.filter;
+    render();
+  });
+});
+
+// SSE real-time
+function connectSSE() {
+  const token = NXS.getToken();
+  if (!token) return;
+  const es = new EventSource(`${NXS.API_BASE}/api/notifications/stream?token=${token}`);
+  es.onmessage = e => {
+    const data = JSON.parse(e.data);
+    if (data.type === 'notification') { load(); }
+  };
+  es.onerror = () => es.close();
+}
+
+if (!NXS.getToken()) window.location.href = 'login.html';
+else { load(); connectSSE(); }
+</script>
+</body>
+</html>

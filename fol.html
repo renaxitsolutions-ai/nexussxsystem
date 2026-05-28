@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FOL — SDSS y Seguridad Laboral · Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .fol-hero{background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(121,38,255,.06));border:1px solid rgba(0,212,255,.15);border-radius:16px;padding:40px;margin-bottom:32px;text-align:center}
+    .fol-hero h1{font-size:2rem;margin-bottom:12px}
+    .fol-hero p{color:var(--muted);max-width:600px;margin:0 auto;line-height:1.7}
+    .fol-tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:0}
+    .ftab{padding:11px 20px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;font-size:.9rem;font-weight:500;transition:.2s;margin-bottom:-1px}
+    .ftab:hover{color:#fff}
+    .ftab.active{color:#00d4ff;border-bottom-color:#00d4ff}
+    .fpanel{display:none}.fpanel.active{display:block}
+    .info-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px;margin-bottom:20px}
+    .info-card h3{font-size:1.05rem;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .info-card p{color:rgba(255,255,255,.8);line-height:1.75;font-size:.9rem;margin-bottom:12px}
+    .info-card ul{color:rgba(255,255,255,.8);line-height:1.75;font-size:.9rem;padding-left:20px}
+    .info-card ul li{margin-bottom:6px}
+    .regime-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:20px}
+    .regime-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;transition:.2s}
+    .regime-card:hover{border-color:rgba(0,212,255,.3)}
+    .regime-card .icon{font-size:2rem;margin-bottom:10px}
+    .regime-card h4{font-size:.95rem;margin-bottom:8px}
+    .regime-card p{color:var(--muted);font-size:.82rem;line-height:1.6}
+    .highlight-box{background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(121,38,255,.06));border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:20px;margin-bottom:16px}
+    .highlight-box h4{color:#00d4ff;margin-bottom:10px;font-size:.95rem}
+    .highlight-box p,.highlight-box li{color:rgba(255,255,255,.85);font-size:.88rem;line-height:1.7}
+    .institution-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+    .institution-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px}
+    .institution-card .tag-inst{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.72rem;font-weight:600;margin-bottom:8px}
+    .institution-card h4{font-size:.88rem;margin-bottom:6px}
+    .institution-card p{color:var(--muted);font-size:.78rem;line-height:1.5}
+    .contribution-table{width:100%;border-collapse:collapse;font-size:.84rem;margin-bottom:20px}
+    .contribution-table th{background:rgba(0,212,255,.08);color:#00d4ff;padding:10px 14px;text-align:left;font-weight:600;border-bottom:1px solid rgba(0,212,255,.2)}
+    .contribution-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .contribution-table tr:hover td{background:rgba(255,255,255,.03)}
+    .risk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:20px}
+    .risk-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px}
+    .risk-card .risk-icon{font-size:1.8rem;margin-bottom:8px}
+    .risk-card h4{font-size:.9rem;margin-bottom:6px}
+    .risk-card p{color:var(--muted);font-size:.8rem;line-height:1.5}
+    .step-list{counter-reset:step;padding:0;list-style:none}
+    .step-list li{counter-increment:step;display:flex;gap:14px;margin-bottom:16px;align-items:flex-start}
+    .step-list li::before{content:counter(step);min-width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#7926ff);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+    .step-content h5{font-size:.88rem;margin-bottom:4px}
+    .step-content p{color:var(--muted);font-size:.82rem;line-height:1.6}
+    .law-badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:.75rem;font-weight:700;background:rgba(121,38,255,.15);color:#9b5bff;margin-right:6px;margin-bottom:4px}
+    .quiz-section{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px}
+    .quiz-q{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .quiz-q:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+    .quiz-q p{font-size:.9rem;font-weight:600;margin-bottom:10px}
+    .quiz-opt{display:block;padding:8px 14px;margin-bottom:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;cursor:pointer;font-size:.85rem;transition:.2s}
+    .quiz-opt:hover{border-color:#00d4ff;background:rgba(0,212,255,.06)}
+    .quiz-opt.correct{background:rgba(34,197,94,.12);border-color:#22c55e;color:#22c55e}
+    .quiz-opt.wrong{background:rgba(239,68,68,.1);border-color:#ef4444;color:#ef4444}
+    .breadcrumb{font-size:.82rem;color:var(--muted);margin-bottom:16px}
+    .breadcrumb a{color:#00d4ff;text-decoration:none}
+    .breadcrumb a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="tareas.html">Tareas</a>
+      <a href="fol.html" style="color:#00d4ff">FOL/SDSS</a>
+      <a href="contacto.html">Contacto</a>
+      <a href="login.html" class="btn">Ingresar</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+
+  <div class="breadcrumb" style="margin-top:20px">
+    <a href="index.html">Inicio</a> / <span>Módulo FOL — Formación y Orientación Laboral</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="fol-hero reveal">
+    <span class="tag" style="background:rgba(0,212,255,.1);color:#00d4ff;border-color:rgba(0,212,255,.3);margin-bottom:16px;display:inline-block">
+      📚 Módulo FOL · Formación y Orientación Laboral
+    </span>
+    <h1>Sistema Dominicano de Seguridad Social<br><span style="color:#00d4ff">y Gestión de Seguridad Laboral</span></h1>
+    <p>Conoce los fundamentos del sistema de protección social de la República Dominicana y las normas de seguridad y salud en el entorno laboral — conocimiento esencial para todo profesional de tecnología.</p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+      <span class="chip">🇩🇴 República Dominicana</span>
+      <span class="chip">🏛 Ley 87-01</span>
+      <span class="chip">🦺 Seguridad Laboral</span>
+      <span class="chip">🏥 Salud Ocupacional</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="fol-tabs">
+    <button class="ftab active" data-panel="sdss">🏛 SDSS</button>
+    <button class="ftab" data-panel="regimenes">📋 Regímenes</button>
+    <button class="ftab" data-panel="instituciones">🏢 Instituciones</button>
+    <button class="ftab" data-panel="aportes">💰 Aportes</button>
+    <button class="ftab" data-panel="salud">🦺 Seguridad Laboral</button>
+    <button class="ftab" data-panel="empresa">🏭 Sistema de Gestión</button>
+    <button class="ftab" data-panel="quiz">📝 Cuestionario</button>
+  </div>
+
+  <!-- ═══ TAB: SDSS ═══════════════════════════════════════════════════════════ -->
+  <div class="fpanel active" id="panel-sdss">
+    <div class="info-card">
+      <h3>🏛 ¿Qué es el Sistema Dominicano de Seguridad Social (SDSS)?</h3>
+      <p>El <strong>Sistema Dominicano de Seguridad Social (SDSS)</strong> es el conjunto de instituciones, normas y procedimientos que tiene por objeto proteger a los trabajadores y sus familias ante los riesgos derivados de la vejez, discapacidad, cesantía, enfermedad, maternidad, infancia y muerte en la República Dominicana.</p>
+      <p>Fue creado mediante la <strong>Ley 87-01</strong> del 9 de mayo del 2001 y está fundamentado en los principios de universalidad, obligatoriedad, integralidad, unidad, equidad, solidaridad, subsidiariedad y eficiencia.</p>
+    </div>
+
+    <div class="highlight-box">
+      <h4>⚖️ Marco Legal Principal</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li><span class="law-badge">Ley 87-01</span> — Ley que crea el Sistema Dominicano de Seguridad Social</li>
+        <li><span class="law-badge">Ley 116-02</span> — Ley sobre Subsidios por Enfermedad y Maternidad</li>
+        <li><span class="law-badge">Ley 16-92</span> — Código de Trabajo de la República Dominicana</li>
+        <li><span class="law-badge">Ley 42-01</span> — Ley General de Salud</li>
+        <li><span class="law-badge">Decreto 974-01</span> — Reglamento del SDSS</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>🎯 Principios del SDSS</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div style="background:rgba(0,212,255,.06);border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:#00d4ff;margin-bottom:4px">🌐 Universalidad</div>
+          <div style="font-size:.82rem;color:var(--muted)">Cubre a todos los ciudadanos y residentes legales</div>
+        </div>
+        <div style="background:rgba(121,38,255,.06);border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:#9b5bff;margin-bottom:4px">📋 Obligatoriedad</div>
+          <div style="font-size:.82rem;color:var(--muted)">Participación obligatoria de empleadores y trabajadores</div>
+        </div>
+        <div style="background:rgba(34,197,94,.06);border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:#22c55e;margin-bottom:4px">🤝 Solidaridad</div>
+          <div style="font-size:.82rem;color:var(--muted)">Los que más ganan contribuyen más para proteger a los vulnerables</div>
+        </div>
+        <div style="background:rgba(245,158,11,.06);border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:#f59e0b;margin-bottom:4px">⚡ Eficiencia</div>
+          <div style="font-size:.82rem;color:var(--muted)">Uso óptimo de recursos para maximizar los beneficios</div>
+        </div>
+        <div style="background:rgba(239,68,68,.06);border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:#ef4444;margin-bottom:4px">⚖️ Equidad</div>
+          <div style="font-size:.82rem;color:var(--muted)">Prestaciones proporcionales según contribuciones</div>
+        </div>
+        <div style="background:rgba(0,212,255,.06);border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:#00d4ff;margin-bottom:4px">🛡 Integralidad</div>
+          <div style="font-size:.82rem;color:var(--muted)">Cobertura ante todos los riesgos sociales previstos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>🔒 Riesgos que cubre el SDSS</h3>
+      <ul>
+        <li><strong>Vejez</strong> — Pensión por retiro al alcanzar la edad requerida</li>
+        <li><strong>Discapacidad</strong> — Pensión por invalidez total o parcial</li>
+        <li><strong>Sobrevivencia</strong> — Protección a familiares dependientes del fallecido</li>
+        <li><strong>Enfermedad</strong> — Atención médica y subsidio por incapacidad temporal</li>
+        <li><strong>Maternidad</strong> — Subsidio por descanso prenatal y posnatal</li>
+        <li><strong>Riesgos Laborales</strong> — Accidentes de trabajo y enfermedades profesionales</li>
+        <li><strong>Cesantía</strong> — Subsidio por desempleo involuntario</li>
+        <li><strong>Infancia</strong> — Guarderías y estancias infantiles</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: REGÍMENES ═══════════════════════════════════════════════════════ -->
+  <div class="fpanel" id="panel-regimenes">
+    <div class="info-card">
+      <h3>📋 Los Tres Regímenes del SDSS</h3>
+      <p>El SDSS organiza a los afiliados en tres regímenes según su condición económica y laboral:</p>
+    </div>
+
+    <div class="regime-grid">
+      <div class="regime-card" style="border-color:rgba(0,212,255,.3)">
+        <div class="icon">💼</div>
+        <h4 style="color:#00d4ff">Régimen Contributivo</h4>
+        <p>Para trabajadores asalariados y empleadores del sector formal. Tanto el empleado como el empleador realizan aportes al sistema. Es el régimen más amplio en cobertura y beneficios.</p>
+        <ul style="font-size:.8rem;color:var(--muted);padding-left:16px;margin-top:8px">
+          <li>Trabajadores privados con contrato</li>
+          <li>Empleados públicos del gobierno central</li>
+          <li>Empleadores que cotizan por sus empleados</li>
+        </ul>
+      </div>
+      <div class="regime-card" style="border-color:rgba(34,197,94,.3)">
+        <div class="icon">🆓</div>
+        <h4 style="color:#22c55e">Régimen Subsidiado</h4>
+        <p>Para personas en situación de pobreza extrema o con incapacidad para generar ingresos. El Estado dominicano financia el 100% de las contribuciones.</p>
+        <ul style="font-size:.8rem;color:var(--muted);padding-left:16px;margin-top:8px">
+          <li>Familias en extrema pobreza</li>
+          <li>Discapacitados sin capacidad laboral</li>
+          <li>Menores en situación de abandono</li>
+          <li>Ancianos no pensionados</li>
+        </ul>
+      </div>
+      <div class="regime-card" style="border-color:rgba(245,158,11,.3)">
+        <div class="icon">🤝</div>
+        <h4 style="color:#f59e0b">Régimen Contributivo Subsidiado</h4>
+        <p>Para trabajadores independientes, informales y microempresarios con ingresos variables. El Estado subsidia una parte de las contribuciones.</p>
+        <ul style="font-size:.8rem;color:var(--muted);padding-left:16px;margin-top:8px">
+          <li>Profesionales independientes</li>
+          <li>Trabajadores del sector informal</li>
+          <li>Pequeños comerciantes</li>
+          <li>Freelancers y autónomos</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>💡 ¿En qué régimen estás tú como programador?</h4>
+      <p>Como futuro profesional de tecnología:</p>
+      <ul style="padding-left:18px;margin:8px 0 0">
+        <li><strong>Si trabajas en empresa:</strong> Régimen Contributivo — tu empleador cotiza por ti</li>
+        <li><strong>Si trabajas freelance:</strong> Régimen Contributivo Subsidiado — puedes afiliarte voluntariamente</li>
+        <li><strong>Si tienes tu propia empresa:</strong> Te registras como empleador y cotizas por tus empleados</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: INSTITUCIONES ════════════════════════════════════════════════════ -->
+  <div class="fpanel" id="panel-instituciones">
+    <div class="info-card">
+      <h3>🏢 Principales Instituciones del SDSS</h3>
+      <p>El sistema está administrado por un conjunto de organismos públicos y privados con funciones específicas:</p>
+    </div>
+
+    <div class="institution-grid">
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(0,212,255,.15);color:#00d4ff">Rector</span>
+        <h4>CNSS — Consejo Nacional de Seguridad Social</h4>
+        <p>Máximo órgano de gobierno del sistema. Establece las políticas generales y supervisa el cumplimiento de la Ley 87-01.</p>
+      </div>
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(121,38,255,.15);color:#9b5bff">Supervisor</span>
+        <h4>SISALRIL — Superintendencia de Salud y Riesgos Laborales</h4>
+        <p>Supervisa y regula las Administradoras de Riesgos de Salud (ARS) y las ARL. Protege los derechos de los afiliados.</p>
+      </div>
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(245,158,11,.15);color:#f59e0b">Supervisor</span>
+        <h4>SIPEN — Superintendencia de Pensiones</h4>
+        <p>Regula y supervisa las Administradoras de Fondos de Pensiones (AFP) para garantizar los ahorros de los trabajadores.</p>
+      </div>
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(34,197,94,.15);color:#22c55e">Recaudador</span>
+        <h4>TSS — Tesorería de la Seguridad Social</h4>
+        <p>Recauda, distribuye y controla el flujo de fondos del sistema. Punto de contacto para empleadores que cotizan.</p>
+      </div>
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(239,68,68,.15);color:#ef4444">Salud</span>
+        <h4>SENASA — Seguro Nacional de Salud</h4>
+        <p>ARS pública que atiende principalmente a los afiliados del régimen subsidiado y contributivo subsidiado.</p>
+      </div>
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(0,212,255,.15);color:#00d4ff">Pensiones</span>
+        <h4>AFP Privadas</h4>
+        <p>Administran las cuentas individuales de ahorro para retiro (CCI). Las principales son AFP Popular, AFP Reservas, AFP Siembra.</p>
+      </div>
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(121,38,255,.15);color:#9b5bff">Riesgos</span>
+        <h4>ARL — Administradoras de Riesgos Laborales</h4>
+        <p>Cubren accidentes de trabajo y enfermedades profesionales. El empleador paga el 100% de esta contribución.</p>
+      </div>
+      <div class="institution-card">
+        <span class="tag-inst" style="background:rgba(245,158,11,.15);color:#f59e0b">Infancia</span>
+        <h4>CONDEI / INFOTEP</h4>
+        <p>CONDEI gestiona las estancias infantiles. INFOTEP administra la capacitación técnica y vocacional de trabajadores.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: APORTES ══════════════════════════════════════════════════════════ -->
+  <div class="fpanel" id="panel-aportes">
+    <div class="info-card">
+      <h3>💰 Estructura de Aportes al SDSS</h3>
+      <p>Los aportes se calculan sobre el salario cotizable (SC) del trabajador. La Ley 87-01 establece los porcentajes que deben pagar empleadores y empleados:</p>
+    </div>
+
+    <table class="contribution-table">
+      <thead>
+        <tr>
+          <th>Fondo / Seguro</th>
+          <th>Empleador</th>
+          <th>Empleado</th>
+          <th>Total</th>
+          <th>¿Quién administra?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Seguro de Vejez, Discapacidad y Sobrevivencia (SVDS)</strong></td>
+          <td>7.10%</td>
+          <td>2.87%</td>
+          <td>9.97%</td>
+          <td>AFP</td>
+        </tr>
+        <tr>
+          <td><strong>Seguro Familiar de Salud (SFS)</strong></td>
+          <td>7.09%</td>
+          <td>3.04%</td>
+          <td>10.13%</td>
+          <td>ARS</td>
+        </tr>
+        <tr>
+          <td><strong>Seguro de Riesgos Laborales (SRL)</strong></td>
+          <td>1.20%</td>
+          <td>0%</td>
+          <td>1.20%</td>
+          <td>ARL</td>
+        </tr>
+        <tr>
+          <td><strong>INFOTEP (Capacitación)</strong></td>
+          <td>1.00%</td>
+          <td>0%</td>
+          <td>1.00%</td>
+          <td>INFOTEP</td>
+        </tr>
+        <tr style="font-weight:700;background:rgba(0,212,255,.05)">
+          <td>TOTAL</td>
+          <td>16.39%</td>
+          <td>5.91%</td>
+          <td>22.30%</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <h4>🧮 Ejemplo práctico — Programador con salario RD$ 50,000</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li><strong>Descuento al empleado:</strong> RD$ 50,000 × 5.91% = <strong>RD$ 2,955</strong></li>
+        <li><strong>Aporte del empleador:</strong> RD$ 50,000 × 16.39% = <strong>RD$ 8,195</strong></li>
+        <li><strong>Salario neto del empleado:</strong> RD$ 50,000 − RD$ 2,955 = <strong>RD$ 47,045</strong></li>
+        <li><strong>Costo total para el empleador:</strong> RD$ 50,000 + RD$ 8,195 = <strong>RD$ 58,195</strong></li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>📅 Plazos de Cotización</h3>
+      <ul>
+        <li>Los empleadores deben depositar las cotizaciones a la <strong>TSS antes del día 10</strong> de cada mes</li>
+        <li>El incumplimiento genera recargos del <strong>3% mensual</strong> sobre el monto adeudado</li>
+        <li>El trabajador puede verificar sus aportes en <strong>www.tss.gob.do</strong> o en la app TSS</li>
+        <li>La Cuenta de Capitalización Individual (CCI) acumula los fondos para la pensión</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: SEGURIDAD LABORAL ════════════════════════════════════════════════ -->
+  <div class="fpanel" id="panel-salud">
+    <div class="info-card">
+      <h3>🦺 Seguridad y Salud en el Trabajo (SST)</h3>
+      <p>La seguridad y salud en el trabajo es el conjunto de medidas preventivas destinadas a proteger la integridad física y mental de los trabajadores, eliminar o reducir los riesgos de accidentes y enfermedades profesionales.</p>
+      <p>En República Dominicana está regulada principalmente por el <strong>Código de Trabajo (Ley 16-92)</strong> y el <strong>Reglamento de Seguridad Industrial 522-06</strong>.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>⚠️ Principales Riesgos Laborales en TI</h3>
+      <div class="risk-grid">
+        <div class="risk-card">
+          <div class="risk-icon">👁</div>
+          <h4>Fatiga Visual</h4>
+          <p>Exposición prolongada a pantallas. Causa irritación, sequedad ocular y dolores de cabeza.</p>
+        </div>
+        <div class="risk-card">
+          <div class="risk-icon">🦴</div>
+          <h4>Trastornos Musculoesqueléticos</h4>
+          <p>Mala postura, escritura excesiva y uso incorrecto de mobiliario ergonómico.</p>
+        </div>
+        <div class="risk-card">
+          <div class="risk-icon">🧠</div>
+          <h4>Estrés Laboral</h4>
+          <p>Plazos ajustados, trabajo en equipo bajo presión y jornadas extensas afectan la salud mental.</p>
+        </div>
+        <div class="risk-card">
+          <div class="risk-icon">⚡</div>
+          <h4>Riesgos Eléctricos</h4>
+          <p>Mantenimiento de equipos sin protección adecuada y sobrecarga de instalaciones eléctricas.</p>
+        </div>
+        <div class="risk-card">
+          <div class="risk-icon">🌡</div>
+          <h4>Ambiente Térmico</h4>
+          <p>Servidores y equipos generan calor. El ambiente excesivamente frío por aire acondicionado también es un riesgo.</p>
+        </div>
+        <div class="risk-card">
+          <div class="risk-icon">🔇</div>
+          <h4>Sedentarismo</h4>
+          <p>El trabajo de oficina prolongado sin pausas activas aumenta riesgo cardiovascular y circulatorio.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>✅ Derechos del Trabajador en SST</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li>Recibir <strong>formación e información</strong> sobre los riesgos del puesto de trabajo</li>
+        <li>Disponer de <strong>equipos de protección personal (EPP)</strong> adecuados y gratuitos</li>
+        <li>Paralizar la actividad ante <strong>riesgo grave e inminente</strong> sin perder el empleo</li>
+        <li>Participar en la <strong>evaluación de riesgos</strong> de su área de trabajo</li>
+        <li>Recibir atención médica inmediata ante un <strong>accidente laboral</strong></li>
+        <li>No ser discriminado por ejercer sus derechos en materia de SST</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: SISTEMA DE GESTIÓN ═══════════════════════════════════════════════ -->
+  <div class="fpanel" id="panel-empresa">
+    <div class="info-card">
+      <h3>🏭 Sistema de Gestión de Seguridad y Salud en el Trabajo (SG-SST)</h3>
+      <p>El SG-SST es el conjunto de elementos interrelacionados para establecer la política, los objetivos, los mecanismos y las acciones necesarias para prevenir, identificar, evaluar y controlar los riesgos laborales en una empresa.</p>
+      <p>Se basa en la norma <strong>ISO 45001:2018</strong> y el ciclo <strong>PHVA (Planificar → Hacer → Verificar → Actuar)</strong>.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>🔄 Ciclo PHVA del SG-SST</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div style="background:rgba(0,212,255,.08);border-radius:10px;padding:16px;border:1px solid rgba(0,212,255,.2)">
+          <div style="font-size:1.5rem;margin-bottom:8px">📋</div>
+          <h4 style="color:#00d4ff;margin-bottom:8px">P — Planificar</h4>
+          <ul style="font-size:.8rem;color:var(--muted);padding-left:14px">
+            <li>Identificar riesgos y peligros</li>
+            <li>Establecer objetivos SST</li>
+            <li>Diseñar el programa anual</li>
+          </ul>
+        </div>
+        <div style="background:rgba(34,197,94,.08);border-radius:10px;padding:16px;border:1px solid rgba(34,197,94,.2)">
+          <div style="font-size:1.5rem;margin-bottom:8px">🔧</div>
+          <h4 style="color:#22c55e;margin-bottom:8px">H — Hacer</h4>
+          <ul style="font-size:.8rem;color:var(--muted);padding-left:14px">
+            <li>Ejecutar capacitaciones</li>
+            <li>Implementar controles</li>
+            <li>Registrar incidentes</li>
+          </ul>
+        </div>
+        <div style="background:rgba(245,158,11,.08);border-radius:10px;padding:16px;border:1px solid rgba(245,158,11,.2)">
+          <div style="font-size:1.5rem;margin-bottom:8px">📊</div>
+          <h4 style="color:#f59e0b;margin-bottom:8px">V — Verificar</h4>
+          <ul style="font-size:.8rem;color:var(--muted);padding-left:14px">
+            <li>Medir indicadores SST</li>
+            <li>Auditorías internas</li>
+            <li>Inspecciones de seguridad</li>
+          </ul>
+        </div>
+        <div style="background:rgba(121,38,255,.08);border-radius:10px;padding:16px;border:1px solid rgba(121,38,255,.2)">
+          <div style="font-size:1.5rem;margin-bottom:8px">🚀</div>
+          <h4 style="color:#9b5bff;margin-bottom:8px">A — Actuar</h4>
+          <ul style="font-size:.8rem;color:var(--muted);padding-left:14px">
+            <li>Corregir desviaciones</li>
+            <li>Mejorar el sistema</li>
+            <li>Actualizar política SST</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>📋 Pasos para Implementar el SG-SST en Nexuss X Systems</h3>
+      <ol class="step-list">
+        <li>
+          <div class="step-content">
+            <h5>Diagnóstico inicial</h5>
+            <p>Evaluación de las condiciones actuales de seguridad y salud. Identificación de peligros, evaluación de riesgos y verificación del cumplimiento legal.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-content">
+            <h5>Política de SST</h5>
+            <p>Redactar y publicar la política de seguridad y salud, firmada por la alta dirección. Debe ser visible para todos los empleados.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-content">
+            <h5>Comité de Seguridad y Salud</h5>
+            <p>Constituir el comité paritario (empleadores y trabajadores) que supervise el sistema. Obligatorio para empresas con más de 10 trabajadores.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-content">
+            <h5>Mapa de Riesgos</h5>
+            <p>Elaborar el mapa visual de los riesgos por área de trabajo. Señalizar las zonas de peligro con colores normalizados.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-content">
+            <h5>Plan de Capacitación</h5>
+            <p>Capacitar a todos los empleados en prevención de riesgos, uso de EPP, primeros auxilios y evacuación de emergencia.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-content">
+            <h5>Plan de Emergencia</h5>
+            <p>Elaborar el plan de respuesta ante emergencias (incendios, terremotos, evacuación). Realizar simulacros periódicos.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-content">
+            <h5>Registro y Seguimiento</h5>
+            <p>Registrar todos los incidentes, accidentes y enfermedades laborales. Investigar causas y aplicar medidas correctivas.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="highlight-box">
+      <h4>📍 Obligaciones del Empleador en SST (Código de Trabajo RD)</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li>Suministrar equipos de protección personal (EPP) de forma <strong>gratuita</strong></li>
+        <li>Afiliar a todos los trabajadores al <strong>Seguro de Riesgos Laborales (ARL)</strong></li>
+        <li>Reportar todo accidente laboral al <strong>Ministerio de Trabajo y a la TSS</strong> en 48 horas</li>
+        <li>Mantener las instalaciones en condiciones <strong>higiénicas y seguras</strong></li>
+        <li>Contar con botiquín de primeros auxilios y <strong>extintor</strong> en cada área</li>
+        <li>Realizar exámenes médicos pre-empleo y <strong>anuales</strong> a los trabajadores</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: CUESTIONARIO ══════════════════════════════════════════════════════ -->
+  <div class="fpanel" id="panel-quiz">
+    <div class="info-card" style="margin-bottom:16px">
+      <h3>📝 Cuestionario de Evaluación — FOL y SDSS</h3>
+      <p style="margin:0">Pon a prueba tus conocimientos sobre el Sistema Dominicano de Seguridad Social y la seguridad laboral. Haz clic en la respuesta correcta.</p>
+    </div>
+
+    <div class="quiz-section">
+      <!-- Q1 -->
+      <div class="quiz-q">
+        <p>1. ¿Qué ley creó el Sistema Dominicano de Seguridad Social?</p>
+        <label class="quiz-opt" data-correct="false">Ley 16-92 (Código de Trabajo)</label>
+        <label class="quiz-opt" data-correct="true">Ley 87-01</label>
+        <label class="quiz-opt" data-correct="false">Ley 42-01 (Ley General de Salud)</label>
+        <label class="quiz-opt" data-correct="false">Ley 116-02</label>
+      </div>
+      <!-- Q2 -->
+      <div class="quiz-q">
+        <p>2. ¿Cuántos regímenes tiene el SDSS?</p>
+        <label class="quiz-opt" data-correct="false">2 regímenes</label>
+        <label class="quiz-opt" data-correct="true">3 regímenes</label>
+        <label class="quiz-opt" data-correct="false">4 regímenes</label>
+        <label class="quiz-opt" data-correct="false">5 regímenes</label>
+      </div>
+      <!-- Q3 -->
+      <div class="quiz-q">
+        <p>3. ¿Qué institución recauda y distribuye los fondos del SDSS?</p>
+        <label class="quiz-opt" data-correct="false">SIPEN</label>
+        <label class="quiz-opt" data-correct="false">SISALRIL</label>
+        <label class="quiz-opt" data-correct="true">TSS — Tesorería de la Seguridad Social</label>
+        <label class="quiz-opt" data-correct="false">SENASA</label>
+      </div>
+      <!-- Q4 -->
+      <div class="quiz-q">
+        <p>4. ¿Qué porcentaje paga el empleado para el Seguro de Riesgos Laborales (SRL)?</p>
+        <label class="quiz-opt" data-correct="false">1.20%</label>
+        <label class="quiz-opt" data-correct="false">0.50%</label>
+        <label class="quiz-opt" data-correct="true">0% — Lo paga íntegro el empleador</label>
+        <label class="quiz-opt" data-correct="false">2.87%</label>
+      </div>
+      <!-- Q5 -->
+      <div class="quiz-q">
+        <p>5. ¿Qué significa el ciclo PHVA en el sistema de gestión de seguridad?</p>
+        <label class="quiz-opt" data-correct="false">Procesar, Hacer, Validar, Administrar</label>
+        <label class="quiz-opt" data-correct="true">Planificar, Hacer, Verificar, Actuar</label>
+        <label class="quiz-opt" data-correct="false">Prevenir, Hallar, Vigilar, Ajustar</label>
+        <label class="quiz-opt" data-correct="false">Planear, Hallar, Verificar, Aplicar</label>
+      </div>
+      <!-- Q6 -->
+      <div class="quiz-q">
+        <p>6. ¿Cuál es el máximo órgano rector del SDSS?</p>
+        <label class="quiz-opt" data-correct="false">SIPEN</label>
+        <label class="quiz-opt" data-correct="false">TSS</label>
+        <label class="quiz-opt" data-correct="false">SENASA</label>
+        <label class="quiz-opt" data-correct="true">CNSS — Consejo Nacional de Seguridad Social</label>
+      </div>
+      <!-- Q7 -->
+      <div class="quiz-q">
+        <p>7. Un trabajador independiente (freelancer) está en el régimen:</p>
+        <label class="quiz-opt" data-correct="false">Régimen Contributivo</label>
+        <label class="quiz-opt" data-correct="false">Régimen Subsidiado</label>
+        <label class="quiz-opt" data-correct="true">Régimen Contributivo Subsidiado</label>
+        <label class="quiz-opt" data-correct="false">No tiene régimen asignado</label>
+      </div>
+      <!-- Q8 -->
+      <div class="quiz-q">
+        <p>8. ¿En cuántas horas debe reportarse un accidente laboral al Ministerio de Trabajo?</p>
+        <label class="quiz-opt" data-correct="false">24 horas</label>
+        <label class="quiz-opt" data-correct="true">48 horas</label>
+        <label class="quiz-opt" data-correct="false">72 horas</label>
+        <label class="quiz-opt" data-correct="false">Una semana</label>
+      </div>
+    </div>
+
+    <div id="quizResult" style="display:none;margin-top:20px;text-align:center">
+      <div class="highlight-box">
+        <h4>📊 Resultado del Cuestionario</h4>
+        <p id="quizScore" style="font-size:1.2rem;font-weight:700;margin:10px 0"></p>
+        <p id="quizMsg"></p>
+        <button class="btn primary" onclick="resetQuiz()" style="margin-top:12px">🔄 Intentar de nuevo</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer style="margin-top:60px;padding:30px 0;border-top:1px solid rgba(255,255,255,.06);text-align:center">
+  <div class="container">
+    <div class="brand" style="justify-content:center;margin-bottom:10px">
+      <img class="brand-logo" src="logo.jpeg" alt="logo" style="width:28px" />
+      Nexuss X Systems
+    </div>
+    <p style="color:var(--muted);font-size:.82rem">Módulo FOL — Formación y Orientación Laboral · Proyecto Final 5to Año</p>
+    <p style="color:var(--muted);font-size:.78rem;margin-top:4px">Politécnico — Programación y Desarrollo Web</p>
+  </div>
+</footer>
+
+<script src="nexus.js"></script>
+<script>
+// Tab navigation
+document.querySelectorAll('.ftab').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.fpanel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
+  };
+});
+
+// Quiz logic
+let answered = 0;
+const totalQ = document.querySelectorAll('.quiz-q').length;
+
+document.querySelectorAll('.quiz-opt').forEach(opt => {
+  opt.onclick = function() {
+    const q = this.closest('.quiz-q');
+    if (q.dataset.answered) return;
+    q.dataset.answered = '1';
+    const correct = this.dataset.correct === 'true';
+    this.classList.add(correct ? 'correct' : 'wrong');
+    if (!correct) {
+      q.querySelectorAll('.quiz-opt').forEach(o => {
+        if (o.dataset.correct === 'true') o.classList.add('correct');
+      });
+    }
+    answered++;
+    if (answered === totalQ) {
+      const correctCount = document.querySelectorAll('.quiz-opt.correct:not(.wrong)').length;
+      // count only options that were chosen correctly (user clicked correct)
+      const userCorrect = [...document.querySelectorAll('.quiz-q')].filter(q => q.querySelector('.quiz-opt.correct') && !q.querySelector('.quiz-opt.wrong')).length;
+      const pct = Math.round((userCorrect / totalQ) * 100);
+      document.getElementById('quizScore').textContent = `${userCorrect} de ${totalQ} correctas — ${pct}%`;
+      document.getElementById('quizMsg').textContent = pct >= 80
+        ? '¡Excelente! Dominas el módulo FOL y SDSS.'
+        : pct >= 60
+        ? 'Bien. Repasa los temas donde tuviste dificultad.'
+        : 'Necesitas repasar el contenido del módulo FOL.';
+      document.getElementById('quizResult').style.display = 'block';
+    }
+  };
+});
+
+function resetQuiz() {
+  answered = 0;
+  document.querySelectorAll('.quiz-q').forEach(q => { delete q.dataset.answered; });
+  document.querySelectorAll('.quiz-opt').forEach(opt => {
+    opt.classList.remove('correct','wrong');
+  });
+  document.getElementById('quizResult').style.display = 'none';
+}
+</script>
+</body>
+</html>

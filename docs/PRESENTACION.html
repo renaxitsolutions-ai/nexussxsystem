@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NexussXSystem — Presentación Final</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#080818;color:#fff;overflow:hidden;height:100vh}
+  .deck{width:100%;height:100vh;position:relative}
+  .slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;opacity:0;pointer-events:none;transition:opacity .5s,transform .5s;transform:translateX(60px)}
+  .slide.active{opacity:1;pointer-events:all;transform:translateX(0)}
+  .slide.prev{opacity:0;transform:translateX(-60px)}
+
+  /* Backgrounds */
+  .bg-dark{background:radial-gradient(ellipse at 20% 50%,rgba(0,212,255,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(121,38,255,.1) 0%,transparent 60%),#080818}
+  .bg-blue{background:radial-gradient(ellipse at 30% 50%,rgba(0,212,255,.15) 0%,transparent 60%),#080818}
+  .bg-purple{background:radial-gradient(ellipse at 70% 50%,rgba(121,38,255,.15) 0%,transparent 60%),#080818}
+  .bg-green{background:radial-gradient(ellipse at 50% 50%,rgba(34,197,94,.1) 0%,transparent 60%),#080818}
+
+  /* Elements */
+  .tag{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.3);color:#00d4ff;margin-bottom:16px}
+  .slide-num{position:absolute;bottom:20px;right:30px;color:rgba(255,255,255,.2);font-size:.8rem}
+  .nav{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:100;align-items:center}
+  .nav-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 24px;border-radius:30px;cursor:pointer;font-size:.9rem;transition:.2s;backdrop-filter:blur(10px)}
+  .nav-btn:hover{background:rgba(0,212,255,.2);border-color:#00d4ff}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#00d4ff,#7926ff);transition:.4s;z-index:100}
+  .counter{position:fixed;top:14px;right:20px;color:rgba(255,255,255,.3);font-size:.8rem;z-index:100}
+  .key-hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.2);font-size:.72rem}
+
+  /* Typography */
+  h1{font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.1;margin-bottom:16px}
+  h2{font-size:clamp(1.6rem,3.5vw,2.8rem);font-weight:800;line-height:1.2;margin-bottom:12px}
+  h3{font-size:clamp(1.1rem,2.5vw,1.6rem);font-weight:700;margin-bottom:8px}
+  p{font-size:clamp(.9rem,1.8vw,1.1rem);line-height:1.7;color:rgba(255,255,255,.8);max-width:700px}
+  .gradient{background:linear-gradient(135deg,#00d4ff,#7926ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .muted{color:rgba(255,255,255,.45);font-size:.9rem}
+  .big-num{font-size:clamp(2.5rem,6vw,5rem);font-weight:900;line-height:1}
+
+  /* Cards */
+  .cards{display:grid;gap:16px;width:100%;max-width:1000px;margin-top:20px}
+  .cards-3{grid-template-columns:repeat(3,1fr)}
+  .cards-4{grid-template-columns:repeat(4,1fr)}
+  .cards-2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:700px){.cards-3,.cards-4,.cards-2{grid-template-columns:1fr}}
+  .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:20px}
+  .card-icon{font-size:2rem;margin-bottom:10px}
+  .card h4{font-size:1rem;margin-bottom:6px}
+  .card p{font-size:.82rem;color:rgba(255,255,255,.6)}
+  .card.accent{border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.06)}
+  .card.purple{border-color:rgba(121,38,255,.3);background:rgba(121,38,255,.06)}
+  .card.green{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.05)}
+
+  /* Tech pills */
+  .tech-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;justify-content:center;max-width:800px}
+  .tech-pill{padding:8px 18px;border-radius:30px;font-size:.85rem;font-weight:600;border:1px solid}
+  .t-node{background:rgba(104,160,99,.15);border-color:rgba(104,160,99,.4);color:#68a063}
+  .t-express{background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.2);color:#ccc}
+  .t-sqlite{background:rgba(0,123,255,.12);border-color:rgba(0,123,255,.3);color:#4d9eff}
+  .t-jwt{background:rgba(236,72,153,.12);border-color:rgba(236,72,153,.3);color:#f472b6}
+  .t-ai{background:rgba(121,38,255,.2);border-color:rgba(121,38,255,.4);color:#a78bfa}
+  .t-html{background:rgba(228,77,38,.12);border-color:rgba(228,77,38,.3);color:#f97316}
+  .t-css{background:rgba(21,114,182,.12);border-color:rgba(21,114,182,.3);color:#38bdf8}
+  .t-js{background:rgba(247,223,30,.1);border-color:rgba(247,223,30,.3);color:#fbbf24}
+
+  /* Stats row */
+  .stats{display:flex;gap:30px;margin-top:24px;flex-wrap:wrap;justify-content:center}
+  .stat{text-align:center}
+  .stat .num{font-size:2.5rem;font-weight:900;color:#00d4ff}
+  .stat .lbl{color:rgba(255,255,255,.5);font-size:.78rem;margin-top:2px}
+
+  /* Feature list */
+  .feat-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:16px;max-width:700px}
+  .feat-list li{display:flex;align-items:flex-start;gap:12px;font-size:.95rem;color:rgba(255,255,255,.85)}
+  .feat-list li::before{content:'→';color:#00d4ff;font-weight:700;flex-shrink:0;margin-top:2px}
+
+  /* Cover specific */
+  .cover-sub{font-size:clamp(.9rem,2vw,1.15rem);color:rgba(255,255,255,.55);margin-bottom:28px;letter-spacing:.5px}
+  .cover-badges{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+  .cbadge{padding:6px 16px;border-radius:20px;font-size:.78rem;font-weight:600;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6)}
+
+  /* DB table */
+  .db-table{border-collapse:collapse;width:100%;max-width:860px;font-size:.82rem}
+  .db-table th{padding:8px 14px;background:rgba(0,212,255,.1);text-align:left;color:#00d4ff;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px}
+  .db-table td{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .db-table tr:hover td{background:rgba(255,255,255,.03)}
+  .db-cat{font-weight:700;color:#7926ff;border-right:2px solid rgba(121,38,255,.3)}
+
+  /* Flow */
+  .flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin-top:20px}
+  .flow-step{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 18px;text-align:center;font-size:.82rem;min-width:110px}
+  .flow-arrow{color:rgba(0,212,255,.6);font-size:1.4rem;margin:0 6px}
+  .flow-step .icon{font-size:1.6rem;margin-bottom:6px}
+
+  /* Role table */
+  .role-table{border-collapse:collapse;width:100%;max-width:800px;font-size:.84rem}
+  .role-table th{padding:8px 12px;background:rgba(255,255,255,.06);text-align:center;color:rgba(255,255,255,.5);font-size:.75rem;border-bottom:1px solid rgba(255,255,255,.08)}
+  .role-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05);text-align:center}
+  .role-table td:first-child{text-align:left;font-weight:600}
+  .yes{color:#22c55e}.no{color:rgba(255,255,255,.15)}
+  .partial{color:#f59e0b}
+
+  /* Final slide */
+  .final-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;max-width:900px}
+  .final-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;text-align:center}
+  .final-card .big{font-size:2rem;margin-bottom:6px}
+  .final-card p{font-size:.82rem}
+
+  /* Canvas stars background */
+  canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:0}
+  .slide>*{position:relative;z-index:1}
+  .slide{z-index:1}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="progress" id="progress"></div>
+<div class="counter" id="counter">1 / 12</div>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active bg-dark" id="s1">
+    <div class="tag">🎓 Proyecto Final de Grado · 5to B</div>
+    <h1 style="text-align:center">Nexuss<span class="gradient">X</span>System</h1>
+    <p class="cover-sub" style="text-align:center">Sistema Empresarial Premium con Inteligencia Artificial</p>
+    <p style="text-align:center;max-width:560px">Plataforma completa de gestión empresarial: CRM, soporte técnico, pipeline de ventas, base de conocimiento y generación de contenido con IA.</p>
+    <div class="cover-badges">
+      <span class="cbadge">📅 2026</span>
+      <span class="cbadge">🏫 Desarrollo y Admin. de Apps Informáticas</span>
+      <span class="cbadge">✉️ nexussxsistem@gmail.com</span>
+    </div>
+    <div class="slide-num">1 / 12</div>
+  </div>
+
+  <!-- SLIDE 2: EL PROBLEMA -->
+  <div class="slide bg-dark" id="s2">
+    <div class="tag">🔍 El problema</div>
+    <h2>Las empresas pierden clientes por <span class="gradient">falta de organización</span></h2>
+    <div class="cards cards-3" style="max-width:900px">
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <h4>Sin CRM</h4>
+        <p>Los datos de clientes están en hojas de Excel, WhatsApp y correos sin estructura.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎫</div>
+        <h4>Sin seguimiento</h4>
+        <p>Los tickets de soporte se pierden en emails. El cliente no sabe el estado de su solicitud.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h4>Sin analíticas</h4>
+        <p>No hay visibilidad de ingresos, leads o rendimiento del equipo en tiempo real.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💸</div>
+        <h4>Herramientas caras</h4>
+        <p>Salesforce, HubSpot o Zendesk cuestan entre $500 y $3,000/mes para una PYME.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⏱️</div>
+        <h4>Trabajo manual</h4>
+        <p>Responder tickets, generar reportes y crear contenido consume horas de trabajo innecesario.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <h4>Sin seguridad</h4>
+        <p>Contraseñas compartidas, sin 2FA, sin registro de quién hizo qué y cuándo.</p>
+      </div>
+    </div>
+    <div class="slide-num">2 / 12</div>
+  </div>
+
+  <!-- SLIDE 3: LA SOLUCIÓN -->
+  <div class="slide bg-blue" id="s3">
+    <div class="tag">💡 La solución</div>
+    <h2>Una sola plataforma que <span class="gradient">lo hace todo</span></h2>
+    <p style="text-align:center;margin:0 auto 24px">NexussXSystem es un sistema empresarial completo desarrollado desde cero, asequible y con IA integrada.</p>
+    <div class="stats">
+      <div class="stat"><div class="big-num gradient">19</div><div class="lbl">Páginas funcionales</div></div>
+      <div class="stat"><div class="big-num gradient">50+</div><div class="lbl">Endpoints de API</div></div>
+      <div class="stat"><div class="big-num gradient">18</div><div class="lbl">Tablas en base de datos</div></div>
+      <div class="stat"><div class="big-num gradient">5</div><div class="lbl">Niveles de roles</div></div>
+      <div class="stat"><div class="big-num gradient">6</div><div class="lbl">Funciones de IA</div></div>
+    </div>
+    <div class="slide-num">3 / 12</div>
+  </div>
+
+  <!-- SLIDE 4: ARQUITECTURA -->
+  <div class="slide bg-dark" id="s4">
+    <div class="tag">⚙️ Arquitectura técnica</div>
+    <h2>Diseño <span class="gradient">cliente-servidor</span></h2>
+    <div class="flow">
+      <div class="flow-step"><div class="icon">🌐</div>Navegador<br><span class="muted">19 páginas HTML</span></div>
+      <div class="flow-arrow">⟶</div>
+      <div class="flow-step"><div class="icon">🔒</div>JWT Auth<br><span class="muted">Bearer token</span></div>
+      <div class="flow-arrow">⟶</div>
+      <div class="flow-step"><div class="icon">⚡</div>Express.js<br><span class="muted">50+ rutas</span></div>
+      <div class="flow-arrow">⟶</div>
+      <div class="flow-step"><div class="icon">🗄️</div>SQLite<br><span class="muted">18 tablas</span></div>
+      <div class="flow-arrow" style="color:rgba(121,38,255,.6)">↕</div>
+      <div class="flow-step" style="border-color:rgba(121,38,255,.3);background:rgba(121,38,255,.08)"><div class="icon">🤖</div>Claude AI<br><span class="muted">Anthropic API</span></div>
+    </div>
+    <div style="display:flex;gap:14px;margin-top:24px;flex-wrap:wrap;justify-content:center">
+      <div class="card" style="padding:12px 18px;font-size:.82rem;text-align:center"><div>🔒 Helmet.js</div><div class="muted">Headers seguros</div></div>
+      <div class="card" style="padding:12px 18px;font-size:.82rem;text-align:center"><div>🚦 Rate Limiting</div><div class="muted">Anti-brute force</div></div>
+      <div class="card" style="padding:12px 18px;font-size:.82rem;text-align:center"><div>📡 SSE</div><div class="muted">Notif. tiempo real</div></div>
+      <div class="card" style="padding:12px 18px;font-size:.82rem;text-align:center"><div>🗜️ Compresión</div><div class="muted">gzip en respuestas</div></div>
+      <div class="card" style="padding:12px 18px;font-size:.82rem;text-align:center"><div>📋 Audit Log</div><div class="muted">Toda acción registrada</div></div>
+    </div>
+    <div class="slide-num">4 / 12</div>
+  </div>
+
+  <!-- SLIDE 5: TECNOLOGÍAS -->
+  <div class="slide bg-dark" id="s5">
+    <div class="tag">🛠️ Stack tecnológico</div>
+    <h2>Tecnologías <span class="gradient">seleccionadas</span></h2>
+    <div class="tech-grid">
+      <span class="tech-pill t-node">Node.js v24</span>
+      <span class="tech-pill t-express">Express.js 4</span>
+      <span class="tech-pill t-sqlite">SQLite (nativo Node)</span>
+      <span class="tech-pill t-jwt">JWT · bcryptjs</span>
+      <span class="tech-pill t-ai">Anthropic Claude SDK</span>
+      <span class="tech-pill t-html">HTML5</span>
+      <span class="tech-pill t-css">CSS3 (Vanilla)</span>
+      <span class="tech-pill t-js">JavaScript ES2022</span>
+      <span class="tech-pill" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fbbf24">Helmet.js · CORS</span>
+      <span class="tech-pill" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171">Rate Limiting</span>
+      <span class="tech-pill" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:#4ade80">otplib (2FA TOTP)</span>
+      <span class="tech-pill" style="background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);color:#22d3ee">SSE (Tiempo real)</span>
+    </div>
+    <p style="text-align:center;margin:16px auto 0;font-size:.85rem;color:rgba(255,255,255,.4)">Sin frameworks de frontend — todo en JavaScript puro para máximo control y aprendizaje.</p>
+    <div class="slide-num">5 / 12</div>
+  </div>
+
+  <!-- SLIDE 6: MÓDULOS -->
+  <div class="slide bg-purple" id="s6">
+    <div class="tag">📦 Módulos del sistema</div>
+    <h2>10 módulos <span class="gradient">completamente funcionales</span></h2>
+    <div class="cards cards-4" style="max-width:1000px;margin-top:16px">
+      <div class="card accent" style="padding:14px"><div style="font-size:1.4rem">👥</div><h4 style="font-size:.88rem">CRM</h4><p>Contactos, notas, etapas, insights IA</p></div>
+      <div class="card purple" style="padding:14px"><div style="font-size:1.4rem">📊</div><h4 style="font-size:.88rem">Pipeline Kanban</h4><p>Deals drag & drop, funnel de ventas</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">🎫</div><h4 style="font-size:.88rem">Tickets + SLA</h4><p>Soporte con respuesta IA y CSAT</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">🤖</div><h4 style="font-size:.88rem">IA Tools</h4><p>Blog, emails, social media, ads</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">📚</div><h4 style="font-size:.88rem">Knowledge Base</h4><p>Artículos Markdown, búsqueda</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">📈</div><h4 style="font-size:.88rem">Reportes</h4><p>10 KPIs, 4 gráficas, resumen IA</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">🔔</div><h4 style="font-size:.88rem">Notificaciones</h4><p>Tiempo real via SSE</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">🔍</div><h4 style="font-size:.88rem">Auditoría</h4><p>Log completo de acciones</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">⚡</div><h4 style="font-size:.88rem">Automatizaciones</h4><p>Reglas condicionales de eventos</p></div>
+      <div class="card" style="padding:14px"><div style="font-size:1.4rem">🎨</div><h4 style="font-size:.88rem">White-label</h4><p>Branding y SMTP personalizados</p></div>
+    </div>
+    <div class="slide-num">6 / 12</div>
+  </div>
+
+  <!-- SLIDE 7: BASE DE DATOS -->
+  <div class="slide bg-dark" id="s7">
+    <div class="tag">🗄️ Base de datos</div>
+    <h2>18 tablas en <span class="gradient">SQLite nativo</span> de Node.js</h2>
+    <table class="db-table" style="margin-top:16px">
+      <thead><tr><th>Módulo</th><th>Tablas</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td class="db-cat">Núcleo</td><td>tenants, users, audit_logs, api_keys, notifications</td><td>Autenticación, roles, seguridad</td></tr>
+        <tr><td class="db-cat">CRM</td><td>contacts, deals, crm_activities, crm_notes</td><td>Gestión de clientes y ventas</td></tr>
+        <tr><td class="db-cat">Soporte</td><td>tickets, ticket_comments, ticket_templates</td><td>Sistema de tickets con SLA</td></tr>
+        <tr><td class="db-cat">Conocimiento</td><td>kb_categories, kb_articles, blog_posts</td><td>Base de conocimiento y blog</td></tr>
+        <tr><td class="db-cat">Operaciones</td><td>orders, referrals, projects, messages</td><td>Órdenes, proyectos, formularios</td></tr>
+        <tr><td class="db-cat">Config.</td><td>plans, subscriptions, automation_rules, ai_conversations</td><td>Planes, automatizaciones, IA</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px;text-align:center;font-size:.82rem;color:rgba(255,255,255,.4)">
+      Se usa el módulo nativo <code style="background:rgba(0,212,255,.1);padding:2px 8px;border-radius:4px;color:#00d4ff">node:sqlite</code> de Node.js 22.5+ — sin dependencias externas compiladas.
+    </p>
+    <div class="slide-num">7 / 12</div>
+  </div>
+
+  <!-- SLIDE 8: INTELIGENCIA ARTIFICIAL -->
+  <div class="slide bg-dark" id="s8">
+    <div class="tag">🤖 Inteligencia artificial</div>
+    <h2>6 funciones de <span class="gradient">IA integradas</span></h2>
+    <div class="cards cards-3" style="max-width:900px">
+      <div class="card purple" style="padding:16px">
+        <div class="card-icon">💬</div>
+        <h4>Chatbot Jarvis</h4>
+        <p>Asistente de ventas en el sitio web. Responde preguntas sobre servicios con links relevantes.</p>
+      </div>
+      <div class="card purple" style="padding:16px">
+        <div class="card-icon">✍️</div>
+        <h4>Sugerir respuesta</h4>
+        <p>Analiza el ticket y propone una respuesta profesional y empática para el agente.</p>
+      </div>
+      <div class="card purple" style="padding:16px">
+        <div class="card-icon">📋</div>
+        <h4>Resumir ticket</h4>
+        <p>Resume conversaciones largas en 2-3 líneas: problema, estado y acción pendiente.</p>
+      </div>
+      <div class="card accent" style="padding:16px">
+        <div class="card-icon">🎨</div>
+        <h4>Generar contenido</h4>
+        <p>Blog posts, emails, social media, landing pages, FAQs y publicidad en segundos.</p>
+      </div>
+      <div class="card accent" style="padding:16px">
+        <div class="card-icon">👤</div>
+        <h4>Insights CRM</h4>
+        <p>Analiza el historial de un contacto y da 3 recomendaciones de ventas concretas.</p>
+      </div>
+      <div class="card accent" style="padding:16px">
+        <div class="card-icon">📊</div>
+        <h4>Resumen ejecutivo</h4>
+        <p>Analiza todas las métricas del negocio y genera un informe con acciones prioritarias.</p>
+      </div>
+    </div>
+    <div class="slide-num">8 / 12</div>
+  </div>
+
+  <!-- SLIDE 9: SEGURIDAD -->
+  <div class="slide bg-dark" id="s9">
+    <div class="tag">🔐 Seguridad</div>
+    <h2>Seguridad de nivel <span class="gradient">empresarial</span></h2>
+    <div class="cards cards-2" style="max-width:860px">
+      <div class="card green" style="padding:16px">
+        <h4>🔑 JWT + bcrypt</h4>
+        <p>Tokens firmados con HS256 (7 días). Contraseñas con bcrypt de 12 rondas — el estándar de la industria.</p>
+      </div>
+      <div class="card green" style="padding:16px">
+        <h4>📱 2FA TOTP</h4>
+        <p>Autenticación de dos factores compatible con Google Authenticator, Authy y Microsoft Authenticator.</p>
+      </div>
+      <div class="card" style="padding:16px">
+        <h4>👥 5 niveles de roles</h4>
+        <p>Owner → Admin → Manager → Agent → Viewer. Cada endpoint verifica el rol en el servidor, no solo en el cliente.</p>
+      </div>
+      <div class="card" style="padding:16px">
+        <h4>🚦 Rate Limiting</h4>
+        <p>Máximo 20 intentos de login/15min. 120 req/min general. 15 req/min en IA. Bloqueo automático.</p>
+      </div>
+      <div class="card" style="padding:16px">
+        <h4>🔍 Audit Log completo</h4>
+        <p>Cada acción sensible registra: usuario, acción, entidad, cambios, IP y timestamp.</p>
+      </div>
+      <div class="card" style="padding:16px">
+        <h4>🛡️ Helmet.js + CORS</h4>
+        <p>Headers HTTP de seguridad: X-Frame-Options, Content-Security-Policy, HSTS, XSS-Protection.</p>
+      </div>
+    </div>
+    <div class="slide-num">9 / 12</div>
+  </div>
+
+  <!-- SLIDE 10: ROLES -->
+  <div class="slide bg-dark" id="s10">
+    <div class="tag">👥 Sistema de roles</div>
+    <h2>Control de acceso <span class="gradient">granular</span></h2>
+    <table class="role-table" style="margin-top:20px">
+      <thead>
+        <tr>
+          <th style="text-align:left">Módulo</th>
+          <th>Owner</th><th>Admin</th><th>Manager</th><th>Agent</th><th>Viewer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Dashboard completo</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td>CRM / Contactos</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td>Pipeline / Deals</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td>Tickets (propios)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Responder tickets</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td>Gestionar proyectos</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td>Automatizaciones</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td>Gestión de usuarios</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td>Auditoría</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td>Branding / SMTP</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+      </tbody>
+    </table>
+    <div class="slide-num">10 / 12</div>
+  </div>
+
+  <!-- SLIDE 11: VALOR COMERCIAL -->
+  <div class="slide bg-blue" id="s11">
+    <div class="tag">💰 Valor comercial</div>
+    <h2>Un producto listo para <span class="gradient">vender hoy</span></h2>
+    <div class="cards cards-3" style="max-width:900px">
+      <div class="card" style="padding:20px;text-align:center">
+        <div style="font-size:2.5rem;font-weight:900;color:#6366f1;margin-bottom:8px">$49<span style="font-size:1rem">/mes</span></div>
+        <h4>Plan Starter</h4>
+        <p>CRM básico, tickets, 5 usuarios, KB pública</p>
+      </div>
+      <div class="card accent" style="padding:20px;text-align:center">
+        <div style="font-size:2.5rem;font-weight:900;color:#00d4ff;margin-bottom:8px">$199<span style="font-size:1rem">/mes</span></div>
+        <h4>Plan Business</h4>
+        <p>Todo + IA, pipeline, reportes, 25 usuarios</p>
+      </div>
+      <div class="card purple" style="padding:20px;text-align:center">
+        <div style="font-size:2.5rem;font-weight:900;color:#9b5bff;margin-bottom:8px">$499<span style="font-size:1rem">/mes</span></div>
+        <h4>Plan Agency</h4>
+        <p>Todo + white-label, API, usuarios ilimitados</p>
+      </div>
+    </div>
+    <p style="text-align:center;margin:20px auto 0;font-size:.9rem;color:rgba(255,255,255,.5)">
+      Comparado con: Salesforce (~$150/user/mes) · HubSpot (~$800/mes) · Zendesk (~$55/user/mes)
+    </p>
+    <div class="stats" style="margin-top:16px">
+      <div class="stat"><div class="num" style="color:#22c55e">10</div><div class="lbl">clientes a $49/mes</div></div>
+      <div class="stat"><div class="num" style="color:#22c55e">= $490/mes</div><div class="lbl">ingreso mensual recurrente</div></div>
+      <div class="stat"><div class="num" style="color:#22c55e">= $5,880/año</div><div class="lbl">solo con el plan básico</div></div>
+    </div>
+    <div class="slide-num">11 / 12</div>
+  </div>
+
+  <!-- SLIDE 12: CONCLUSIÓN -->
+  <div class="slide bg-dark" id="s12">
+    <div class="tag">🎓 Conclusión</div>
+    <h2>Más que un proyecto — <span class="gradient">un producto real</span></h2>
+    <div class="final-grid">
+      <div class="final-card"><div class="big">📚</div><h4 style="margin-bottom:6px">Aprendizaje</h4><p>Node.js, SQLite, JWT, bcrypt, SSE, REST API, HTML/CSS/JS puro</p></div>
+      <div class="final-card"><div class="big">🤖</div><h4 style="margin-bottom:6px">Innovación</h4><p>Integración con Claude AI para automatizar tareas empresariales reales</p></div>
+      <div class="final-card"><div class="big">🔐</div><h4 style="margin-bottom:6px">Seguridad</h4><p>JWT, bcrypt, 2FA, roles, audit log, rate limiting, Helmet.js</p></div>
+      <div class="final-card"><div class="big">🏗️</div><h4 style="margin-bottom:6px">Arquitectura</h4><p>Cliente-servidor, MVC, REST API, multi-tenancy, SSE real-time</p></div>
+      <div class="final-card"><div class="big">💼</div><h4 style="margin-bottom:6px">Aplicación real</h4><p>Sistema vendible a agencias y PYMEs — precios competitivos definidos</p></div>
+      <div class="final-card"><div class="big">🚀</div><h4 style="margin-bottom:6px">Escalabilidad</h4><p>Arquitectura preparada para migrar a PostgreSQL, agregar SSO, deploy en la nube</p></div>
+    </div>
+    <div style="margin-top:28px;text-align:center">
+      <p style="font-size:1rem;color:rgba(255,255,255,.6);font-style:italic">"Nuestro trabajo supera los límites... va más allá de este planeta."</p>
+      <p style="color:#00d4ff;margin-top:8px;font-weight:600">nexussxsistem@gmail.com · 5to B — Desarrollo y Administración de Aplicaciones Informáticas</p>
+    </div>
+    <div class="slide-num">12 / 12</div>
+  </div>
+
+</div><!-- /deck -->
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn">← Anterior</button>
+  <span id="dotNav" style="display:flex;gap:6px;align-items:center"></span>
+  <button class="nav-btn" id="nextBtn">Siguiente →</button>
+</div>
+<div class="key-hint">Usa ← → o haz clic para navegar · F11 para pantalla completa</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let cur = 0;
+
+function go(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('prev');
+  setTimeout(() => slides[cur].classList.remove('prev'), 500);
+  cur = n;
+  slides[cur].classList.add('active');
+  document.getElementById('counter').textContent = `${cur+1} / ${slides.length}`;
+  document.getElementById('progress').style.width = `${((cur+1)/slides.length)*100}%`;
+  renderDots();
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').disabled = cur === slides.length-1;
+}
+
+function renderDots() {
+  document.getElementById('dotNav').innerHTML = Array.from({length:slides.length},(_,i)=>`<span onclick="go(${i})" style="width:${cur===i?'20px':'8px'};height:8px;border-radius:4px;background:${cur===i?'#00d4ff':'rgba(255,255,255,.2)'};cursor:pointer;transition:.3s;display:inline-block"></span>`).join('');
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => go(cur-1));
+document.getElementById('nextBtn').addEventListener('click', () => go(cur+1));
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') go(cur+1);
+  if (e.key === 'ArrowLeft') go(cur-1);
+  if (e.key === 'F11') document.documentElement.requestFullscreen?.();
+});
+
+// Stars
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+function initStars() { stars=Array.from({length:Math.floor(canvas.width*canvas.height/8000)},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.2+0.3,a:Math.random()*0.5+0.1,v:Math.random()*0.15+0.03})); }
+function drawStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ctx.beginPath();ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();s.y+=s.v;if(s.y>canvas.height){s.y=0;s.x=Math.random()*canvas.width;}}); requestAnimationFrame(drawStars); }
+resizeCanvas(); initStars(); drawStars();
+window.addEventListener('resize', ()=>{ resizeCanvas(); initStars(); });
+
+go(0);
+</script>
+</body>
+</html>

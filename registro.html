@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crear cuenta — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .auth-page{min-height:calc(100vh - 130px);display:flex;align-items:center;justify-content:center;padding:40px 0}
+    .auth-shell{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:900px;width:100%}
+    @media(max-width:700px){.auth-shell{grid-template-columns:1fr}}
+    .auth-info{display:block}
+    @media(max-width:700px){.auth-info{display:none}}
+    .auth-card{padding:36px;max-width:420px;width:100%}
+    .auth-check{display:flex;align-items:center;gap:10px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-weight:500;font-size:.88rem;color:var(--muted)}
+    .field input{
+      background:var(--bg-2);border:1px solid var(--line);
+      border-radius:var(--border-radius);padding:12px 14px;
+      color:var(--ink);font-size:1rem;font-family:inherit;
+      transition:border-color .2s;box-sizing:border-box;width:100%
+    }
+    .field input:focus{outline:none;border-color:#00d4ff;box-shadow:0 0 0 3px rgba(0,212,255,.12)}
+    .field input.err{border-color:#ef4444!important}
+    .field .hint{font-size:.78rem;color:var(--muted)}
+    .error-box{
+      background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);
+      border-radius:10px;padding:12px 14px;font-size:.85rem;color:#ef4444;
+      display:none;margin-bottom:4px
+    }
+    .success-box{
+      background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);
+      border-radius:10px;padding:12px 14px;font-size:.85rem;color:#22c55e;
+      display:none;margin-bottom:4px
+    }
+    .btn-reg{width:100%;justify-content:center;font-size:1rem;padding:14px;margin-top:8px;position:relative}
+    .btn-reg .spinner{
+      display:none;width:16px;height:16px;
+      border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+      border-radius:50%;animation:spin .7s linear infinite;margin-right:8px
+    }
+    .btn-reg.loading .spinner{display:inline-block}
+    .btn-reg.loading .btn-text{opacity:.7}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .pw-strength{height:4px;border-radius:2px;background:var(--line);margin-top:6px;overflow:hidden}
+    .pw-strength-bar{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
+    .server-hint{
+      background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);
+      border-radius:8px;padding:10px 14px;font-size:.78rem;color:rgba(245,158,11,.9);
+      display:none;margin-top:8px
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menu</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html">Home</a>
+          <a href="servicios.html">Servicios</a>
+          <a href="contacto.html">Contacto</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="auth-page">
+      <div class="auth-shell">
+
+        <!-- Info lateral -->
+        <div class="auth-info hero-panel reveal">
+          <span class="tag" style="background:rgba(121,38,255,.1);color:#9b5bff;border-color:rgba(121,38,255,.3);box-shadow:0 0 14px rgba(121,38,255,.2)">
+            Crea tu cuenta
+          </span>
+          <h2 class="hero-title" style="margin-top:14px;font-size:2.2rem">
+            Unete a Nexuss X Systems
+          </h2>
+          <p class="sub lead" style="margin-top:12px;line-height:1.65">
+            Crea tu cuenta para acceder a servicios premium, gestionar proyectos y obtener soporte dedicado.
+          </p>
+          <ul style="margin-top:24px;list-style:none;padding:0;color:var(--muted);font-size:.95rem">
+            <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center"><span style="color:#7926ff">✓</span> Crea tu cuenta en segundos</li>
+            <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center"><span style="color:#7926ff">✓</span> Acceso a panel completo</li>
+            <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center"><span style="color:#7926ff">✓</span> Soporte prioritario 24/7</li>
+            <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center"><span style="color:#7926ff">✓</span> Beneficios exclusivos</li>
+          </ul>
+          <div style="margin-top:24px;padding:16px;background:rgba(121,38,255,.06);border:1px solid rgba(121,38,255,.15);border-radius:10px;font-size:.83rem;color:var(--muted)">
+            <strong style="color:#9b5bff">Contrasena minima:</strong> 6 caracteres.<br />
+            Usa el mismo email con que quieres recibir notificaciones.
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="hero-card auth-card">
+          <h3 style="margin:0 0 8px;font-size:1.55rem">Crear cuenta</h3>
+          <p style="margin:0 0 24px;color:var(--muted);font-size:.95rem">
+            Completa el formulario para registrarte
+          </p>
+
+          <div class="error-box"   id="errorBox"></div>
+          <div class="success-box" id="successBox"></div>
+
+          <form id="registerForm" novalidate style="display:flex;flex-direction:column;gap:14px">
+
+            <div class="field">
+              <label for="reg_name">Nombre completo <span style="color:#ef4444">*</span></label>
+              <input type="text" id="reg_name" name="name" placeholder="Juan Perez" required autocomplete="name" />
+            </div>
+
+            <div class="field">
+              <label for="reg_email">Correo electronico <span style="color:#ef4444">*</span></label>
+              <input type="email" id="reg_email" name="email" placeholder="tu@email.com" required autocomplete="email" />
+            </div>
+
+            <div class="field">
+              <label for="reg_phone">Telefono <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+              <input type="tel" id="reg_phone" name="phone" placeholder="+1 (829) 123-4567" autocomplete="tel" />
+            </div>
+
+            <div class="field">
+              <label for="reg_password">Contrasena <span style="color:#ef4444">*</span></label>
+              <input type="password" id="reg_password" name="password"
+                placeholder="Minimo 6 caracteres" minlength="6" required autocomplete="new-password" />
+              <div class="pw-strength"><div class="pw-strength-bar" id="pwBar"></div></div>
+              <span class="hint" id="pwHint">Escribe una contrasena</span>
+            </div>
+
+            <div class="field">
+              <label for="reg_confirm">Confirmar contrasena <span style="color:#ef4444">*</span></label>
+              <input type="password" id="reg_confirm" name="password_confirm"
+                placeholder="Repite la contrasena" minlength="6" required autocomplete="new-password" />
+            </div>
+
+            <div class="auth-check">
+              <input type="checkbox" id="reg_terms" name="terms"
+                style="cursor:pointer;width:16px;height:16px;accent-color:#7926ff;flex-shrink:0" />
+              <label for="reg_terms" style="font-size:.88rem;color:var(--muted);cursor:pointer;margin:0;line-height:1.4">
+                Acepto los <a href="#" style="color:#9b5bff;text-decoration:underline">terminos de servicio</a>
+                y la <a href="#" style="color:#9b5bff;text-decoration:underline">politica de privacidad</a>
+              </label>
+            </div>
+
+            <div class="auth-check">
+              <input type="checkbox" id="reg_newsletter" name="newsletter" checked
+                style="cursor:pointer;width:16px;height:16px;accent-color:#7926ff" />
+              <label for="reg_newsletter" style="font-size:.88rem;color:var(--muted);cursor:pointer;margin:0">
+                Recibir ofertas y actualizaciones por email
+              </label>
+            </div>
+
+            <button type="submit" class="btn primary btn-reg" id="regBtn">
+              <span class="spinner"></span>
+              <span class="btn-text">Crear cuenta</span>
+            </button>
+
+            <div class="server-hint" id="serverHint">
+              El servidor no responde. Asegurate de que este corriendo:
+              <code style="font-size:.75rem">INICIAR_SERVIDOR.bat</code>
+            </div>
+
+          </form>
+
+          <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:.9rem;color:var(--muted)">
+            Ya tienes cuenta?
+            <a href="login.html" style="color:#9b5bff;font-weight:600;text-decoration:none;margin-left:4px">
+              Iniciar sesion
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:24px 0;text-align:center;color:var(--muted);font-size:.85rem;margin-top:40px">
+    <div class="container">
+      <p style="margin:0">&copy; 2026 Nexuss X Systems. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="nexus.js"></script>
+  <script>
+    // URL base — usa NXS si esta disponible, si no fallback
+    const API_BASE = (window.NXS && NXS.API_BASE) || 'http://localhost:3002';
+
+    // Si ya hay sesion activa, ir al home
+    (function checkExisting() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('nxs_auth') || 'null');
+        if (stored && stored.token) {
+          const age = Date.now() - (stored.timestamp || 0);
+          if (age < 7 * 24 * 60 * 60 * 1000) {
+            window.location.href = 'home.html';
+          } else {
+            localStorage.removeItem('nxs_auth');
+          }
+        }
+      } catch(e) {
+        localStorage.removeItem('nxs_auth');
+      }
+    })();
+
+    const form       = document.getElementById('registerForm');
+    const btn        = document.getElementById('regBtn');
+    const errorBox   = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+    const serverHint = document.getElementById('serverHint');
+    const pwBar      = document.getElementById('pwBar');
+    const pwHint     = document.getElementById('pwHint');
+    const passInput  = document.getElementById('reg_password');
+
+    function showError(msg) {
+      errorBox.textContent     = msg;
+      errorBox.style.display   = 'block';
+      successBox.style.display = 'none';
+      serverHint.style.display = 'none';
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    function showSuccess(msg) {
+      successBox.textContent   = msg;
+      successBox.style.display = 'block';
+      errorBox.style.display   = 'none';
+    }
+
+    function clearMessages() {
+      errorBox.style.display   = 'none';
+      successBox.style.display = 'none';
+      serverHint.style.display = 'none';
+    }
+
+    function clearErr(id) {
+      document.getElementById(id) && document.getElementById(id).classList.remove('err');
+    }
+
+    function markErr(id) {
+      const el = document.getElementById(id);
+      if (el) { el.classList.add('err'); el.focus(); }
+    }
+
+    // Indicador de fortaleza de contrasena
+    passInput.addEventListener('input', function() {
+      const v = this.value;
+      let score = 0;
+      if (v.length >= 6)  score++;
+      if (v.length >= 10) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const colors  = ['#ef4444','#f97316','#f59e0b','#22c55e','#00d4ff'];
+      const labels  = ['Muy debil','Debil','Regular','Fuerte','Muy fuerte'];
+      pwBar.style.width      = (score * 20) + '%';
+      pwBar.style.background = colors[score - 1] || '#ef4444';
+      pwHint.textContent     = v.length ? (labels[score - 1] || 'Muy debil') : 'Escribe una contrasena';
+      pwHint.style.color     = v.length ? (colors[score - 1] || '#ef4444') : 'var(--muted)';
+    });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      clearMessages();
+
+      // Recoger valores
+      const name     = document.getElementById('reg_name').value.trim();
+      const email    = document.getElementById('reg_email').value.trim().toLowerCase();
+      const phone    = document.getElementById('reg_phone').value.trim();
+      const password = document.getElementById('reg_password').value;
+      const confirm  = document.getElementById('reg_confirm').value;
+      const terms    = document.getElementById('reg_terms').checked;
+      const newsletter = document.getElementById('reg_newsletter').checked;
+
+      // Limpiar errores previos
+      ['reg_name','reg_email','reg_password','reg_confirm'].forEach(clearErr);
+
+      // Validaciones
+      if (!name || name.length < 2) {
+        showError('Ingresa tu nombre completo (minimo 2 caracteres).');
+        markErr('reg_name'); return;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('Ingresa un correo electronico valido.');
+        markErr('reg_email'); return;
+      }
+      if (!password || password.length < 6) {
+        showError('La contrasena debe tener minimo 6 caracteres.');
+        markErr('reg_password'); return;
+      }
+      if (password !== confirm) {
+        showError('Las contrasenas no coinciden. Verificalas.');
+        markErr('reg_confirm'); return;
+      }
+      if (!terms) {
+        showError('Debes aceptar los terminos de servicio para continuar.');
+        return;
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(API_BASE + '/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, password, newsletter })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.token) {
+          // Registro exitoso
+          showSuccess('Cuenta creada. Bienvenido a Nexuss X Systems!');
+          localStorage.setItem('nxs_auth', JSON.stringify({
+            token:     data.token,
+            user:      data.user,
+            timestamp: Date.now()
+          }));
+          localStorage.setItem('nxs_token', data.token);
+          if (window.NXS) {
+            localStorage.setItem('nxs_user', JSON.stringify(data.user));
+          }
+          setTimeout(() => { window.location.href = 'home.html'; }, 800);
+
+        } else {
+          const msg = (data && (data.error || data.message)) || 'No se pudo crear la cuenta. Intenta de nuevo.';
+          showError(msg);
+          if (msg.toLowerCase().includes('email') || msg.toLowerCase().includes('registrado')) {
+            markErr('reg_email');
+          }
+        }
+
+      } catch (err) {
+        console.warn('[Registro] Error de red:', err.message);
+        showError('No se puede conectar al servidor.');
+        serverHint.style.display = 'block';
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

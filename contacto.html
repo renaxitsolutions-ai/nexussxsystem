@@ -1,0 +1,255 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nexuss X Systems — Contacto</title>
+  <link rel="stylesheet" href="nexus.css" />
+</head>
+<body data-requires-auth="true">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" /> Nexuss X Systems</div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html" data-i18n="nav_home">Home</a>
+          <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+          <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+          <div class="nav-dropdown" id="ddRecursos">
+            <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="blog.html">Blog</a>
+              <a href="casos.html">Casos de exito</a>
+              <a href="calculadora.html">Calculadora</a>
+              <a href="faq.html">FAQ</a>
+              <a href="sobre.html">Sobre nosotros</a>
+            </div>
+          </div>
+          <div class="nav-dropdown" id="ddPanel">
+            <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="timeline.html">Mi proyecto</a>
+              <a href="tickets.html">Soporte</a>
+              <a href="crm.html">CRM</a>
+              <a href="referidos.html">Referidos</a>
+            </div>
+          </div>
+          <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+          <a href="admin.html" data-i18n="nav_admin">Admin</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+          <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ══ HERO ══ -->
+    <section class="hero-split">
+      <div class="hero-panel reveal">
+        <span class="tag" style="background:rgba(0,212,255,0.1);color:#00d4ff;border-color:rgba(0,212,255,0.3);box-shadow:0 0 14px rgba(0,212,255,0.2)">
+          ✉️ Contacto premium
+        </span>
+        <h1 class="hero-title" style="margin-top:14px">Hablemos de tu proyecto</h1>
+        <p class="sub" style="margin-top:10px;line-height:1.65">Cuéntame tu idea y te propongo una solución clara, escalable y con resultados medibles. Respuesta garantizada en menos de 24 horas.</p>
+        <div class="chip-row" style="margin:14px 0">
+          <span class="chip">⚡ Respuesta rápida</span>
+          <span class="chip">🌎 Atención LATAM</span>
+          <span class="chip">🤝 Sin compromiso</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <a class="btn primary" href="#formulario">Enviar mensaje</a>
+          <a class="btn whatsapp" href="https://wa.me/18293689630?text=Hola,%20me%20gustaría%20hablar%20de%20mi%20proyecto" target="_blank" rel="noopener">💬 WhatsApp directo</a>
+        </div>
+      </div>
+      <div class="hero-art reveal">
+        <div class="shape-line"></div>
+        <div class="shape-line alt"></div>
+        <img alt="Atención al cliente" src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=80" />
+      </div>
+    </section>
+
+    <div class="pulse-line"></div>
+
+    <!-- ══ STATS ══ -->
+    <section class="section">
+      <div class="stats-band reveal">
+        <div>
+          <div class="stat">24h</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Tiempo de respuesta</div>
+        </div>
+        <div>
+          <div class="stat"><span data-counter="30" data-prefix="+">+30</span></div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Proyectos entregados</div>
+        </div>
+        <div>
+          <div class="stat"><span data-counter="100" data-suffix="%">100%</span></div>
+          <div style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-top:4px">Satisfacción de clientes</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ FORMULARIO + INFO ══ -->
+    <section class="section" id="formulario">
+      <div class="section-head">
+        <h2 class="reveal">Envíanos un <span class="gradient-label">mensaje</span></h2>
+        <p class="muted">Completa el formulario y nos comunicamos en menos de 24 horas con una propuesta personalizada.</p>
+      </div>
+      <div class="grid" style="margin-top:20px">
+
+        <div class="card reveal" style="padding:28px">
+          <h3 style="margin:0 0 4px" data-i18n="contact_form_title">Formulario de contacto</h3>
+          <p class="muted" style="font-size:.85rem;margin-bottom:18px">Todos los campos marcados son requeridos para darte la mejor atención.</p>
+          <form id="contactForm" novalidate>
+            <div class="form-row">
+              <div class="field">
+                <label for="name">Nombre <span style="color:#ff6b91">*</span></label>
+                <input type="text" id="name" name="name" data-i18n-placeholder="ph_name" placeholder="Tu nombre" required />
+                <span class="field-status" aria-hidden="true"></span>
+                <small class="error" id="errName">Necesitamos tu nombre.</small>
+              </div>
+              <div class="field">
+                <label for="email">Correo electrónico <span style="color:#ff6b91">*</span></label>
+                <input type="email" id="email" name="email" data-i18n-placeholder="ph_email" placeholder="tu@correo.com" required />
+                <span class="field-status" aria-hidden="true"></span>
+                <small class="error" id="errEmail">Agrega un correo válido.</small>
+              </div>
+            </div>
+            <div class="field">
+              <label for="company">Empresa <span class="muted" style="font-size:.8rem;font-weight:400">(opcional)</span></label>
+              <input type="text" id="company" name="company" data-i18n-placeholder="ph_company" placeholder="Nombre de tu empresa" />
+              <span class="field-status" aria-hidden="true"></span>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="service">Servicio de interés</label>
+                <select id="service" name="service">
+                  <option data-i18n="opt_service_0">Servicio de interés</option>
+                  <option data-i18n="opt_service_1">Landing page</option>
+                  <option data-i18n="opt_service_2">Página de ventas</option>
+                  <option data-i18n="opt_service_3">Panel de gestión</option>
+                  <option data-i18n="opt_service_4">Aplicación web</option>
+                  <option data-i18n="opt_service_5">Chatbot con IA</option>
+                  <option data-i18n="opt_service_6">Automatización / Integraciones</option>
+                  <option>Marketing digital</option>
+                  <option>E-commerce</option>
+                  <option>Diseño &amp; branding</option>
+                  <option>Consultoría tecnológica</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="budget">Presupuesto estimado</label>
+                <select id="budget" name="budget">
+                  <option data-i18n="opt_budget_0">Presupuesto estimado</option>
+                  <option data-i18n="opt_budget_1">DOP 2,000 – 5,000</option>
+                  <option data-i18n="opt_budget_2">DOP 5,000 – 10,000</option>
+                  <option data-i18n="opt_budget_3">DOP 10,000 – 20,000</option>
+                  <option data-i18n="opt_budget_4">DOP 20,000+</option>
+                  <option>USD 500 – 1,000</option>
+                  <option>USD 1,000 – 3,000</option>
+                  <option>USD 3,000+</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="message">Mensaje <span style="color:#ff6b91">*</span></label>
+              <textarea id="message" name="message" rows="5" data-i18n-placeholder="ph_message" placeholder="Cuéntame sobre tu proyecto, idea o necesidad..." required></textarea>
+              <span class="field-status" aria-hidden="true"></span>
+              <small class="error" id="errMsg">Cuéntanos un poco más sobre tu proyecto.</small>
+            </div>
+            <button type="submit" class="btn primary" data-i18n="contact_send" style="width:100%;justify-content:center;padding:14px">Enviar mensaje →</button>
+          </form>
+        </div>
+
+        <!-- INFO LATERAL -->
+        <div style="display:grid;gap:16px;align-content:start">
+
+          <!-- Status online -->
+          <div class="card reveal" style="padding:18px;border:1px solid rgba(101,240,177,0.3)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="width:10px;height:10px;border-radius:50%;background:#65f0b1;box-shadow:0 0 8px #65f0b1;display:inline-block"></span>
+              <span style="font-weight:600;color:#65f0b1">En línea y disponibles</span>
+            </div>
+            <p class="muted" style="font-size:.82rem;margin:6px 0 0">Tiempo de respuesta actual: <strong style="color:#fff">menos de 2 horas</strong></p>
+          </div>
+
+          <div class="card reveal" style="padding:24px">
+            <h3 style="margin:0 0 14px" data-i18n="contact_info_title">Información de contacto</h3>
+            <p class="muted" style="font-size:.88rem;margin-bottom:16px">Atendemos de forma remota clientes en toda América Latina y el Caribe.</p>
+            <ul class="list" style="gap:12px">
+              <li style="font-size:.9rem">🕐 Horario: Lunes a Viernes, 9:00 – 18:00</li>
+              <li style="font-size:.9rem">📧 Soporte: soporte@nexusx.system</li>
+              <li style="font-size:.9rem">💼 Ventas: ventas@nexusx.system</li>
+              <li style="font-size:.9rem">🌎 Cobertura: LATAM &amp; Caribe</li>
+              <li style="font-size:.9rem">📞 WhatsApp: +1 (829) 368-9630</li>
+            </ul>
+          </div>
+
+          <div class="card reveal" style="padding:24px">
+            <h3 style="margin:0 0 10px">Canales directos</h3>
+            <div style="display:grid;gap:8px">
+              <a class="btn whatsapp" href="https://wa.me/18293689630" target="_blank" rel="noopener" style="justify-content:center">💬 WhatsApp Business</a>
+              <a class="btn" href="mailto:ventas@nexusx.system" style="justify-content:center">📧 Correo de ventas</a>
+              <a class="btn" href="https://calendly.com/nexussxsystems" target="_blank" rel="noopener" style="justify-content:center;background:rgba(121,38,255,0.15);border-color:rgba(121,38,255,0.4);color:#9b5bff">📅 Agendar llamada</a>
+            </div>
+          </div>
+
+          <!-- Redes sociales -->
+          <div class="card reveal" style="padding:24px">
+            <h3 style="margin:0 0 14px">Síguenos en redes</h3>
+            <div style="display:grid;gap:8px">
+              <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-decoration:none;color:inherit">
+                <span style="font-size:1.3rem">📸</span>
+                <div><div style="font-size:.88rem;font-weight:600">Instagram</div><div class="muted" style="font-size:.75rem">@nexussxsystems</div></div>
+              </a>
+              <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-decoration:none;color:inherit">
+                <span style="font-size:1.3rem">🎵</span>
+                <div><div style="font-size:.88rem;font-weight:600">TikTok</div><div class="muted" style="font-size:.75rem">@nexussxsystems</div></div>
+              </a>
+              <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-decoration:none;color:inherit">
+                <span style="font-size:1.3rem">💼</span>
+                <div><div style="font-size:.88rem;font-weight:600">LinkedIn</div><div class="muted" style="font-size:.75rem">Nexuss X Systems</div></div>
+              </a>
+            </div>
+          </div>
+
+          <div class="why-card reveal" style="padding:20px">
+            <span class="why-icon">⚡</span>
+            <h4>Respuesta garantizada</h4>
+            <p>Respondemos toda consulta en menos de 24 horas hábiles con una propuesta clara y sin compromisos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PROCESO POST-CONTACTO ══ -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="reveal">¿Qué pasa después de <span class="gradient-label">contactarnos</span>?</h2>
+        <p class="muted">Un proceso simple, rápido y sin complicaciones para empezar tu proyecto.</p>
+      </div>
+      <div class="process-grid" style="margin-top:18px">
+        <div class="process-card reveal"><div class="icon">01</div><b>Recibimos tu mensaje</b><div class="muted" style="font-size:.88rem;margin-top:4px">En menos de 24h te respondemos con preguntas clave sobre tu proyecto.</div></div>
+        <div class="process-card reveal"><div class="icon">02</div><b>Llamada de descubrimiento</b><div class="muted" style="font-size:.88rem;margin-top:4px">30 minutos para entender tus metas, urgencias y presupuesto disponible.</div></div>
+        <div class="process-card reveal"><div class="icon">03</div><b>Propuesta personalizada</b><div class="muted" style="font-size:.88rem;margin-top:4px">Enviamos una propuesta detallada con alcance, tiempos y precio fijo.</div></div>
+        <div class="process-card reveal"><div class="icon">04</div><b>¡Empezamos!</b><div class="muted" style="font-size:.88rem;margin-top:4px">Aprobada la propuesta, iniciamos en 48 horas con el diseño y planificación.</div></div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Systems</span></div>
+      <div class="muted" style="font-size:.82rem">Soluciones digitales de alto impacto · LATAM</div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Systems — Todos los derechos reservados</div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="nexus.js"></script>
+  <script></script>
+</body>
+</html>

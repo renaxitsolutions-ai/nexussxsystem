@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Configuración — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .settings-layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+    @media(max-width:700px){.settings-layout{grid-template-columns:1fr}}
+    .settings-nav{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;position:sticky;top:20px}
+    .settings-nav a{display:flex;align-items:center;gap:10px;padding:14px 18px;color:rgba(255,255,255,0.7);text-decoration:none;border-left:3px solid transparent;transition:.2s;font-size:.9rem}
+    .settings-nav a:hover{background:rgba(255,255,255,0.05);color:#fff}
+    .settings-nav a.active{background:rgba(0,212,255,0.08);color:#00d4ff;border-left-color:#00d4ff}
+    .settings-panel{display:none}.settings-panel.active{display:block}
+    .panel-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:28px;margin-bottom:20px}
+    .panel-card h4{margin-bottom:6px;font-size:1rem}.panel-card p.muted{margin-bottom:20px;font-size:.85rem}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;margin-bottom:6px;font-size:.85rem;color:var(--muted)}
+    .form-group input,.form-group select{width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;font-size:.9rem;box-sizing:border-box}
+    .form-group input:focus{outline:none;border-color:#00d4ff}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .key-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-bottom:10px}
+    .key-prefix{font-family:monospace;color:#00d4ff;font-size:.85rem}
+    .key-meta{color:var(--muted);font-size:.78rem}
+    .new-key-box{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.3);border-radius:10px;padding:16px;margin-bottom:16px}
+    .new-key-box code{font-family:monospace;font-size:.85rem;word-break:break-all;color:#00d4ff}
+    .qr-wrap{text-align:center;padding:20px 0}
+    .qr-wrap img{border-radius:8px;border:4px solid rgba(255,255,255,0.1)}
+    .totp-input{text-align:center;letter-spacing:8px;font-size:1.4rem;font-family:monospace;padding:14px !important}
+    .badge-role{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
+    .badge-owner,.badge-admin{background:rgba(121,38,255,0.2);color:#9b5bff}
+    .badge-manager{background:rgba(0,212,255,0.15);color:#00d4ff}
+    .badge-agent{background:rgba(245,158,11,0.15);color:#f59e0b}
+    .badge-viewer{background:rgba(255,255,255,0.1);color:#aaa}
+    .danger-zone{border-color:rgba(255,71,87,0.3)!important}
+    .danger-zone h4{color:#ff4757}
+    .avatar-preview{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.15);margin-bottom:12px}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a><a href="tickets.html">Soporte</a>
+          <a href="referidos.html">Referidos</a><a href="notifications.html">Notificaciones</a>
+          <a href="settings.html" style="color:#00d4ff">Configuración</a>
+        </div>
+      </div>
+      <a href="contacto.html">Contacto</a>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div style="margin-bottom:24px">
+    <span class="tag">⚙️ Settings</span>
+    <h2 class="reveal">Configuración de <span class="gradient-label">Cuenta</span></h2>
+  </div>
+
+  <div class="settings-layout">
+    <nav class="settings-nav">
+      <a href="#" class="active" data-panel="profile">👤 Perfil</a>
+      <a href="#" data-panel="security">🔒 Seguridad</a>
+      <a href="#" data-panel="2fa">📱 2FA</a>
+      <a href="#" data-panel="apikeys">🔑 API Keys</a>
+      <a href="#" data-panel="notifications-set">🔔 Notificaciones</a>
+    </nav>
+
+    <div>
+      <!-- PROFILE -->
+      <div class="settings-panel active" id="panel-profile">
+        <div class="panel-card">
+          <h4>Información de perfil</h4>
+          <p class="muted">Tu nombre y datos de contacto visibles en el sistema.</p>
+          <div style="text-align:center;margin-bottom:20px">
+            <img id="avatarPreview" class="avatar-preview" src="https://ui-avatars.com/api/?name=U&background=0d0d1a&color=00d4ff&size=72" alt="avatar" />
+            <div style="color:var(--muted);font-size:.8rem">Tu rol: <span class="badge-role" id="roleBadge">—</span></div>
+          </div>
+          <form id="profileForm">
+            <div class="form-row">
+              <div class="form-group"><label>Nombre completo</label><input type="text" id="pName" placeholder="Tu nombre" /></div>
+              <div class="form-group"><label>Teléfono</label><input type="tel" id="pPhone" placeholder="+1 809 000 0000" /></div>
+            </div>
+            <div class="form-group"><label>Avatar URL (imagen)</label><input type="url" id="pAvatar" placeholder="https://..." /></div>
+            <div class="form-group"><label>Email</label><input type="email" id="pEmail" disabled style="opacity:.5" /></div>
+            <button type="submit" class="btn primary">Guardar cambios</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="settings-panel" id="panel-security">
+        <div class="panel-card">
+          <h4>Cambiar contraseña</h4>
+          <p class="muted">Usa una contraseña de al menos 8 caracteres.</p>
+          <form id="passForm">
+            <div class="form-group"><label>Contraseña actual</label><input type="password" id="sCurrent" placeholder="••••••••" /></div>
+            <div class="form-group"><label>Nueva contraseña</label><input type="password" id="sNew" placeholder="••••••••" /></div>
+            <div class="form-group"><label>Confirmar nueva contraseña</label><input type="password" id="sConfirm" placeholder="••••••••" /></div>
+            <button type="submit" class="btn primary">Cambiar contraseña</button>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h4>Sesiones activas</h4>
+          <p class="muted">Tu sesión actual y dispositivos conectados.</p>
+          <div id="sessionInfo" style="color:var(--muted);font-size:.85rem">Cargando...</div>
+        </div>
+      </div>
+
+      <!-- 2FA -->
+      <div class="settings-panel" id="panel-2fa">
+        <div class="panel-card" id="twofa-disabled">
+          <h4>Autenticación de dos factores (2FA)</h4>
+          <p class="muted">Protege tu cuenta con Google Authenticator, Authy o cualquier app TOTP.</p>
+          <div id="twofa-status" style="margin-bottom:16px"></div>
+          <div id="twofa-setup-area">
+            <button class="btn primary" id="setup2faBtn">Configurar 2FA</button>
+          </div>
+          <div id="twofa-qr-area" style="display:none">
+            <div class="qr-wrap"><img id="qrImg" src="" alt="QR Code" width="200" /></div>
+            <p class="muted" style="text-align:center;margin-bottom:8px">Escanea con tu app y luego ingresa el código:</p>
+            <div class="form-group"><input type="text" id="totpCode" class="totp-input" placeholder="000000" maxlength="6" /></div>
+            <div style="display:flex;gap:10px">
+              <button class="btn primary" id="enable2faBtn">Activar 2FA</button>
+              <button class="btn ghost" id="cancel2faBtn">Cancelar</button>
+            </div>
+          </div>
+          <div id="twofa-disable-area" style="display:none">
+            <p class="muted" style="margin-bottom:12px">Ingresa un código de tu app para desactivar el 2FA:</p>
+            <div class="form-group"><input type="text" id="disableTotpCode" class="totp-input" placeholder="000000" maxlength="6" /></div>
+            <button class="btn" id="disable2faBtn" style="background:rgba(255,71,87,0.2);border-color:rgba(255,71,87,0.4);color:#ff4757">Desactivar 2FA</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- API KEYS -->
+      <div class="settings-panel" id="panel-apikeys">
+        <div class="panel-card">
+          <h4>API Keys</h4>
+          <p class="muted">Genera claves para acceder a la API sin usuario/contraseña. Solo se muestran una vez al crearse.</p>
+          <div id="newKeyBox" style="display:none" class="new-key-box">
+            <p style="margin-bottom:8px;font-size:.85rem;color:#f59e0b">⚠️ Copia esta clave ahora — no se volverá a mostrar:</p>
+            <code id="newKeyValue"></code>
+            <button class="btn" id="copyKeyBtn" style="margin-top:10px;display:block">📋 Copiar clave</button>
+          </div>
+          <div id="keysList"><div class="muted">Cargando...</div></div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:end">
+            <div class="form-group" style="flex:1;margin:0"><label>Nombre de la clave</label><input type="text" id="keyName" placeholder="Ej: Integración Zapier" /></div>
+            <button class="btn primary" id="createKeyBtn">Crear clave</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS PREFS -->
+      <div class="settings-panel" id="panel-notifications-set">
+        <div class="panel-card">
+          <h4>Preferencias de notificaciones</h4>
+          <p class="muted">Controla qué notificaciones recibes dentro del sistema.</p>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+              <input type="checkbox" id="notif_tickets" checked style="width:18px;height:18px;accent-color:#00d4ff" />
+              <div><div style="font-size:.9rem">Actualizaciones de tickets</div><div class="muted" style="font-size:.78rem">Cuando cambien el estado de tus tickets</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+              <input type="checkbox" id="notif_projects" checked style="width:18px;height:18px;accent-color:#00d4ff" />
+              <div><div style="font-size:.9rem">Actualizaciones de proyectos</div><div class="muted" style="font-size:.78rem">Progreso y etapas de tus proyectos</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+              <input type="checkbox" id="notif_marketing" style="width:18px;height:18px;accent-color:#00d4ff" />
+              <div><div style="font-size:.9rem">Promociones y novedades</div><div class="muted" style="font-size:.78rem">Ofertas y nuevas funcionalidades</div></div>
+            </label>
+          </div>
+          <button class="btn primary" style="margin-top:20px">Guardar preferencias</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+// Tab navigation
+document.querySelectorAll('.settings-nav a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.settings-nav a').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+    link.classList.add('active');
+    document.getElementById(`panel-${link.dataset.panel}`).classList.add('active');
+  });
+});
+
+// Load user profile
+async function loadProfile() {
+  try {
+    const { user } = await NXS.apiGet('/api/me');
+    document.getElementById('pName').value   = user.name || '';
+    document.getElementById('pPhone').value  = user.phone || '';
+    document.getElementById('pEmail').value  = user.email || '';
+    document.getElementById('pAvatar').value = user.avatar_url || '';
+    if (user.avatar_url) document.getElementById('avatarPreview').src = user.avatar_url;
+    else document.getElementById('avatarPreview').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name||'U')}&background=0d0d1a&color=00d4ff&size=72`;
+    const roles = { owner:'owner', admin:'admin', manager:'manager', agent:'agent', viewer:'viewer' };
+    const rb = document.getElementById('roleBadge');
+    rb.textContent = user.role; rb.className = `badge-role badge-${user.role}`;
+    document.getElementById('sessionInfo').innerHTML = `<p>📍 Sesión activa · Último acceso: ${user.last_login_at ? new Date(user.last_login_at).toLocaleString('es') : 'Primera vez'}</p><p>🔐 Logins totales: ${user.login_count || 1}</p><p>✅ Email ${user.verified ? 'verificado' : 'sin verificar'}</p>`;
+    // 2FA status
+    if (user.totp_enabled) {
+      document.getElementById('twofa-status').innerHTML = '<span style="color:#22c55e">✅ 2FA activado — tu cuenta está protegida</span>';
+      document.getElementById('twofa-setup-area').style.display = 'none';
+      document.getElementById('twofa-disable-area').style.display = '';
+    } else {
+      document.getElementById('twofa-status').innerHTML = '<span style="color:#f59e0b">⚠️ 2FA desactivado — actívalo para mayor seguridad</span>';
+    }
+  } catch(e) { console.error(e); }
+}
+
+// Avatar preview on input
+document.getElementById('pAvatar').addEventListener('input', e => {
+  if (e.target.value) document.getElementById('avatarPreview').src = e.target.value;
+});
+
+// Profile form
+document.getElementById('profileForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = { name: document.getElementById('pName').value.trim(), phone: document.getElementById('pPhone').value.trim(), avatar_url: document.getElementById('pAvatar').value.trim() };
+  try { await NXS.apiPatch('/api/me', data); showToast('✅ Perfil actualizado'); loadProfile(); }
+  catch { showToast('Error guardando perfil'); }
+});
+
+// Password form
+document.getElementById('passForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const current = document.getElementById('sCurrent').value;
+  const n = document.getElementById('sNew').value;
+  const c = document.getElementById('sConfirm').value;
+  if (n !== c) return showToast('Las contraseñas no coinciden');
+  if (n.length < 6) return showToast('Mínimo 6 caracteres');
+  try { await NXS.apiPost('/api/me/change-password', { current, newPassword: n }); showToast('✅ Contraseña cambiada'); document.getElementById('passForm').reset(); }
+  catch(err) { showToast('Contraseña actual incorrecta'); }
+});
+
+// 2FA Setup
+document.getElementById('setup2faBtn').addEventListener('click', async () => {
+  try {
+    const { qr, secret } = await NXS.apiPost('/api/me/2fa/setup', {});
+    document.getElementById('qrImg').src = qr;
+    document.getElementById('twofa-setup-area').style.display = 'none';
+    document.getElementById('twofa-qr-area').style.display = '';
+    showToast('Escanea el QR con tu app de autenticación');
+  } catch { showToast('Error al configurar 2FA. El servidor puede no tener otplib instalado.'); }
+});
+document.getElementById('cancel2faBtn').addEventListener('click', () => {
+  document.getElementById('twofa-setup-area').style.display = '';
+  document.getElementById('twofa-qr-area').style.display = 'none';
+});
+document.getElementById('enable2faBtn').addEventListener('click', async () => {
+  const code = document.getElementById('totpCode').value.trim();
+  if (code.length !== 6) return showToast('Ingresa el código de 6 dígitos');
+  try { await NXS.apiPost('/api/me/2fa/enable', { code }); showToast('✅ 2FA activado exitosamente'); loadProfile(); document.getElementById('twofa-qr-area').style.display = 'none'; }
+  catch { showToast('Código inválido. Intenta de nuevo.'); }
+});
+document.getElementById('disable2faBtn').addEventListener('click', async () => {
+  const code = document.getElementById('disableTotpCode').value.trim();
+  if (!confirm('¿Desactivar el 2FA? Tu cuenta será menos segura.')) return;
+  try { await NXS.apiPost('/api/me/2fa/disable', { code }); showToast('2FA desactivado'); loadProfile(); }
+  catch { showToast('Código inválido'); }
+});
+
+// API Keys
+async function loadKeys() {
+  try {
+    const { items } = await NXS.apiGet('/api/api-keys');
+    const list = document.getElementById('keysList');
+    if (!items.length) { list.innerHTML = '<p class="muted" style="font-size:.85rem">No tienes API keys todavía.</p>'; return; }
+    list.innerHTML = items.map(k => `
+      <div class="key-row">
+        <div><span class="key-prefix">${k.key_prefix}••••••••</span><div class="key-meta">${k.name} · Creada: ${new Date(k.created_at).toLocaleDateString('es')}</div></div>
+        <button class="btn ghost" onclick="deleteKey(${k.id})" style="padding:6px 12px;font-size:.78rem;color:#ff4757;border-color:rgba(255,71,87,0.3)">Eliminar</button>
+      </div>`).join('');
+  } catch {}
+}
+
+async function deleteKey(id) {
+  if (!confirm('¿Eliminar esta API key?')) return;
+  await NXS.apiDelete(`/api/api-keys/${id}`);
+  showToast('Key eliminada'); loadKeys();
+}
+
+document.getElementById('createKeyBtn').addEventListener('click', async () => {
+  const name = document.getElementById('keyName').value.trim();
+  if (!name) return showToast('Ingresa un nombre para la clave');
+  try {
+    const { key } = await NXS.apiPost('/api/api-keys', { name, permissions: ['read','write'] });
+    document.getElementById('newKeyValue').textContent = key;
+    document.getElementById('newKeyBox').style.display = '';
+    document.getElementById('keyName').value = '';
+    loadKeys();
+    showToast('✅ API Key creada. ¡Cópiala ahora!');
+  } catch { showToast('Error creando API key'); }
+});
+document.getElementById('copyKeyBtn').addEventListener('click', async () => {
+  const key = document.getElementById('newKeyValue').textContent;
+  try { await navigator.clipboard.writeText(key); showToast('✅ Copiado'); } catch {}
+});
+
+if (!NXS.getToken()) window.location.href = 'login.html';
+else { loadProfile(); loadKeys(); }
+</script>
+</body>
+</html>

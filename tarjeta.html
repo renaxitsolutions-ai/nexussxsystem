@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tarjeta de Presentación — Nexuss X Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Variables ─────────────────────────────────────────────────────────── */
+    :root {
+      --cyan:   #00d4ff;
+      --purple: #7926ff;
+      --dark:   #08080f;
+      --dark2:  #0f0f1a;
+      --border: rgba(255,255,255,.1);
+      --muted:  rgba(255,255,255,.5);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0d0d18;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* ── Página de impresión ──────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; }
+      .print-area { padding: 0 !important; }
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    .site-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,8,15,.9);
+      backdrop-filter: blur(10px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .95rem; }
+    .brand img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+    .header-actions { display: flex; gap: 10px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #fff; border: none; border-radius: 8px;
+      padding: 9px 18px; font-size: .85rem; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: opacity .2s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn.ghost {
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Contenedor principal ─────────────────────────────────────────────── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .page-title h1 { font-size: clamp(1.4rem, 3vw, 2.2rem); font-weight: 800; margin-bottom: 8px; }
+    .page-title p  { color: var(--muted); font-size: .9rem; }
+    .gradient-text {
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Grid de diseños ─────────────────────────────────────────────────── */
+    .designs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    .design-block { }
+    .design-label {
+      font-size: .75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--muted);
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .design-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       TARJETA DE PRESENTACIÓN (3.5 × 2 pulgadas — escala web)
+       ════════════════════════════════════════════════════════════════════ */
+    .biz-card {
+      width: 340px;
+      height: 192px;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08);
+    }
+
+    /* Versión DELANTERA — oscura con gradiente */
+    .biz-card.front {
+      background: linear-gradient(135deg, #0a0a1a 0%, #12103a 50%, #0e0e20 100%);
+    }
+    .biz-card.front::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 80% 30%, rgba(121,38,255,.25) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 20% 70%, rgba(0,212,255,.15) 0%, transparent 55%);
+    }
+    .biz-card.front .lines {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .card-front-content {
+      position: relative; z-index: 2;
+      padding: 22px 22px 18px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .card-logo-area { display: flex; align-items: center; gap: 10px; }
+    .card-logo {
+      width: 38px; height: 38px;
+      border-radius: 9px;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.1);
+    }
+    .card-logo-placeholder {
+      width: 38px; height: 38px; border-radius: 9px;
+      background: linear-gradient(135deg,var(--purple),var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 900; color: #fff;
+      box-shadow: 0 4px 12px rgba(121,38,255,.4);
+      flex-shrink: 0;
+    }
+    .card-company { font-size: .85rem; font-weight: 800; line-height: 1.2; }
+    .card-tagline { font-size: .58rem; color: var(--muted); margin-top: 2px; }
+    .card-badge {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: .58rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: .05em;
+    }
+    .card-name  { font-size: 1rem; font-weight: 800; margin-bottom: 3px; }
+    .card-role  { font-size: .7rem; color: var(--cyan); font-weight: 600; margin-bottom: 10px; }
+    .card-contacts { display: flex; flex-wrap: wrap; gap: 10px; }
+    .card-contacts a, .card-contacts span {
+      font-size: .6rem; color: var(--muted); text-decoration: none;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .card-contacts a:hover { color: var(--cyan); }
+    .card-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,.35), transparent);
+      margin: 6px 0;
+    }
+
+    /* Versión TRASERA — clara y elegante */
+    .biz-card.back {
+      background: linear-gradient(135deg, #fff 0%, #f0f4ff 100%);
+      color: #111;
+    }
+    .biz-card.back::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 90% 10%, rgba(121,38,255,.08) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 10% 90%, rgba(0,212,255,.08) 0%, transparent 55%);
+    }
+    .card-back-content {
+      position: relative; z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+    .back-logo-circle {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg,var(--purple),var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      box-shadow: 0 6px 20px rgba(121,38,255,.35);
+    }
+    .back-company { font-size: .95rem; font-weight: 800; color: #111; margin-bottom: 3px; }
+    .back-slogan  { font-size: .62rem; color: rgba(0,0,0,.5); margin-bottom: 10px; font-style: italic; }
+    .back-line    { width: 60px; height: 2px; border-radius: 2px;
+                   background: linear-gradient(90deg,var(--purple),var(--cyan)); margin: 0 auto 10px; }
+    .back-contact { font-size: .6rem; color: rgba(0,0,0,.55); line-height: 1.8; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       BROCHE / PIN de solapa
+       ════════════════════════════════════════════════════════════════════ */
+    .pin-showcase {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 32px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    /* PIN circular */
+    .pin {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pin-label { font-size: .72rem; color: var(--muted); text-align: center; }
+    .pin-body {
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
+    }
+    /* Tamaño grande */
+    .pin-lg .pin-body { width: 90px; height: 90px; }
+    /* Tamaño mediano */
+    .pin-md .pin-body { width: 64px; height: 64px; }
+    /* Tamaño pequeño */
+    .pin-sm .pin-body { width: 44px; height: 44px; }
+
+    /* Estilo oscuro */
+    .pin-dark .pin-body {
+      background: linear-gradient(145deg, #1a1a2e, #12103a);
+      border: 2px solid rgba(0,212,255,.4);
+    }
+    .pin-dark .pin-body::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 35% 30%, rgba(0,212,255,.2) 0%, transparent 65%);
+    }
+    /* Estilo gradiente */
+    .pin-gradient .pin-body {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      border: 2px solid rgba(255,255,255,.2);
+    }
+    /* Estilo blanco */
+    .pin-white .pin-body {
+      background: #fff;
+      border: 2px solid rgba(0,0,0,.1);
+    }
+    .pin-body .pin-content {
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 6px;
+    }
+    .pin-logo-text {
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.01em;
+    }
+    .pin-logo-sub { font-weight: 600; letter-spacing: .08em; opacity: .8; }
+
+    /* Pin rectangular tipo ID badge */
+    .badge-pin {
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: linear-gradient(135deg, #0a0a1a, #12103a);
+      border: 1px solid rgba(0,212,255,.35);
+      box-shadow: 0 8px 24px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.05);
+      min-width: 220px;
+    }
+    .badge-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(121,38,255,.4);
+    }
+    .badge-info { flex: 1; min-width: 0; }
+    .badge-name    { font-size: .95rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge-company { font-size: .65rem; color: var(--cyan); font-weight: 600; letter-spacing: .05em; margin-bottom: 2px; }
+    .badge-role    { font-size: .6rem; color: var(--muted); }
+    .badge-pin::after {
+      content: '';
+      position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+      width: 28px; height: 4px;
+      background: rgba(255,255,255,.08);
+      border-radius: 2px;
+    }
+
+    /* Clip metálico del pin */
+    .pin-clip {
+      position: absolute;
+      bottom: -8px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #c8c8d0, #888);
+      border: 2px solid #aaa;
+      box-shadow: 0 2px 6px rgba(0,0,0,.4);
+      z-index: 3;
+    }
+
+    /* ── Sección info ─────────────────────────────────────────────────────── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .info-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .info-icon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .info-txt .label { font-size: .72rem; color: var(--muted); margin-bottom: 3px; }
+    .info-txt .val   { font-size: .9rem; font-weight: 700; }
+
+    /* Nombre del alumno (a personalizar) */
+    .student-name { color: var(--cyan); }
+
+    /* ── School cards ─────────────────────────────────────────────────────── */
+    .school-card {
+      width: 340px;
+      height: 192px;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .school-card.school-front {
+      background: linear-gradient(135deg, #00205c 0%, #003280 50%, #001a4d 100%);
+    }
+    .school-card.school-front::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 90% 20%, rgba(255,200,0,.15) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 10% 80%, rgba(255,255,255,.08) 0%, transparent 50%);
+    }
+    .school-content {
+      position: relative; z-index: 2;
+      padding: 20px 22px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .school-header { display: flex; align-items: center; gap: 12px; }
+    .school-emblem {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.95);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(0,0,0,.3);
+    }
+    .school-title { font-size: .85rem; font-weight: 800; line-height: 1.3; }
+    .school-subtitle { font-size: .6rem; color: rgba(255,255,255,.65); margin-top: 2px; }
+    .school-divider { height: 1px; background: rgba(255,255,255,.18); }
+    .school-info-row { display: flex; justify-content: space-between; align-items: flex-end; }
+    .student-info-block { }
+    .student-label { font-size: .58rem; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+    .student-value { font-weight: 700; font-size: .85rem; }
+    .student-sub   { font-size: .65rem; color: rgba(255,255,255,.65); }
+    .school-year-badge {
+      background: rgba(255,200,0,.2);
+      border: 1px solid rgba(255,200,0,.4);
+      color: #ffc800;
+      font-size: .62rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: .05em;
+    }
+
+    /* ── Tips de impresión ────────────────────────────────────────────────── */
+    .print-tips {
+      background: rgba(0,212,255,.06);
+      border: 1px solid rgba(0,212,255,.2);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-top: 32px;
+    }
+    .print-tips h4 { color: var(--cyan); margin-bottom: 10px; font-size: .9rem; }
+    .print-tips ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .print-tips li { font-size: .82rem; color: var(--muted); display: flex; align-items: flex-start; gap: 8px; }
+    .print-tips li::before { content: '→'; color: var(--cyan); flex-shrink: 0; }
+
+    /* Animaciones */
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+    .pin-body { animation: float 4s ease-in-out infinite; }
+    .biz-card.front { animation: float 5s ease-in-out infinite; }
+    @media (prefers-reduced-motion:reduce) { .pin-body, .biz-card.front { animation: none; } }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header no-print">
+  <div class="brand">
+    <img src="logo.jpeg" alt="logo" onerror="this.style.display='none'">
+    Nexuss X Systems
+  </div>
+  <div class="header-actions">
+    <a href="trabajos.html" class="btn ghost">← Trabajos anteriores</a>
+    <button class="btn" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <a href="home.html" class="btn ghost">🏠 Home</a>
+  </div>
+</header>
+
+<div class="main print-area">
+
+  <div class="page-title no-print">
+    <h1>Tarjeta de Presentación &amp; <span class="gradient-text">Broches</span></h1>
+    <p>Diseños para la expo final del Politécnico · Lista para imprimir o exportar como PDF</p>
+  </div>
+
+  <!-- ── Info de la tarjeta ──────────────────────────────────────────────── -->
+  <div class="info-grid no-print">
+    <div class="info-card">
+      <div class="info-icon">🏫</div>
+      <div class="info-txt">
+        <div class="label">Institución educativa</div>
+        <div class="val">Politécnico Jesús María</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">📚</div>
+      <div class="info-txt">
+        <div class="label">Año / Especialidad</div>
+        <div class="val">5to Año — Informática</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">🏆</div>
+      <div class="info-txt">
+        <div class="label">Proyecto</div>
+        <div class="val">Nexuss X Systems v2.0</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">📅</div>
+      <div class="info-txt">
+        <div class="label">Año escolar</div>
+        <div class="val">2025 – 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SECCIÓN 1 — TARJETA DE EMPRESA (Business Card)
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="designs-grid">
+
+    <!-- Cara delantera -->
+    <div class="design-block">
+      <div class="design-label">Tarjeta — Cara delantera</div>
+      <div class="biz-card front">
+        <div class="lines"></div>
+        <div class="card-front-content">
+          <div class="card-top">
+            <div class="card-logo-area">
+              <div class="card-logo-placeholder">N<span style="font-size:.55em">X</span></div>
+              <div>
+                <div class="card-company">Nexuss <span style="background:linear-gradient(90deg,#7926ff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">X</span> Systems</div>
+                <div class="card-tagline">Desarrollo Web · Inteligencia Artificial</div>
+              </div>
+            </div>
+            <span class="card-badge">✦ AGENCY</span>
+          </div>
+
+          <div class="card-divider"></div>
+
+          <div>
+            <div class="card-name student-name">Renaxit Solutions</div>
+            <div class="card-role">Fundador &amp; Desarrollador Full-Stack</div>
+            <div class="card-contacts">
+              <span>📧 nexussxsistem@gmail.com</span>
+              <span>🌐 localhost:3002</span>
+              <span>📱 República Dominicana</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cara trasera -->
+    <div class="design-block">
+      <div class="design-label">Tarjeta — Cara trasera</div>
+      <div class="biz-card back">
+        <div class="card-back-content">
+          <div class="back-logo-circle">🚀</div>
+          <div class="back-company">Nexuss X Systems</div>
+          <div class="back-slogan">"Nuestro trabajo supera los límites..."</div>
+          <div class="back-line"></div>
+          <div class="back-contact">
+            nexussxsistem@gmail.com<br>
+            República Dominicana · 2026<br>
+            <span style="color:rgba(0,0,0,.35);font-size:.55rem">CRM · Tickets · IA · Pipeline · Analytics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta Politécnico -->
+    <div class="design-block">
+      <div class="design-label">Tarjeta — Identificación Escolar</div>
+      <div class="school-card school-front">
+        <div class="school-content">
+          <div class="school-header">
+            <div class="school-emblem">🏫</div>
+            <div>
+              <div class="school-title">Politécnico<br>Jesús María</div>
+              <div class="school-subtitle">Ministerio de Educación · MINERD</div>
+            </div>
+          </div>
+          <div class="school-divider"></div>
+          <div class="school-info-row">
+            <div class="student-info-block">
+              <div class="student-label">Estudiante</div>
+              <div class="student-value student-name">Renaxit Solutions</div>
+              <div class="student-sub">Bachillerato en Informática</div>
+            </div>
+            <div>
+              <div class="school-year-badge">5to Año · 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta Politécnico — info del proyecto -->
+    <div class="design-block">
+      <div class="design-label">Tarjeta — Trabajo Final</div>
+      <div class="school-card" style="background:linear-gradient(135deg,#0a0a1a,#12103a);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,212,255,.2)">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 80% 20%,rgba(121,38,255,.2) 0%,transparent 60%)"></div>
+        <div class="school-content" style="position:relative;z-index:2">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#7926ff,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🖥</div>
+            <div>
+              <div style="font-size:.85rem;font-weight:800;line-height:1.2">Nexuss X Systems</div>
+              <div style="font-size:.6rem;color:rgba(255,255,255,.5);margin-top:2px">Sistema Empresarial — Trabajo Final 5to Año</div>
+            </div>
+          </div>
+          <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <span style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#00d4ff;font-size:.58rem;padding:3px 8px;border-radius:20px">HTML5</span>
+            <span style="background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.25);color:#3b82f6;font-size:.58rem;padding:3px 8px;border-radius:20px">CSS3</span>
+            <span style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#f59e0b;font-size:.58rem;padding:3px 8px;border-radius:20px">JavaScript</span>
+            <span style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#22c55e;font-size:.58rem;padding:3px 8px;border-radius:20px">Node.js</span>
+            <span style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);color:#6366f1;font-size:.58rem;padding:3px 8px;border-radius:20px">SQLite</span>
+            <span style="background:rgba(121,38,255,.1);border:1px solid rgba(121,38,255,.3);color:#a855f7;font-size:.58rem;padding:3px 8px;border-radius:20px">Claude AI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SECCIÓN 2 — BROCHES / PINES DE SOLAPA
+       ════════════════════════════════════════════════════════════════════ -->
+  <div style="margin-bottom:12px">
+    <span style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">
+      Broches y Pines de Solapa
+    </span>
+  </div>
+  <div class="pin-showcase">
+
+    <!-- Pin circular grande — oscuro -->
+    <div class="pin pin-lg pin-dark">
+      <div class="pin-body">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 35% 30%,rgba(0,212,255,.2) 0%,transparent 65%)"></div>
+        <div class="pin-content">
+          <div class="pin-logo-text" style="font-size:1.1rem;background:linear-gradient(90deg,#7926ff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">NX</div>
+          <div class="pin-logo-sub" style="font-size:.38rem;color:rgba(255,255,255,.6)">SYSTEMS</div>
+        </div>
+      </div>
+      <div class="pin-clip"></div>
+      <div class="pin-label">Circular grande<br>32mm</div>
+    </div>
+
+    <!-- Pin circular mediano — gradiente -->
+    <div class="pin pin-md pin-gradient">
+      <div class="pin-body">
+        <div class="pin-content">
+          <div class="pin-logo-text" style="font-size:.85rem;color:#fff;font-weight:900">NX</div>
+          <div class="pin-logo-sub" style="font-size:.3rem;color:rgba(255,255,255,.8)">SYS</div>
+        </div>
+      </div>
+      <div class="pin-clip"></div>
+      <div class="pin-label">Circular mediano<br>25mm</div>
+    </div>
+
+    <!-- Pin circular pequeño — blanco -->
+    <div class="pin pin-sm pin-white">
+      <div class="pin-body">
+        <div class="pin-content">
+          <div class="pin-logo-text" style="font-size:.7rem;background:linear-gradient(135deg,#7926ff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">NX</div>
+        </div>
+      </div>
+      <div class="pin-clip" style="background:linear-gradient(145deg,#e8e8e8,#bbb)"></div>
+      <div class="pin-label">Redondo blanco<br>18mm</div>
+    </div>
+
+    <!-- Badge rectangular tipo etiqueta de solapa -->
+    <div class="pin" style="gap:8px">
+      <div style="position:relative">
+        <div class="badge-pin">
+          <div class="badge-icon">🚀</div>
+          <div class="badge-info">
+            <div class="badge-company">NEXUSS X SYSTEMS</div>
+            <div class="badge-name student-name">Renaxit Solutions</div>
+            <div class="badge-role">Desarrollador Full-Stack · 5to Año Informática</div>
+          </div>
+        </div>
+        <div class="pin-clip" style="bottom:-8px;left:50%;transform:translateX(-50%)"></div>
+      </div>
+      <div class="pin-label">Badge rectangular — Expo</div>
+    </div>
+
+    <!-- Pin escolar redondo -->
+    <div class="pin pin-lg">
+      <div class="pin-body" style="width:90px;height:90px;background:linear-gradient(135deg,#00205c,#003d99);border:2px solid rgba(255,200,0,.5)">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 40% 35%,rgba(255,200,0,.15) 0%,transparent 60%)"></div>
+        <div class="pin-content" style="gap:2px">
+          <div style="font-size:1.4rem">🏫</div>
+          <div style="font-size:.32rem;color:rgba(255,255,255,.9);font-weight:700;text-align:center;letter-spacing:.02em">POLITÉCNICO<br>JESÚS MARÍA</div>
+        </div>
+      </div>
+      <div class="pin-clip"></div>
+      <div class="pin-label">Pin escolar<br>32mm</div>
+    </div>
+
+  </div>
+
+  <!-- Tips de impresión -->
+  <div class="print-tips no-print">
+    <h4>🖨 Instrucciones para imprimir</h4>
+    <ul>
+      <li>Usa papel couché o cartulina 300g para las tarjetas de negocio.</li>
+      <li>Imprime en modo "Tamaño real" (sin escalar) para mantener las proporciones.</li>
+      <li>Para los pines, imprime en papel adhesivo de alta calidad y aplica sobre botones/pines en blanco.</li>
+      <li>Selecciona "Guardar como PDF" en la ventana de impresión para obtener un PDF listo para imprenta.</li>
+      <li>Tamaño de tarjeta estándar: 8.5 cm × 5.5 cm (3.5" × 2.17").</li>
+      <li>Pines recomendados: 32mm para circular grande, 25mm para mediano.</li>
+    </ul>
+  </div>
+
+  <!-- Nav inferior -->
+  <div class="no-print" style="display:flex;gap:12px;justify-content:center;margin-top:36px;padding-top:24px;border-top:1px solid var(--border)">
+    <a href="trabajos.html" class="btn ghost">← Trabajos anteriores</a>
+    <a href="home.html" class="btn">🚀 Ir al sistema →</a>
+  </div>
+
+</div>
+
+<script src="nexus.js"></script>
+<script>
+// Personalizar nombre del estudiante desde el localStorage si está disponible
+try {
+  const userData = JSON.parse(localStorage.getItem('nxs_user') || '{}');
+  if (userData.name) {
+    document.querySelectorAll('.student-name').forEach(el => { el.textContent = userData.name; });
+  }
+} catch(e) {}
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Auditoría — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .audit-table{width:100%;border-collapse:collapse;font-size:.82rem}
+    .audit-table th{padding:10px 14px;background:rgba(255,255,255,.05);text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
+    .audit-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .audit-table tr:hover td{background:rgba(255,255,255,.03)}
+    .action-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600}
+    .action-badge.create{background:rgba(34,197,94,.15);color:#22c55e}
+    .action-badge.update,.action-badge.patch{background:rgba(0,212,255,.12);color:#00d4ff}
+    .action-badge.delete{background:rgba(239,68,68,.15);color:#ef4444}
+    .action-badge.login,.action-badge.auth{background:rgba(121,38,255,.15);color:#9b5bff}
+    .action-badge.other{background:rgba(255,255,255,.08);color:#aaa}
+    .filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end}
+    .filter-row input,.filter-row select{padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:.82rem}
+    .filter-row input:focus,.filter-row select:focus{outline:none;border-color:#00d4ff}
+    .pagination{display:flex;align-items:center;gap:10px;margin-top:16px;justify-content:center;font-size:.85rem}
+    .page-btn{padding:6px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;cursor:pointer;transition:.2s}
+    .page-btn:hover:not(:disabled){background:rgba(0,212,255,.1);border-color:#00d4ff}
+    .page-btn:disabled{opacity:.3;cursor:default}
+    .table-wrap{overflow-x:auto}
+    .detail-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center}
+    .detail-box{background:#161626;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:28px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto}
+    .detail-box pre{background:rgba(0,0,0,.3);padding:14px;border-radius:8px;font-size:.78rem;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+  </style>
+</head>
+<body data-requires-auth="true">
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-btn" type="button">Admin ▾</button>
+        <div class="nav-dropdown-panel">
+          <a href="dashboard.html">Dashboard</a><a href="reports.html">Reportes</a>
+          <a href="admin.html">Mensajes</a><a href="audit.html" style="color:#00d4ff">Auditoría</a>
+          <a href="automation.html">Automatizaciones</a>
+        </div>
+      </div>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="tag">🔍 Auditoría</span>
+      <h2 class="reveal">Registro de <span class="gradient-label">Actividad</span></h2>
+      <p class="muted">Historial completo de todas las acciones en el sistema.</p>
+    </div>
+    <button class="btn ghost" id="refreshBtn">↻ Actualizar</button>
+  </div>
+
+  <div class="filter-row">
+    <div><label style="display:block;font-size:.75rem;color:var(--muted);margin-bottom:4px">Usuario</label>
+      <input type="text" id="fEmail" placeholder="email@..." style="width:180px" /></div>
+    <div><label style="display:block;font-size:.75rem;color:var(--muted);margin-bottom:4px">Acción</label>
+      <input type="text" id="fAction" placeholder="Ej: ticket.created" style="width:160px" /></div>
+    <div><label style="display:block;font-size:.75rem;color:var(--muted);margin-bottom:4px">Entidad</label>
+      <select id="fEntity" style="width:130px">
+        <option value="">Todas</option>
+        <option value="user">Usuario</option>
+        <option value="ticket">Ticket</option>
+        <option value="contact">Contacto</option>
+        <option value="deal">Deal</option>
+        <option value="order">Orden</option>
+        <option value="project">Proyecto</option>
+      </select></div>
+    <div><label style="display:block;font-size:.75rem;color:var(--muted);margin-bottom:4px">Desde</label>
+      <input type="date" id="fFrom" /></div>
+    <div><label style="display:block;font-size:.75rem;color:var(--muted);margin-bottom:4px">Hasta</label>
+      <input type="date" id="fTo" /></div>
+    <button class="btn primary" id="applyFilters" style="align-self:flex-end">Filtrar</button>
+    <button class="btn ghost" id="clearFilters" style="align-self:flex-end">Limpiar</button>
+  </div>
+
+  <div style="margin-bottom:10px;color:var(--muted);font-size:.82rem" id="resultInfo"></div>
+
+  <div class="table-wrap card" style="padding:0;overflow:hidden">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Usuario</th>
+          <th>Acción</th>
+          <th>Entidad</th>
+          <th>ID</th>
+          <th>IP</th>
+          <th>Detalles</th>
+        </tr>
+      </thead>
+      <tbody id="auditBody">
+        <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button class="page-btn" id="prevBtn" disabled>← Anterior</button>
+    <span id="pageInfo">Página 1</span>
+    <button class="page-btn" id="nextBtn">Siguiente →</button>
+  </div>
+</section>
+</main>
+
+<!-- Detail modal -->
+<div class="detail-modal" id="detailModal" style="display:none">
+  <div class="detail-box">
+    <h4 style="margin-bottom:16px" id="detailTitle">Detalle de acción</h4>
+    <pre id="detailContent"></pre>
+    <button class="btn ghost" style="margin-top:16px;width:100%" onclick="document.getElementById('detailModal').style.display='none'">Cerrar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+const LIMIT = 50;
+let offset = 0, total = 0;
+
+function actionClass(action) {
+  if (action.includes('creat') || action.includes('register') || action.includes('add')) return 'create';
+  if (action.includes('updat') || action.includes('patch') || action.includes('edit') || action.includes('chang')) return 'update';
+  if (action.includes('delet') || action.includes('remov')) return 'delete';
+  if (action.includes('login') || action.includes('auth') || action.includes('2fa') || action.includes('password')) return 'auth';
+  return 'other';
+}
+
+function fmt(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es') + ' ' + d.toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' });
+}
+
+function showDetail(item) {
+  document.getElementById('detailTitle').textContent = item.action;
+  document.getElementById('detailContent').textContent = JSON.stringify({
+    id: item.id,
+    user: item.user_email,
+    action: item.action,
+    entity: `${item.entity_type} #${item.entity_id}`,
+    changes: JSON.parse(item.changes_json||'{}'),
+    ip: item.ip,
+    date: item.created_at
+  }, null, 2);
+  document.getElementById('detailModal').style.display = 'flex';
+}
+document.getElementById('detailModal').addEventListener('click', e => { if(e.target===document.getElementById('detailModal')) document.getElementById('detailModal').style.display='none'; });
+
+function getFilters() {
+  return {
+    user_email: document.getElementById('fEmail').value.trim()||undefined,
+    action: document.getElementById('fAction').value.trim()||undefined,
+    entity_type: document.getElementById('fEntity').value||undefined,
+    from: document.getElementById('fFrom').value||undefined,
+    to: document.getElementById('fTo').value||undefined,
+    limit: LIMIT,
+    offset
+  };
+}
+
+async function load() {
+  document.getElementById('auditBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr>';
+  try {
+    const params = new URLSearchParams(Object.fromEntries(Object.entries(getFilters()).filter(([,v])=>v!==undefined)));
+    const { items, total: t } = await NXS.apiGet('/api/audit?' + params);
+    total = t;
+    document.getElementById('resultInfo').textContent = `${t} registro${t!==1?'s':''} encontrado${t!==1?'s':''}`;
+    document.getElementById('pageInfo').textContent = `Página ${Math.floor(offset/LIMIT)+1} de ${Math.max(1,Math.ceil(t/LIMIT))}`;
+    document.getElementById('prevBtn').disabled = offset === 0;
+    document.getElementById('nextBtn').disabled = offset + LIMIT >= t;
+
+    if (!items.length) {
+      document.getElementById('auditBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No hay registros con los filtros aplicados.</td></tr>';
+      return;
+    }
+    document.getElementById('auditBody').innerHTML = items.map(item => `
+      <tr>
+        <td style="white-space:nowrap;color:var(--muted)">${fmt(item.created_at)}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="${item.user_email||''}">${item.user_email||'—'}</td>
+        <td><span class="action-badge ${actionClass(item.action)}">${item.action}</span></td>
+        <td>${item.entity_type||'—'}</td>
+        <td style="color:var(--muted)">${item.entity_id||'—'}</td>
+        <td style="color:var(--muted);font-family:monospace;font-size:.75rem">${item.ip||'—'}</td>
+        <td><button class="btn ghost" onclick='showDetail(${JSON.stringify(item).replace(/'/g,"&#39;")})' style="padding:3px 10px;font-size:.72rem">Ver</button></td>
+      </tr>`).join('');
+  } catch(e) {
+    document.getElementById('auditBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ff6b91">Error cargando logs. Se requiere rol admin/owner.</td></tr>';
+  }
+}
+
+document.getElementById('applyFilters').addEventListener('click', () => { offset=0; load(); });
+document.getElementById('clearFilters').addEventListener('click', () => {
+  ['fEmail','fAction','fFrom','fTo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fEntity').value=''; offset=0; load();
+});
+document.getElementById('refreshBtn').addEventListener('click', () => { offset=0; load(); });
+document.getElementById('prevBtn').addEventListener('click', () => { if(offset>0){offset-=LIMIT;load();} });
+document.getElementById('nextBtn').addEventListener('click', () => { if(offset+LIMIT<total){offset+=LIMIT;load();} });
+
+if (!NXS.getToken()) window.location.href = 'login.html';
+else load();
+</script>
+</body>
+</html>

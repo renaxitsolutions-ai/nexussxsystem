@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Base de Conocimiento — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .kb-search-wrap{background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(121,38,255,.08));border:1px solid rgba(0,212,255,.2);border-radius:16px;padding:36px;text-align:center;margin-bottom:32px}
+    .kb-search-input{width:100%;max-width:560px;padding:14px 20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-size:1rem;box-sizing:border-box;margin-top:16px}
+    .kb-search-input:focus{outline:none;border-color:#00d4ff}
+    .kb-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+    .kb-cat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;cursor:pointer;transition:.2s;text-decoration:none;display:block}
+    .kb-cat-card:hover{border-color:rgba(0,212,255,.4);transform:translateY(-2px)}
+    .kb-cat-card.active{border-color:#00d4ff;background:rgba(0,212,255,.06)}
+    .kb-cat-icon{font-size:2rem;margin-bottom:10px}
+    .kb-cat-name{font-weight:600;font-size:.95rem;margin-bottom:4px}
+    .kb-cat-count{color:var(--muted);font-size:.8rem}
+    .article-list{display:flex;flex-direction:column;gap:10px}
+    .article-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:18px 20px;cursor:pointer;transition:.2s}
+    .article-item:hover{border-color:rgba(0,212,255,.3);background:rgba(255,255,255,.06)}
+    .article-title{font-weight:600;font-size:.95rem;margin-bottom:6px;color:#fff}
+    .article-meta{display:flex;gap:12px;color:var(--muted);font-size:.78rem}
+    .article-views{color:var(--muted);font-size:.78rem}
+    .article-content-view{display:none}
+    .article-content-view.open{display:block}
+    .article-body{line-height:1.8;font-size:.92rem}
+    .article-body h2{color:#00d4ff;font-size:1.1rem;margin:20px 0 10px}
+    .article-body h3{color:rgba(0,212,255,.8);font-size:1rem;margin:16px 0 8px}
+    .article-body code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.85rem}
+    .article-body pre{background:rgba(0,0,0,.3);padding:16px;border-radius:8px;overflow-x:auto;font-size:.85rem}
+    .article-body ul,.article-body ol{padding-left:20px;margin:10px 0}
+    .article-body li{margin:6px 0}
+    .article-body strong{color:#fff}
+    .article-body table{width:100%;border-collapse:collapse;margin:16px 0}
+    .article-body th{background:rgba(0,212,255,.1);padding:8px 12px;text-align:left;font-size:.85rem}
+    .article-body td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem}
+    .helpful-bar{display:flex;align-items:center;gap:12px;padding:16px;background:rgba(255,255,255,.03);border-radius:8px;margin-top:24px;font-size:.85rem}
+    .breadcrumb{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.82rem;margin-bottom:16px}
+    .breadcrumb a{color:var(--muted);text-decoration:none}.breadcrumb a:hover{color:#00d4ff}
+    .breadcrumb span{color:#fff}
+    .kb-layout{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start}
+    @media(max-width:800px){.kb-layout{grid-template-columns:1fr}}
+    .kb-sidebar{position:sticky;top:20px}
+    .related-articles{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px}
+    .related-articles h5{margin-bottom:12px;color:var(--muted);font-size:.85rem}
+    .related-item{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;font-size:.85rem;color:rgba(255,255,255,.8)}
+    .related-item:last-child{border-bottom:none}
+    .related-item:hover{color:#00d4ff}
+    .empty-search{text-align:center;padding:40px;color:var(--muted)}
+  </style>
+</head>
+<body>
+<header>
+  <div class="container"><nav>
+    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Systems</div>
+    <button class="nav-toggle" id="navToggle">Menú</button>
+    <div class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="knowledge.html" style="color:#00d4ff">Ayuda</a>
+      <a href="tickets.html">Soporte</a>
+      <a href="contacto.html">Contacto</a>
+      <a href="#" class="btn" id="logoutBtn">Salir</a>
+    </div>
+  </nav></div>
+</header>
+
+<main class="container">
+<section class="section">
+  <!-- Search hero -->
+  <div class="kb-search-wrap">
+    <span class="tag">📚 Base de Conocimiento</span>
+    <h2 style="margin:10px 0 4px">¿Cómo podemos <span class="gradient-label">ayudarte?</span></h2>
+    <p class="muted">Encuentra respuestas rápidas a las preguntas más comunes.</p>
+    <input type="text" class="kb-search-input" id="searchInput" placeholder="🔍 Buscar en artículos... (Ej: cómo crear cuenta)" />
+  </div>
+
+  <!-- Main layout -->
+  <div class="kb-layout" id="mainLayout">
+    <div id="mainArea">
+      <!-- Category view (default) -->
+      <div id="catView">
+        <h4 style="margin-bottom:16px;color:var(--muted)">Categorías</h4>
+        <div class="kb-cats" id="catGrid"><div class="muted">Cargando...</div></div>
+      </div>
+
+      <!-- Articles list view -->
+      <div id="listView" style="display:none">
+        <div class="breadcrumb" id="listBreadcrumb"></div>
+        <h4 id="listTitle" style="margin-bottom:16px"></h4>
+        <div class="article-list" id="articleList"></div>
+      </div>
+
+      <!-- Article detail view -->
+      <div id="articleView" style="display:none">
+        <div class="breadcrumb" id="articleBreadcrumb"></div>
+        <h2 id="articleTitle" style="margin-bottom:8px"></h2>
+        <div id="articleMeta" style="color:var(--muted);font-size:.8rem;margin-bottom:24px"></div>
+        <div class="article-body" id="articleBody"></div>
+        <div class="helpful-bar" id="helpfulBar">
+          <span>¿Te fue útil este artículo?</span>
+          <button class="btn" id="helpYes" style="padding:6px 14px;font-size:.82rem">👍 Sí</button>
+          <button class="btn ghost" id="helpNo" style="padding:6px 14px;font-size:.82rem">👎 No</button>
+          <a href="tickets.html" class="btn ghost" style="padding:6px 14px;font-size:.82rem;margin-left:auto">🎫 Abrir ticket</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="kb-sidebar" id="sidebar">
+      <div class="related-articles" id="popularBox">
+        <h5>🔥 Artículos populares</h5>
+        <div id="popularList"><div class="muted" style="font-size:.82rem">Cargando...</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="nexus.js"></script>
+<script>
+let categories = [], articles = [], currentCat = null, currentArticle = null;
+
+function md(text) {
+  return text
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code>$1</code>')
+    .replace(/^\| (.+) \|$/gm, (_, row) => '<tr><td>' + row.split(' | ').join('</td><td>') + '</td></tr>')
+    .replace(/(<tr>.*<\/tr>)/gs, '<table>$1</table>')
+    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .replace(/^[-*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .replace(/\n{2,}/g,'</p><p>')
+    .replace(/^(?!<[h|t|u|l])/gm, '')
+    .replace(/\n/g,'<br>');
+}
+
+async function load() {
+  const [catRes, artRes] = await Promise.all([
+    fetch(`${NXS.API_BASE}/api/kb/categories`).then(r=>r.json()),
+    fetch(`${NXS.API_BASE}/api/kb/articles`).then(r=>r.json())
+  ]);
+  categories = catRes.items || [];
+  articles   = artRes.items || [];
+  renderCats(); renderPopular();
+}
+
+function renderCats() {
+  document.getElementById('catGrid').innerHTML = categories.map(c => `
+    <div class="kb-cat-card" onclick="showCat(${c.id})">
+      <div class="kb-cat-icon">${c.icon}</div>
+      <div class="kb-cat-name">${c.name}</div>
+      <div class="kb-cat-count">${c.article_count} artículos</div>
+    </div>`).join('') || '<p class="muted">No hay categorías aún.</p>';
+}
+
+function renderPopular() {
+  const pop = [...articles].sort((a,b)=>b.views-a.views).slice(0,5);
+  document.getElementById('popularList').innerHTML = pop.map(a => `
+    <div class="related-item" onclick="showArticle(${a.id})">${a.title}</div>`).join('') || '<p class="muted" style="font-size:.82rem">Sin artículos.</p>';
+}
+
+function showCat(id) {
+  currentCat = categories.find(c=>c.id===id);
+  const catArts = articles.filter(a=>a.category_id===id);
+  document.getElementById('catView').style.display='none';
+  document.getElementById('articleView').style.display='none';
+  document.getElementById('listView').style.display='';
+  document.getElementById('listBreadcrumb').innerHTML = `<a href="#" onclick="showCats()">Inicio</a> › <span>${currentCat.name}</span>`;
+  document.getElementById('listTitle').textContent = `${currentCat.icon} ${currentCat.name}`;
+  document.getElementById('articleList').innerHTML = catArts.length
+    ? catArts.map(a=>`<div class="article-item" onclick="showArticle(${a.id})"><div class="article-title">${a.title}</div><div class="article-meta"><span>👁 ${a.views} vistas</span><span>👍 ${a.helpful_yes} útil</span></div></div>`).join('')
+    : '<p class="muted">No hay artículos en esta categoría.</p>';
+}
+
+async function showArticle(id) {
+  try {
+    const { article } = await fetch(`${NXS.API_BASE}/api/kb/articles/${id}`).then(r=>r.json());
+    currentArticle = article;
+    document.getElementById('catView').style.display='none';
+    document.getElementById('listView').style.display='none';
+    document.getElementById('articleView').style.display='';
+    const cat = categories.find(c=>c.id===article.category_id);
+    document.getElementById('articleBreadcrumb').innerHTML = `<a href="#" onclick="showCats()">Inicio</a> › <a href="#" onclick="showCat(${cat?.id||0})">${cat?.name||'Artículos'}</a> › <span>${article.title}</span>`;
+    document.getElementById('articleTitle').textContent = article.title;
+    document.getElementById('articleMeta').textContent = `${article.views} vistas · ${article.helpful_yes} personas lo encontraron útil · ${new Date(article.updated_at).toLocaleDateString('es')}`;
+    document.getElementById('articleBody').innerHTML = md(article.content);
+    // Related
+    const related = articles.filter(a=>a.id!==id && a.category_id===article.category_id).slice(0,4);
+    document.getElementById('popularBox').innerHTML = `<div class="related-articles"><h5>📎 Artículos relacionados</h5>${related.map(a=>`<div class="related-item" onclick="showArticle(${a.id})">${a.title}</div>`).join('')||'<p class="muted" style="font-size:.82rem">Ninguno.</p>'}</div>`;
+  } catch { showToast('Error cargando artículo'); }
+}
+
+function showCats() {
+  document.getElementById('catView').style.display='';
+  document.getElementById('listView').style.display='none';
+  document.getElementById('articleView').style.display='none';
+  document.getElementById('popularBox').innerHTML = `<div class="related-articles"><h5>🔥 Artículos populares</h5><div id="popularList"></div></div>`;
+  renderPopular();
+}
+
+// Search
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) { showCats(); return; }
+    const results = articles.filter(a => a.title.toLowerCase().includes(q) || a.content.toLowerCase().includes(q));
+    document.getElementById('catView').style.display='none';
+    document.getElementById('listView').style.display='';
+    document.getElementById('articleView').style.display='none';
+    document.getElementById('listBreadcrumb').innerHTML = `<a href="#" onclick="showCats();document.getElementById('searchInput').value=''">Inicio</a> › <span>Resultados para "${q}"</span>`;
+    document.getElementById('listTitle').textContent = `${results.length} resultado${results.length!==1?'s':''} encontrado${results.length!==1?'s':''}`;
+    document.getElementById('articleList').innerHTML = results.length
+      ? results.map(a=>`<div class="article-item" onclick="showArticle(${a.id})"><div class="article-title">${a.title}</div><div class="article-meta"><span>${categories.find(c=>c.id===a.category_id)?.name||''}</span><span>👁 ${a.views}</span></div></div>`).join('')
+      : '<div class="empty-search"><p>No se encontraron artículos para esa búsqueda.</p><a href="tickets.html" class="btn primary" style="margin-top:12px;display:inline-block">Abrir ticket de soporte</a></div>';
+  }, 300);
+});
+
+// Helpful
+document.getElementById('helpYes').addEventListener('click', async () => {
+  if (!currentArticle) return;
+  await fetch(`${NXS.API_BASE}/api/kb/articles/${currentArticle.id}/helpful`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({helpful:true}) });
+  document.getElementById('helpfulBar').innerHTML = '<span style="color:#22c55e">✅ ¡Gracias por tu feedback!</span>';
+});
+document.getElementById('helpNo').addEventListener('click', async () => {
+  if (!currentArticle) return;
+  await fetch(`${NXS.API_BASE}/api/kb/articles/${currentArticle.id}/helpful`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({helpful:false}) });
+  document.getElementById('helpfulBar').innerHTML = '<span class="muted">Gracias. <a href="tickets.html" style="color:#00d4ff">¿Abrimos un ticket?</a></span>';
+});
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Diagrama del Sistema — NexussXSystem</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#080818;color:#fff;min-height:100vh;padding:32px}
+  h1{text-align:center;margin-bottom:6px;font-size:1.8rem;font-weight:800}
+  h1 span{background:linear-gradient(135deg,#00d4ff,#7926ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .subtitle{text-align:center;color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:40px}
+  .tabs{display:flex;gap:4px;justify-content:center;margin-bottom:32px;background:rgba(255,255,255,.04);border-radius:12px;padding:6px;width:fit-content;margin-left:auto;margin-right:auto}
+  .tab{padding:8px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;color:rgba(255,255,255,.5);transition:.2s;border:none;background:none}
+  .tab.active{background:rgba(0,212,255,.12);color:#00d4ff;font-weight:600}
+  .diagram{display:none}.diagram.active{display:block}
+
+  /* Architecture diagram */
+  .arch-wrap{max-width:900px;margin:0 auto}
+  .layer{border:1px solid;border-radius:12px;padding:16px 20px;margin-bottom:16px;position:relative}
+  .layer-label{position:absolute;top:-12px;left:16px;background:#080818;padding:0 8px;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .layer-client{border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.04)}
+  .layer-client .layer-label{color:#00d4ff}
+  .layer-server{border-color:rgba(121,38,255,.3);background:rgba(121,38,255,.04)}
+  .layer-server .layer-label{color:#9b5bff}
+  .layer-db{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04)}
+  .layer-db .layer-label{color:#22c55e}
+  .layer-ext{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04)}
+  .layer-ext .layer-label{color:#f59e0b}
+  .boxes{display:flex;gap:10px;flex-wrap:wrap}
+  .box{padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
+  .box.cyan{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.25);color:#00d4ff}
+  .box.purple{background:rgba(121,38,255,.12);border-color:rgba(121,38,255,.3);color:#a78bfa}
+  .box.green{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25);color:#4ade80}
+  .box.orange{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);color:#fbbf24}
+  .box.red{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);color:#f87171}
+  .arrow-down{text-align:center;color:rgba(0,212,255,.5);font-size:1.4rem;margin:4px 0;line-height:1}
+
+  /* DB Schema */
+  .db-wrap{max-width:1100px;margin:0 auto}
+  .db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .db-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden}
+  .db-card-head{padding:10px 14px;font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:8px}
+  .db-card-head.cyan{background:rgba(0,212,255,.1);color:#00d4ff;border-bottom:1px solid rgba(0,212,255,.2)}
+  .db-card-head.purple{background:rgba(121,38,255,.1);color:#a78bfa;border-bottom:1px solid rgba(121,38,255,.2)}
+  .db-card-head.green{background:rgba(34,197,94,.08);color:#4ade80;border-bottom:1px solid rgba(34,197,94,.2)}
+  .db-card-head.orange{background:rgba(245,158,11,.08);color:#fbbf24;border-bottom:1px solid rgba(245,158,11,.2)}
+  .db-card-head.blue{background:rgba(59,130,246,.1);color:#60a5fa;border-bottom:1px solid rgba(59,130,246,.2)}
+  .db-card-head.pink{background:rgba(236,72,153,.08);color:#f472b6;border-bottom:1px solid rgba(236,72,153,.2)}
+  .db-fields{padding:8px 14px}
+  .field{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.75rem}
+  .field:last-child{border-bottom:none}
+  .field-name{color:rgba(255,255,255,.8)}
+  .field-type{color:rgba(255,255,255,.3);font-family:monospace}
+  .field-pk{color:#f59e0b}
+  .field-fk{color:#00d4ff}
+
+  /* Flow diagram */
+  .flow-wrap{max-width:900px;margin:0 auto}
+  .flow-section{margin-bottom:32px}
+  .flow-title{font-size:.95rem;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:8px}
+  .flow-row{display:flex;align-items:center;gap:0;margin-bottom:12px;flex-wrap:wrap}
+  .flow-node{padding:10px 16px;border-radius:8px;font-size:.82rem;font-weight:600;text-align:center;min-width:120px}
+  .fn-user{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.3);color:#00d4ff}
+  .fn-server{background:rgba(121,38,255,.12);border:1px solid rgba(121,38,255,.3);color:#a78bfa}
+  .fn-db{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
+  .fn-ai{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fbbf24}
+  .fn-notif{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171}
+  .fa{color:rgba(255,255,255,.25);margin:0 6px;font-size:1rem}
+  .flow-label{font-size:.7rem;color:rgba(255,255,255,.35);margin-top:3px;text-align:center}
+  .flow-node-wrap{display:flex;flex-direction:column;align-items:center}
+
+  /* Security */
+  .sec-wrap{max-width:900px;margin:0 auto}
+  .sec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .sec-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px}
+  .sec-card h4{margin-bottom:8px;font-size:.9rem;display:flex;align-items:center;gap:8px}
+  .sec-card p{font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.6}
+  .sec-card code{background:rgba(0,212,255,.1);color:#00d4ff;padding:1px 6px;border-radius:4px;font-size:.78rem}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700;margin-left:6px}
+  .b-high{background:rgba(34,197,94,.2);color:#4ade80}
+  .b-med{background:rgba(245,158,11,.2);color:#fbbf24}
+</style>
+</head>
+<body>
+<h1>Diagrama del Sistema — Nexuss<span>X</span>System</h1>
+<p class="subtitle">Proyecto Final de Grado · 5to B — Desarrollo y Administración de Aplicaciones Informáticas</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('architecture',this)">🏗️ Arquitectura</button>
+  <button class="tab" onclick="showTab('database',this)">🗄️ Base de datos</button>
+  <button class="tab" onclick="showTab('flows',this)">🔄 Flujos</button>
+  <button class="tab" onclick="showTab('security',this)">🔐 Seguridad</button>
+</div>
+
+<!-- ════════════════════ ARCHITECTURE ════════════════════ -->
+<div class="diagram active" id="tab-architecture">
+  <div class="arch-wrap">
+
+    <div class="layer layer-client">
+      <div class="layer-label">Capa cliente — Navegador</div>
+      <div class="boxes">
+        <div class="box cyan">index.html</div><div class="box cyan">home.html</div>
+        <div class="box cyan">login.html · registro.html</div>
+        <div class="box cyan">dashboard.html</div><div class="box cyan">crm.html</div>
+        <div class="box cyan">pipeline.html</div><div class="box cyan">tickets.html</div>
+        <div class="box cyan">ai-tools.html</div><div class="box cyan">knowledge.html</div>
+        <div class="box cyan">reports.html</div><div class="box cyan">audit.html</div>
+        <div class="box cyan">settings.html</div><div class="box cyan">notifications.html</div>
+        <div class="box cyan">admin.html · plans.html</div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+        <div class="box">nexus.css — Estilos globales</div>
+        <div class="box purple">nexus.js — NXS API client (apiGet, apiPost, apiPatch, apiDelete)</div>
+        <div class="box">localStorage → nxs_auth (JWT token)</div>
+      </div>
+    </div>
+
+    <div class="arrow-down">↕ HTTP / SSE<br><span style="font-size:.7rem;color:rgba(255,255,255,.3)">Puerto 3002 — Authorization: Bearer &lt;token&gt;</span></div>
+
+    <div class="layer layer-server">
+      <div class="layer-label">Capa servidor — Node.js 24 + Express.js</div>
+      <div class="boxes" style="margin-bottom:10px">
+        <div class="box orange">Helmet.js — Headers HTTP seguros</div>
+        <div class="box orange">express-rate-limit — Anti brute force</div>
+        <div class="box orange">compression — gzip</div>
+        <div class="box orange">CORS</div>
+        <div class="box orange">auth() middleware — JWT verify</div>
+        <div class="box orange">requireRole() middleware — RBAC</div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:10px">
+        <div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Grupos de rutas (50+ endpoints)</div>
+        <div class="boxes">
+          <div class="box purple">POST /api/register<br>POST /api/login<br>GET /api/me<br>PATCH /api/me<br>POST /api/me/2fa/*<br>POST /auth/*</div>
+          <div class="box purple">GET/POST /api/crm/contacts<br>GET/POST /api/crm/deals<br>POST /api/crm/notes<br>POST /api/crm/activities<br>POST .../import<br>GET .../contacts.csv</div>
+          <div class="box purple">GET/POST /api/tickets<br>GET/PATCH /api/tickets/:id<br>POST /api/tickets/:id/csat<br>GET /api/tickets/templates</div>
+          <div class="box purple">GET/POST /api/kb/categories<br>GET/POST /api/kb/articles<br>POST .../helpful</div>
+          <div class="box purple">POST /api/ai/ticket-suggest<br>POST /api/ai/ticket-summarize<br>POST /api/ai/generate-content<br>POST /api/ai/contact-insights<br>POST /api/ai/business-summary<br>POST /api/jarvis</div>
+          <div class="box purple">GET /api/notifications<br>SSE /api/notifications/stream<br>PATCH .../read<br>POST .../read-all</div>
+          <div class="box purple">GET /api/metrics<br>GET /api/audit<br>GET/POST /api/automations<br>GET/PATCH /api/admin/users<br>GET/PATCH /api/branding<br>GET /api/plans</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-down">↕ node:sqlite (sync API) &nbsp;|&nbsp; ↕ Anthropic SDK (async)</div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+      <div class="layer layer-db" style="margin:0">
+        <div class="layer-label">Base de datos — SQLite (node:sqlite nativo)</div>
+        <div class="boxes">
+          <div class="box green">tenants · users · audit_logs · api_keys · notifications</div>
+          <div class="box green">contacts · deals · crm_activities · crm_notes</div>
+          <div class="box green">tickets · ticket_comments · ticket_templates</div>
+          <div class="box green">kb_categories · kb_articles · blog_posts</div>
+          <div class="box green">orders · referrals · projects · messages</div>
+          <div class="box green">plans · subscriptions · automation_rules · ai_conversations</div>
+        </div>
+        <div style="margin-top:8px;font-size:.72rem;color:rgba(255,255,255,.3)">
+          WAL mode · Foreign keys ON · Prepared statements · Indexes en tenant_id, email, status
+        </div>
+      </div>
+      <div class="layer layer-ext" style="margin:0">
+        <div class="layer-label">Servicios externos</div>
+        <div class="boxes" style="flex-direction:column">
+          <div class="box orange">Anthropic API<br><span style="font-size:.7rem;color:rgba(255,255,255,.4)">claude-haiku-4-5<br>claude-sonnet-4-5</span></div>
+          <div class="box" style="margin-top:8px">SMTP (opcional)<br><span style="font-size:.7rem;color:rgba(255,255,255,.4)">Nodemailer<br>Gmail / cualquier SMTP</span></div>
+          <div class="box" style="margin-top:8px">Multer uploads<br><span style="font-size:.7rem;color:rgba(255,255,255,.4)">server/uploads/<br>hasta 10MB</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ DATABASE ════════════════════ -->
+<div class="diagram" id="tab-database">
+  <div class="db-wrap">
+    <div class="db-grid">
+
+      <div class="db-card">
+        <div class="db-card-head cyan">🏢 tenants</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name">name</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">slug</span><span class="field-type">TEXT UNIQUE</span></div>
+          <div class="field"><span class="field-name">plan</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">primary_color</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">logo_url</span><span class="field-type">TEXT</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head cyan">👤 users</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name field-fk">tenant_id</span><span class="field-type">FK → tenants</span></div>
+          <div class="field"><span class="field-name">email</span><span class="field-type">TEXT UNIQUE</span></div>
+          <div class="field"><span class="field-name">password_hash</span><span class="field-type">TEXT (bcrypt)</span></div>
+          <div class="field"><span class="field-name">role</span><span class="field-type">owner|admin|manager|agent|viewer</span></div>
+          <div class="field"><span class="field-name">totp_secret</span><span class="field-type">TEXT (2FA)</span></div>
+          <div class="field"><span class="field-name">totp_enabled</span><span class="field-type">INTEGER 0/1</span></div>
+          <div class="field"><span class="field-name">verified</span><span class="field-type">INTEGER 0/1</span></div>
+          <div class="field"><span class="field-name">last_login_at</span><span class="field-type">TEXT</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head purple">👥 contacts</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name field-fk">tenant_id</span><span class="field-type">FK → tenants</span></div>
+          <div class="field"><span class="field-name">name</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">email · phone</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">company · position</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">stage</span><span class="field-type">new|contacted|qualified...</span></div>
+          <div class="field"><span class="field-name">status</span><span class="field-type">lead|prospect|customer</span></div>
+          <div class="field"><span class="field-name">value</span><span class="field-type">REAL</span></div>
+          <div class="field"><span class="field-name">source</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">tags_json</span><span class="field-type">TEXT (JSON array)</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head purple">💼 deals</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name field-fk">contact_id</span><span class="field-type">FK → contacts</span></div>
+          <div class="field"><span class="field-name">title</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">value</span><span class="field-type">REAL</span></div>
+          <div class="field"><span class="field-name">stage</span><span class="field-type">prospecting|qualified...</span></div>
+          <div class="field"><span class="field-name">probability</span><span class="field-type">INTEGER 0-100</span></div>
+          <div class="field"><span class="field-name">close_date</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">won_at · lost_at</span><span class="field-type">TEXT</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head orange">🎫 tickets</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name">number</span><span class="field-type">TEXT (TKT-0001)</span></div>
+          <div class="field"><span class="field-name">title · description</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">priority</span><span class="field-type">urgent|high|normal|low</span></div>
+          <div class="field"><span class="field-name">status</span><span class="field-type">open|in_progress|closed</span></div>
+          <div class="field"><span class="field-name">category</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">sla_hours · sla_due_at</span><span class="field-type">INT · TEXT</span></div>
+          <div class="field"><span class="field-name">csat_score</span><span class="field-type">INTEGER 1-5</span></div>
+          <div class="field"><span class="field-name">ai_summary</span><span class="field-type">TEXT</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head orange">💬 ticket_comments</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name field-fk">ticket_id</span><span class="field-type">FK → tickets</span></div>
+          <div class="field"><span class="field-name">text</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">from_email · from_name</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">is_internal</span><span class="field-type">INTEGER 0/1</span></div>
+          <div class="field"><span class="field-name">is_ai</span><span class="field-type">INTEGER 0/1</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head green">📚 kb_articles</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name field-fk">category_id</span><span class="field-type">FK → kb_categories</span></div>
+          <div class="field"><span class="field-name">title · slug</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">content</span><span class="field-type">TEXT (Markdown)</span></div>
+          <div class="field"><span class="field-name">is_published</span><span class="field-type">INTEGER 0/1</span></div>
+          <div class="field"><span class="field-name">views</span><span class="field-type">INTEGER</span></div>
+          <div class="field"><span class="field-name">helpful_yes · helpful_no</span><span class="field-type">INTEGER</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head pink">🔍 audit_logs</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name">user_email</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">action</span><span class="field-type">TEXT (ticket.created...)</span></div>
+          <div class="field"><span class="field-name">entity_type · entity_id</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">changes_json</span><span class="field-type">TEXT (JSON)</span></div>
+          <div class="field"><span class="field-name">ip</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">created_at</span><span class="field-type">TEXT (ISO 8601)</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head blue">⚡ automation_rules</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name">name</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">trigger_event</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">conditions_json</span><span class="field-type">TEXT (JSON array)</span></div>
+          <div class="field"><span class="field-name">actions_json</span><span class="field-type">TEXT (JSON array)</span></div>
+          <div class="field"><span class="field-name">is_active</span><span class="field-type">INTEGER 0/1</span></div>
+          <div class="field"><span class="field-name">runs_count</span><span class="field-type">INTEGER</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head blue">🔔 notifications</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name field-fk">user_id</span><span class="field-type">FK → users</span></div>
+          <div class="field"><span class="field-name">type</span><span class="field-type">info|success|warning|error</span></div>
+          <div class="field"><span class="field-name">title · message</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">link</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">is_read</span><span class="field-type">INTEGER 0/1</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head pink">🔑 api_keys</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name field-pk">id</span><span class="field-type">INTEGER PK</span></div>
+          <div class="field"><span class="field-name field-fk">user_id</span><span class="field-type">FK → users</span></div>
+          <div class="field"><span class="field-name">name</span><span class="field-type">TEXT</span></div>
+          <div class="field"><span class="field-name">key_prefix</span><span class="field-type">TEXT (8 chars)</span></div>
+          <div class="field"><span class="field-name">key_hash</span><span class="field-type">TEXT (SHA-256)</span></div>
+          <div class="field"><span class="field-name">permissions_json</span><span class="field-type">TEXT (JSON)</span></div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <div class="db-card-head green">📦 orders + referrals</div>
+        <div class="db-fields">
+          <div class="field"><span class="field-name">customer_json</span><span class="field-type">TEXT (JSON)</span></div>
+          <div class="field"><span class="field-name">items_json</span><span class="field-type">TEXT (JSON array)</span></div>
+          <div class="field"><span class="field-name">total · discount</span><span class="field-type">REAL</span></div>
+          <div class="field"><span class="field-name">status</span><span class="field-type">pending|confirmed...</span></div>
+          <div class="field" style="margin-top:8px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px"><span class="field-name">referral code</span><span class="field-type">TEXT UNIQUE</span></div>
+          <div class="field"><span class="field-name">discount · uses</span><span class="field-type">REAL · INT</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ FLOWS ════════════════════ -->
+<div class="diagram" id="tab-flows">
+  <div class="flow-wrap">
+
+    <div class="flow-section">
+      <div class="flow-title">Flujo de autenticación (JWT)</div>
+      <div class="flow-row">
+        <div class="flow-node-wrap"><div class="flow-node fn-user">Usuario</div><div class="flow-label">email + password</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">POST /api/login</div><div class="flow-label">Express.js</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-db">SELECT users WHERE email=?</div><div class="flow-label">SQLite</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">bcrypt.compare()</div><div class="flow-label">Verificar contraseña</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">jwt.sign()</div><div class="flow-label">Generar token 7d</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-user">{ token, user }</div><div class="flow-label">localStorage nxs_auth</div></div>
+      </div>
+    </div>
+
+    <div class="flow-section">
+      <div class="flow-title">Flujo de creación de ticket + notificación</div>
+      <div class="flow-row">
+        <div class="flow-node-wrap"><div class="flow-node fn-user">POST /api/tickets</div><div class="flow-label">Bearer token</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">auth() middleware</div><div class="flow-label">jwt.verify()</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-db">INSERT tickets</div><div class="flow-label">SLA calculado</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">runAutomations()</div><div class="flow-label">Reglas condicionales</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-notif">createNotification()</div><div class="flow-label">Para cada agente</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-db">INSERT audit_logs</div><div class="flow-label">IP + acción</div></div>
+      </div>
+    </div>
+
+    <div class="flow-section">
+      <div class="flow-title">Flujo de generación de contenido con IA</div>
+      <div class="flow-row">
+        <div class="flow-node-wrap"><div class="flow-node fn-user">POST /api/ai/generate-content</div><div class="flow-label">{ type, topic, tone }</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">aiLimiter (15/min)</div><div class="flow-label">Rate limit</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-ai">Anthropic SDK</div><div class="flow-label">claude-sonnet-4-5</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">messages.create()</div><div class="flow-label">System prompt + user</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-user">{ content }</div><div class="flow-label">Texto generado</div></div>
+      </div>
+    </div>
+
+    <div class="flow-section">
+      <div class="flow-title">Flujo de notificaciones en tiempo real (SSE)</div>
+      <div class="flow-row">
+        <div class="flow-node-wrap"><div class="flow-node fn-user">GET /api/notifications/stream</div><div class="flow-label">Conexión SSE persistente</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">sseClients.set(userId, res)</div><div class="flow-label">Guardado en Map</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">Evento en sistema</div><div class="flow-label">(ticket, orden, etc.)</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-db">INSERT notifications</div><div class="flow-label">BD persistente</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-notif">res.write(data)</div><div class="flow-label">Push al cliente</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-user">Badge actualizado</div><div class="flow-label">Sin recargar página</div></div>
+      </div>
+    </div>
+
+    <div class="flow-section">
+      <div class="flow-title">Flujo del motor de automatizaciones</div>
+      <div class="flow-row">
+        <div class="flow-node-wrap"><div class="flow-node fn-server">runAutomations(tenantId, event, data)</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-db">SELECT automation_rules WHERE event=? AND active=1</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">Evaluar condiciones (eq, neq, gt, lt, contains)</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-server">Ejecutar acciones (notify, set_field, set_status)</div></div>
+        <span class="fa">→</span>
+        <div class="flow-node-wrap"><div class="flow-node fn-db">UPDATE runs_count++</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════ SECURITY ════════════════════ -->
+<div class="diagram" id="tab-security">
+  <div class="sec-wrap">
+    <div class="sec-grid">
+      <div class="sec-card">
+        <h4>🔑 JWT — Tokens<span class="badge b-high">Alto</span></h4>
+        <p>Tokens firmados con <code>HS256</code>. Expiran en 7 días. Contienen: id, email, role, tenant_id. Verificados en cada petición por el middleware <code>auth()</code>. Almacenados en <code>localStorage</code>.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🔒 bcrypt — Contraseñas<span class="badge b-high">Alto</span></h4>
+        <p>Todas las contraseñas se hashean con <code>bcryptjs</code> con 12 rondas de sal. Imposible revertir el hash. En comparación de login se usa <code>bcrypt.compareSync()</code> — nunca texto plano.</p>
+      </div>
+      <div class="sec-card">
+        <h4>📱 2FA TOTP<span class="badge b-high">Alto</span></h4>
+        <p>Estándar RFC 6238. Secreto único por usuario generado con <code>otplib</code>. QR code para escanear con Google Authenticator. Código de 6 dígitos que cambia cada 30 segundos. El secreto se almacena cifrado en la BD.</p>
+      </div>
+      <div class="sec-card">
+        <h4>👥 RBAC — Roles<span class="badge b-high">Alto</span></h4>
+        <p>5 roles: Owner → Admin → Manager → Agent → Viewer. Middleware <code>requireRole(...roles)</code> aplicado en cada endpoint. La verificación ocurre en el <strong>servidor</strong>, no solo en el cliente.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🚦 Rate Limiting<span class="badge b-high">Alto</span></h4>
+        <p>Configuración por endpoint:<br>• Auth (login/register): <code>20 req / 15min</code><br>• IA endpoints: <code>15 req / min</code><br>• API general: <code>120 req / min</code><br>Bloqueo automático con error 429.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🛡️ Helmet.js<span class="badge b-high">Alto</span></h4>
+        <p>Headers HTTP automáticos: <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, <code>X-XSS-Protection</code>. Previene clickjacking, MIME sniffing y XSS reflejado.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🔍 Audit Log<span class="badge b-med">Medio</span></h4>
+        <p>Cada acción sensible registra en <code>audit_logs</code>: usuario, email, acción, entidad afectada, cambios en JSON, dirección IP y timestamp. Inmutable — solo lectura para admin/owner.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🗄️ SQL Injection — Prevención<span class="badge b-high">Alto</span></h4>
+        <p>100% de las queries usan <strong>prepared statements</strong> de <code>node:sqlite</code>. Nunca se construye SQL con interpolación de strings. Los parámetros siempre son pasados como argumentos separados.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🔑 API Keys — Almacenamiento<span class="badge b-high">Alto</span></h4>
+        <p>Las claves se generan como <code>nxs_[32 chars aleatorios]</code>. En base de datos se guarda solo el <strong>prefijo</strong> (8 chars) y el <strong>hash SHA-256</strong>. La clave completa solo se muestra una vez al crearla.</p>
+      </div>
+      <div class="sec-card">
+        <h4>⚠️ HTTPS/TLS<span class="badge b-med">Recomendado</span></h4>
+        <p>No implementado en el entorno de desarrollo local. Para producción se requiere certificado SSL/TLS (Let's Encrypt es gratuito) configurado en Nginx como reverse proxy frente a Express.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🔐 Contraseñas en .env<span class="badge b-med">Medio</span></h4>
+        <p>Las claves sensibles (ANTHROPIC_API_KEY, JWT_SECRET, SMTP_PASS) están en <code>server/.env</code> que nunca debe subirse a Git. El archivo <code>.gitignore</code> debe incluirlo explícitamente.</p>
+      </div>
+      <div class="sec-card">
+        <h4>🌐 CORS<span class="badge b-med">Medio</span></h4>
+        <p>Configurado con <code>origin: '*'</code> en desarrollo para facilitar las pruebas. En producción debe restringirse al dominio propio. Configuración centralizada en el middleware de Express.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.diagram').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

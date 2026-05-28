@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/jpeg" href="favicon.ico" />
+  <title>Iniciar sesion — Nexuss X Systems</title>
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .auth-page{min-height:calc(100vh - 130px);display:flex;align-items:center;justify-content:center;padding:40px 0}
+    .auth-shell{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:900px;width:100%}
+    @media(max-width:700px){.auth-shell{grid-template-columns:1fr}}
+    .auth-info{display:block}
+    @media(max-width:700px){.auth-info{display:none}}
+    .auth-card{padding:36px;max-width:420px;width:100%}
+    .auth-check{display:flex;align-items:center;gap:10px}
+    .input-wrap{position:relative}
+    .input-wrap input{
+      width:100%;padding:12px 14px 12px 44px;
+      background:var(--bg-2);border:1px solid var(--line);
+      border-radius:var(--border-radius);color:var(--ink);
+      font-size:1rem;font-family:inherit;transition:border-color .2s;box-sizing:border-box
+    }
+    .input-wrap input:focus{outline:none;border-color:#00d4ff;box-shadow:0 0 0 3px rgba(0,212,255,.12)}
+    .input-wrap input.err{border-color:#ef4444}
+    .input-wrap .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
+    .error-box{
+      background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);
+      border-radius:10px;padding:12px 14px;font-size:.85rem;color:#ef4444;
+      display:none;margin-bottom:4px
+    }
+    .success-box{
+      background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);
+      border-radius:10px;padding:12px 14px;font-size:.85rem;color:#22c55e;
+      display:none;margin-bottom:4px
+    }
+    .btn-login{width:100%;justify-content:center;font-size:1rem;padding:14px;margin-top:8px;position:relative}
+    .btn-login .spinner{
+      display:none;width:16px;height:16px;
+      border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+      border-radius:50%;animation:spin .7s linear infinite;margin-right:8px
+    }
+    .btn-login.loading .spinner{display:inline-block}
+    .btn-login.loading .btn-text{opacity:.7}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .info-list{list-style:none;padding:0}
+    .info-list li{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:.92rem;color:var(--muted)}
+    .info-list li::before{content:'✓';color:#00d4ff;font-weight:700;flex-shrink:0}
+    label{font-weight:500;font-size:.88rem;color:var(--muted);display:block;margin-bottom:6px}
+    .server-hint{
+      background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);
+      border-radius:8px;padding:10px 14px;font-size:.78rem;color:rgba(245,158,11,.9);
+      display:none;margin-top:8px
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Systems logo" />
+          Nexuss X Systems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menu</button>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html">Inicio</a>
+          <a href="servicios.html">Servicios</a>
+          <a href="fol.html">FOL/SDSS</a>
+          <a href="contacto.html">Contacto</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="auth-page">
+      <div class="auth-shell">
+
+        <!-- Info lateral -->
+        <div class="auth-info hero-panel reveal">
+          <span class="tag" style="background:rgba(0,212,255,.1);color:#00d4ff;border-color:rgba(0,212,255,.3);box-shadow:0 0 14px rgba(0,212,255,.2)">
+            Acceso seguro
+          </span>
+          <h2 class="hero-title" style="margin-top:14px;font-size:2rem">
+            Inicia sesion en tu panel
+          </h2>
+          <p class="sub lead" style="margin-top:12px;line-height:1.65">
+            Accede a tu dashboard, proyectos, soporte y panel de control exclusivo para clientes Nexuss X Systems.
+          </p>
+          <ul class="info-list" style="margin-top:24px">
+            <li>Gestiona tus proyectos en tiempo real</li>
+            <li>Acceso a soporte prioritario 24/7</li>
+            <li>Seguimiento de milestones y pagos</li>
+            <li>Descarga documentos y recursos</li>
+            <li>Panel de gestion de tareas Kanban</li>
+          </ul>
+          <div style="margin-top:28px;padding:16px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);border-radius:10px;font-size:.83rem;color:var(--muted)">
+            <strong style="color:#00d4ff">Cuenta de prueba:</strong><br />
+            Email: nexussxsistem@gmail.com<br />
+            Contrasena: la que usaste al registrarte
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="hero-card auth-card">
+          <h3 style="margin:0 0 6px;font-size:1.5rem">Iniciar sesion</h3>
+          <p style="margin:0 0 24px;color:var(--muted);font-size:.9rem">
+            Ingresa tus credenciales para acceder
+          </p>
+
+          <div class="error-box"   id="errorBox"></div>
+          <div class="success-box" id="successBox"></div>
+
+          <form id="loginForm" novalidate style="display:flex;flex-direction:column;gap:16px">
+
+            <div>
+              <label for="emailInput">Correo electronico</label>
+              <div class="input-wrap">
+                <span class="icon">✉</span>
+                <input id="emailInput" type="email" name="email"
+                  placeholder="tu@email.com" autocomplete="email" required />
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <label for="passInput" style="margin:0">Contrasena</label>
+                <a href="forgot-password.html" style="font-size:.8rem;color:#00d4ff;text-decoration:none">
+                  Olvide mi contrasena
+                </a>
+              </div>
+              <div class="input-wrap">
+                <span class="icon">🔒</span>
+                <input id="passInput" type="password" name="password"
+                  placeholder="Tu contrasena" autocomplete="current-password" required />
+              </div>
+            </div>
+
+            <div class="auth-check">
+              <input type="checkbox" id="rememberMe" name="remember"
+                style="cursor:pointer;width:16px;height:16px;accent-color:#00d4ff" />
+              <label for="rememberMe" style="font-size:.88rem;cursor:pointer;margin:0">
+                Recordarme en este dispositivo
+              </label>
+            </div>
+
+            <button type="submit" class="btn primary btn-login" id="loginBtn">
+              <span class="spinner"></span>
+              <span class="btn-text">Iniciar sesion</span>
+            </button>
+
+            <div class="server-hint" id="serverHint">
+              ⚠ El servidor no responde. Asegurate de que este corriendo:<br>
+              <code style="font-size:.75rem">INICIAR_SERVIDOR.bat</code>
+            </div>
+
+          </form>
+
+          <div style="display:flex;align-items:center;gap:12px;margin:24px 0;opacity:.4">
+            <div style="flex:1;height:1px;background:var(--line)"></div>
+            <span style="font-size:.82rem;color:var(--muted)">o</span>
+            <div style="flex:1;height:1px;background:var(--line)"></div>
+          </div>
+
+          <div style="text-align:center;font-size:.9rem;color:var(--muted)">
+            No tienes cuenta?
+            <a href="registro.html" style="color:#00d4ff;font-weight:600;text-decoration:none;margin-left:4px">
+              Crear cuenta
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:24px 0;text-align:center;color:var(--muted);font-size:.85rem">
+    <div class="container">
+      <p style="margin:0">&copy; 2026 Nexuss X Systems. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="nexus.js"></script>
+  <script>
+    // URL base — usa NXS si existe, si no fallback directo
+    const API_BASE = (window.NXS && NXS.API_BASE) || 'http://localhost:3002';
+
+    // Si ya esta autenticado con token valido, ir al home
+    (function checkExisting() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('nxs_auth') || 'null');
+        if (stored && stored.token) {
+          // Verificar que no sea excesivamente viejo (7 dias)
+          const age = Date.now() - (stored.timestamp || 0);
+          if (age < 7 * 24 * 60 * 60 * 1000) {
+            window.location.href = 'home.html';
+          } else {
+            localStorage.removeItem('nxs_auth');
+          }
+        }
+      } catch(e) {
+        localStorage.removeItem('nxs_auth');
+      }
+    })();
+
+    const form      = document.getElementById('loginForm');
+    const btn       = document.getElementById('loginBtn');
+    const errorBox  = document.getElementById('errorBox');
+    const successBox= document.getElementById('successBox');
+    const serverHint= document.getElementById('serverHint');
+
+    function showError(msg) {
+      errorBox.textContent   = msg;
+      errorBox.style.display = 'block';
+      successBox.style.display = 'none';
+      serverHint.style.display = 'none';
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    function showSuccess(msg) {
+      successBox.textContent   = msg;
+      successBox.style.display = 'block';
+      errorBox.style.display   = 'none';
+    }
+
+    function clearMessages() {
+      errorBox.style.display   = 'none';
+      successBox.style.display = 'none';
+      serverHint.style.display = 'none';
+    }
+
+    // Prellenar email guardado
+    const savedEmail = localStorage.getItem('nxs_remember');
+    if (savedEmail) {
+      document.getElementById('emailInput').value = savedEmail;
+      document.getElementById('rememberMe').checked = true;
+    }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      clearMessages();
+
+      const email    = document.getElementById('emailInput').value.trim().toLowerCase();
+      const password = document.getElementById('passInput').value;
+      const remember = document.getElementById('rememberMe').checked;
+
+      // Validacion basica
+      document.getElementById('emailInput').classList.remove('err');
+      document.getElementById('passInput').classList.remove('err');
+
+      if (!email) {
+        showError('Ingresa tu correo electronico.');
+        document.getElementById('emailInput').classList.add('err');
+        document.getElementById('emailInput').focus();
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('El correo electronico no es valido.');
+        document.getElementById('emailInput').classList.add('err');
+        document.getElementById('emailInput').focus();
+        return;
+      }
+      if (!password) {
+        showError('Ingresa tu contrasena.');
+        document.getElementById('passInput').classList.add('err');
+        document.getElementById('passInput').focus();
+        return;
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(API_BASE + '/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.token) {
+          // Login exitoso
+          showSuccess('Acceso concedido. Redirigiendo...');
+          localStorage.setItem('nxs_auth', JSON.stringify({
+            token:     data.token,
+            user:      data.user,
+            timestamp: Date.now()
+          }));
+          localStorage.setItem('nxs_token', data.token);
+          if (window.NXS) {
+            localStorage.setItem('nxs_user', JSON.stringify(data.user));
+          }
+          if (remember) {
+            localStorage.setItem('nxs_remember', email);
+          } else {
+            localStorage.removeItem('nxs_remember');
+          }
+          setTimeout(() => { window.location.href = 'home.html'; }, 600);
+
+        } else if (response.status === 200 && data.requires_2fa) {
+          showError('Esta cuenta tiene 2FA activo. Ingresa tu codigo TOTP.');
+          btn.classList.remove('loading');
+          btn.disabled = false;
+
+        } else {
+          const msg = (data && (data.error || data.message)) || 'Credenciales incorrectas. Verifica tu email y contrasena.';
+          showError(msg);
+          document.getElementById('passInput').value = '';
+          document.getElementById('passInput').focus();
+        }
+
+      } catch (err) {
+        console.warn('[Login] Error de red:', err.message);
+        showError('No se puede conectar al servidor.');
+        serverHint.style.display = 'block';
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
