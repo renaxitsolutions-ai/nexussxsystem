@@ -486,26 +486,26 @@ if (taskCatCount === 0) {
   const c5 = icat.run('Documentación',     '#f59e0b', '📝').lastInsertRowid;
 
   const itask = db.prepare(`INSERT INTO tasks (tenant_id, category_id, title, description, status, priority, assigned_email, progress, due_date) VALUES (1,?,?,?,?,?,?,?,?)`);
-  itask.run(c1,'Crear página de inicio (index.html)','Diseñar y codificar la página principal del proyecto usando HTML5 y CSS3.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-10');
-  itask.run(c1,'Implementar sistema de autenticación','Desarrollar login, registro y verificación por correo electrónico.','completada','urgente','nexussxsistem@gmail.com',100,'2026-04-12');
-  itask.run(c1,'Desarrollar API REST con Express','Crear endpoints para usuarios, tareas, tickets y reportes.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-15');
-  itask.run(c2,'Diseñar paleta de colores y tipografía','Definir variables CSS, tema oscuro y sistema de diseño.','completada','normal','nexussxsistem@gmail.com',100,'2026-04-08');
-  itask.run(c2,'Crear componentes reutilizables CSS','Botones, tarjetas, badges, modales y tablas en nexus.css.','completada','normal','nexussxsistem@gmail.com',100,'2026-04-14');
-  itask.run(c3,'Diseñar esquema de base de datos','Definir tablas, relaciones y llaves foráneas en SQLite.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-11');
-  itask.run(c3,'Crear registros semilla (20 por tabla)','Poblar la base de datos con datos de prueba realistas.','completada','normal','nexussxsistem@gmail.com',100,'2026-04-20');
-  itask.run(c3,'Implementar roles y permisos de BD','Configurar roles: owner, admin, manager, agent, viewer.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-18');
-  itask.run(c3,'Configurar backup automático de datos','Sistema de respaldo de la base de datos SQLite.','en_progreso','alta','nexussxsistem@gmail.com',75,'2026-05-25');
-  itask.run(c4,'Implementar JWT y rate limiting','Asegurar la API con tokens JWT y límites de petición.','completada','urgente','nexussxsistem@gmail.com',100,'2026-04-16');
-  itask.run(c4,'Configurar CORS y Helmet','Añadir cabeceras de seguridad HTTP al servidor Express.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-17');
-  itask.run(c1,'Desarrollar panel de tareas (tareas.html)','Página para crear, asignar, filtrar y completar tareas.','en_progreso','alta','nexussxsistem@gmail.com',80,'2026-05-28');
-  itask.run(c1,'Integrar Chart.js para reportes','Gráficos de barras, dona y línea en el módulo de reportes.','completada','normal','nexussxsistem@gmail.com',100,'2026-04-25');
-  itask.run(c5,'Redactar documentación técnica','Manual técnico del sistema con arquitectura y APIs.','completada','normal','nexussxsistem@gmail.com',100,'2026-05-01');
-  itask.run(c5,'Crear manual de usuario','Guía de uso de la plataforma para usuarios finales.','completada','normal','nexussxsistem@gmail.com',100,'2026-05-05');
-  itask.run(c2,'Diseñar módulo FOL/SDSS','Página informativa sobre el Sistema Dominicano de Seguridad Social.','en_progreso','alta','nexussxsistem@gmail.com',60,'2026-05-30');
-  itask.run(c1,'Implementar módulo CRM','Gestión de contactos, deals y pipeline de ventas.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-22');
-  itask.run(c1,'Desarrollar sistema de tickets de soporte','Módulo de soporte con prioridades, SLA y comentarios.','completada','alta','nexussxsistem@gmail.com',100,'2026-04-28');
-  itask.run(c1,'Crear portafolio de trabajos realizados','Sección con ejemplos de proyectos anteriores.','en_progreso','normal','nexussxsistem@gmail.com',50,'2026-06-01');
-  itask.run(c4,'Realizar pruebas de seguridad (QA)','Verificar inyección SQL, XSS, autenticación y autorización.','pendiente','alta','nexussxsistem@gmail.com',0,'2026-06-05');
+  itask.run(c1,'Crear página de inicio (index.html)','Diseñar y codificar la página principal del proyecto usando HTML5 y CSS3.','completada','alta','nexussxsistems@gmail.com',100,'2026-04-10');
+  itask.run(c1,'Implementar sistema de autenticación','Desarrollar login, registro y verificación por correo electrónico.','completada','urgente','nexussxsistems@gmail.com',100,'2026-04-12');
+  itask.run(c1,'Desarrollar API REST con Express','Crear endpoints para usuarios, tareas, tickets y reportes.','completada','alta','nexussxsistems@gmail.com',100,'2026-04-15');
+  itask.run(c2,'Diseñar paleta de colores y tipografía','Definir variables CSS, tema oscuro y sistema de diseño.','completada','normal','nexussxsistems@gmail.com',100,'2026-04-08');
+  itask.run(c2,'Crear componentes reutilizables CSS','Botones, tarjetas, badges, modales y tablas en nexus.css.','completada','normal','nexussxsistems@gmail.com',100,'2026-04-14');
+  itask.run(c3,'Diseñar esquema de base de datos','Definir tablas, relaciones y llaves foráneas en SQLite.','completada','alta','nexussxsistems@gmail.com',100,'2026-04-11');
+  itask.run(c3,'Crear registros semilla (20 por tabla)','Poblar la base de datos con datos de prueba realistas.','completada','normal','nexussxsistems@gmail.com',100,'2026-04-20');
+  itask.run(c3,'Implementar roles y permisos de BD','Configurar roles: owner, admin, manager, agent, viewer.','completada','alta','nexussxsistems@gmail.com',100,'2026-04-18');
+  itask.run(c3,'Configurar backup automático de datos','Sistema de respaldo de la base de datos SQLite.','en_progreso','alta','nexussxsistems@gmail.com',75,'2026-05-25');
+  itask.run(c4,'Implementar JWT y rate limiting','Asegurar la API con tokens JWT y límites de petición.','completada','urgente','nexussxsistems@gmail.com',100,'2026-04-16');
+  itask.run(c4,'Configurar CORS y Helmet','Añadir cabeceras de seguridad HTTP al servidor Express.','completada','alta','nexussxsistems@gmail.com',100,'2026-04-17');
+  itask.run(c1,'Desarrollar panel de tareas (tareas.html)','Página para crear, asignar, filtrar y completar tareas.','en_progreso','alta','nexussxsistems@gmail.com',80,'2026-05-28');
+  itask.run(c1,'Integrar Chart.js para reportes','Gráficos de barras, dona y línea en el módulo de reportes.','completada','normal','nexussxsistems@gmail.com',100,'2026-04-25');
+  itask.run(c5,'Redactar documentación técnica','Manual técnico del sistema con arquitectura y APIs.','completada','normal','nexussxsistems@gmail.com',100,'2026-05-01');
+  itask.run(c5,'Crear manual de usuario','Guía de uso de la plataforma para usuarios finales.','completada','normal','nexussxsistems@gmail.com',100,'2026-05-05');
+  itask.run(c2,'Diseñar módulo FOL/SDSS','Página informativa sobre el Sistema Dominicano de Seguridad Social.','en_progreso','alta','nexussxsistems@gmail.com',60,'2026-05-30');
+  itask.run(c1,'Implementar módulo CRM','Gestión de contactos, deals y pipeline de ventas.','completada','alta','nexussxsistems@gmail.com',100,'2026-04-22');
+  itask.run(c1,'Desarrollar sistema de tickets de soporte','Módulo de soporte con prioridades, SLA y comentarios.','completada','alta','nexussxsistems@gmail.com',100,'2026-04-28');
+  itask.run(c1,'Crear portafolio de trabajos realizados','Sección con ejemplos de proyectos anteriores.','en_progreso','normal','nexussxsistems@gmail.com',50,'2026-06-01');
+  itask.run(c4,'Realizar pruebas de seguridad (QA)','Verificar inyección SQL, XSS, autenticación y autorización.','pendiente','alta','nexussxsistems@gmail.com',0,'2026-06-05');
 }
 
 // ─── SEED 20 CONTACTS ────────────────────────────────────────────────────────
