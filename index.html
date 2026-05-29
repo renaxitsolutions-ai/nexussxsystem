@@ -5,6 +5,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Nexuss X Sistems — Desarrollo Web e IA</title>
+  <!-- Redirect autenticado ANTES de renderizar — elimina el flash de nav pública -->
+  <script>
+    (function(){
+      if (localStorage.getItem('nxs_auth') && sessionStorage.getItem('nxs_intro_done')) {
+        window.location.replace('home.html');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="nexus.css" />
 </head>
 <body>
