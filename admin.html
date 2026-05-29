@@ -683,9 +683,9 @@ function loadAlertsTab() {
       } else {
         res.innerHTML = `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px;color:#ef4444">❌ Error: ${data.error||'No se pudo enviar'}</div>`;
       }
-    } catch(e) { res.style.display='block'; res.innerHTML = '<span style="color:#ef4444">Error conectando al servidor.</span>'; }
+    } catch(e) { res.style.display='block'; res.innerHTML = '<span style="color:#ef4444">Error conectando al servidor. El servidor puede estar iniciando (espera 30 seg y reintenta).</span>'; }
     this.disabled = false; this.textContent = 'Enviar email de prueba';
-  }, { once: true });
+  });
 
   // Check overdue
   document.getElementById('btnCheckOverdue').addEventListener('click', async function() {
@@ -724,9 +724,9 @@ function loadAlertsTab() {
             <span style="font-size:.72rem;padding:2px 8px;border-radius:8px;${a.sent?'background:rgba(34,197,94,.15);color:#22c55e':'background:rgba(245,158,11,.15);color:#f59e0b'}">${a.sent?'Enviado':'Simulado'}</span>
           </div>`).join('');
       }
-    } catch(e) { res.style.display='block'; res.innerHTML = '<span style="color:#ef4444">Error conectando al servidor.</span>'; }
+    } catch(e) { res.style.display='block'; res.innerHTML = '<span style="color:#ef4444">Error conectando al servidor. El servidor puede estar iniciando (espera 30 seg y reintenta).</span>'; }
     this.disabled = false; this.textContent = 'Verificar y enviar alertas';
-  }, { once: true });
+  });
 }
 
 function showEmailPreview(encodedHtml) {
