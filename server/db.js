@@ -591,4 +591,16 @@ function interpolate(str, data) {
   return str.replace(/\{\{(\w+)\}\}/g, (_, k) => data[k] || '');
 }
 
+// ─── GARANTIZAR ROL OWNER AL ADMIN EMAIL ─────────────────────────────────────
+// Cada vez que el servidor arranca, el ADMIN_EMAIL siempre tiene rol owner.
+// Esto corrige cuentas que quedaron con rol viewer por error en el registro.
+if (process.env.ADMIN_EMAIL) {
+  const adminEmail = process.env.ADMIN_EMAIL.toLowerCase().trim();
+  const adminUser = db.prepare("SELECT id, role FROM users WHERE email=? AND tenant_id=1").get(adminEmail);
+  if (adminUser && adminUser.role !== 'owner') {
+    db.prepare("UPDATE users SET role='owner' WHERE email=? AND tenant_id=1").run(adminEmail);
+    console.log(`[DB] Admin role fixed: ${adminEmail} → owner`);
+  }
+}
+
 console.log('[DB] SQLite ready:', dbPath);
