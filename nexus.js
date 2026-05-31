@@ -2565,6 +2565,11 @@ document.addEventListener('DOMContentLoaded', () => {
   bindScrollProgress();
   bindInteractiveCards();
   bindMoreDropdown();
+  // Brand logo → home
+  document.querySelectorAll('.brand').forEach(b => {
+    b.style.cursor = 'pointer';
+    b.addEventListener('click', () => { location.href = 'home.html'; });
+  });
   html.classList.add('js');
 });
 

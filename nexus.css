@@ -56,7 +56,7 @@ header{
   box-shadow: var(--shadow);
 }
 nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:16px}
-.brand{display:flex;align-items:center;gap:12px;font-family:"Space Grotesk", sans-serif;font-weight:700;letter-spacing:.2px}
+.brand{display:flex;align-items:center;gap:12px;font-family:"Space Grotesk", sans-serif;font-weight:700;letter-spacing:.2px;cursor:pointer;text-decoration:none;color:inherit;user-select:none}
 .brand-logo{
   width:40px;height:40px;border-radius:50%;
   object-fit:cover;background:var(--bg-2);padding:2px;
@@ -1940,22 +1940,22 @@ header{isolation:auto}
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: 1px solid rgba(0,255,136,0.45);
-  background: rgba(4,22,14,0.88);
+  border: 1px solid rgba(0,212,255,0.45);
+  background: rgba(4,12,28,0.92);
   cursor: pointer;
   font-size: 1.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.25s ease;
-  box-shadow: 0 0 20px rgba(0,255,136,0.3);
+  box-shadow: 0 0 20px rgba(0,212,255,0.3);
   backdrop-filter: blur(10px);
-  color: #00ff88;
+  color: #00d4ff;
 }
 #jarvis-agent-btn:hover {
-  background: rgba(0,255,136,0.14);
+  background: rgba(0,212,255,0.14);
   transform: scale(1.1);
-  box-shadow: 0 0 34px rgba(0,255,136,0.55);
+  box-shadow: 0 0 34px rgba(0,212,255,0.55);
 }
 .jarvis-badge {
   position: absolute;
@@ -1963,7 +1963,7 @@ header{isolation:auto}
   right: -2px;
   width: 11px;
   height: 11px;
-  background: #00ff88;
+  background: #00d4ff;
   border-radius: 50%;
   border: 2px solid #080c14;
   animation: jarvisPulse 1.8s ease-in-out infinite;
@@ -1977,9 +1977,9 @@ header{isolation:auto}
   max-height: 620px;
   z-index: 901;
   background: rgba(6,14,28,0.97);
-  border: 1px solid rgba(0,255,136,0.22);
+  border: 1px solid rgba(0,212,255,0.22);
   border-radius: 16px;
-  box-shadow: 0 28px 64px rgba(0,0,0,0.65), 0 0 40px rgba(0,255,136,0.1);
+  box-shadow: 0 28px 64px rgba(0,0,0,0.65), 0 0 40px rgba(0,212,255,0.1);
   backdrop-filter: blur(22px);
   display: flex;
   flex-direction: column;
@@ -1999,14 +1999,14 @@ header{isolation:auto}
   align-items: center;
   gap: 10px;
   padding: 13px 15px 11px;
-  border-bottom: 1px solid rgba(0,255,136,0.1);
+  border-bottom: 1px solid rgba(0,212,255,0.1);
 }
 .jarvis-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1.5px solid rgba(0,255,136,0.4);
-  background: rgba(0,255,136,0.07);
+  border: 1.5px solid rgba(0,212,255,0.4);
+  background: rgba(0,212,255,0.07);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2017,13 +2017,13 @@ header{isolation:auto}
 .jarvis-panel-title strong {
   display: block;
   font-size: 0.85rem;
-  color: #00ff88;
+  color: #00d4ff;
   font-family: "Space Grotesk", sans-serif;
   letter-spacing: .5px;
 }
 .jarvis-panel-title span {
   font-size: 0.72rem;
-  color: rgba(0,255,136,0.55);
+  color: rgba(0,212,255,0.55);
 }
 .jarvis-panel-close {
   background: none;
@@ -2046,7 +2046,7 @@ header{isolation:auto}
   flex-direction: column;
   gap: 9px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0,255,136,0.18) transparent;
+  scrollbar-color: rgba(0,212,255,0.18) transparent;
 }
 .jarvis-msg {
   max-width: 88%;
@@ -2058,8 +2058,8 @@ header{isolation:auto}
 }
 .jarvis-msg.jarvis {
   align-self: flex-start;
-  background: rgba(0,255,136,0.06);
-  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,212,255,0.06);
+  border: 1px solid rgba(0,212,255,0.14);
   color: rgba(255,255,255,0.88);
   border-bottom-left-radius: 3px;
 }
@@ -2073,7 +2073,7 @@ header{isolation:auto}
 .jarvis-msg a {
   display: inline-block;
   margin-top: 5px;
-  color: #00ff88;
+  color: #00d4ff;
   font-size: 0.77rem;
   text-decoration: underline;
   opacity: 0.82;
@@ -2087,7 +2087,7 @@ header{isolation:auto}
   font-weight: 700;
   letter-spacing: .8px;
   color: #080c14;
-  background: #00ff88;
+  background: #00d4ff;
   border-radius: 4px;
   padding: 1px 5px;
   margin-left: 5px;
@@ -2098,11 +2098,11 @@ header{isolation:auto}
 .jv-online-dot {
   display: inline-block;
   width: 7px; height: 7px;
-  background: #00ff88;
+  background: #00d4ff;
   border-radius: 50%;
   margin-right: 3px;
   vertical-align: middle;
-  box-shadow: 0 0 6px #00ff88;
+  box-shadow: 0 0 6px #00d4ff;
   animation: jarvisPulse 1.8s ease-in-out infinite;
 }
 .jv-clear-btn {
@@ -2116,13 +2116,13 @@ header{isolation:auto}
   transition: color 0.2s;
   line-height: 1;
 }
-.jv-clear-btn:hover { color: rgba(0,255,136,0.7); }
+.jv-clear-btn:hover { color: rgba(0,212,255,0.7); }
 
 /* Code blocks */
 .jv-code-block {
   position: relative;
   background: rgba(0,0,0,0.45);
-  border: 1px solid rgba(0,255,136,0.18);
+  border: 1px solid rgba(0,212,255,0.18);
   border-radius: 8px;
   margin: 6px 0;
   padding: 10px 12px 10px;
@@ -2133,14 +2133,14 @@ header{isolation:auto}
   font-family: "Courier New", Courier, monospace;
   font-size: 0.78rem;
   line-height: 1.5;
-  color: #a8ffce;
+  color: #a8d8ff;
   white-space: pre;
   overflow-x: auto;
 }
 .jv-code-lang {
   display: inline-block;
   font-size: 0.65rem;
-  color: rgba(0,255,136,0.55);
+  color: rgba(0,212,255,0.55);
   letter-spacing: .6px;
   text-transform: uppercase;
   margin-bottom: 5px;
@@ -2150,32 +2150,32 @@ header{isolation:auto}
   position: absolute;
   top: 7px;
   right: 8px;
-  background: rgba(0,255,136,0.08);
-  border: 1px solid rgba(0,255,136,0.28);
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.28);
   border-radius: 5px;
-  color: rgba(0,255,136,0.75);
+  color: rgba(0,212,255,0.75);
   font-size: 0.68rem;
   padding: 2px 8px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.18s;
 }
-.jv-copy-btn:hover { background: rgba(0,255,136,0.2); color: #00ff88; }
+.jv-copy-btn:hover { background: rgba(0,212,255,0.2); color: #00d4ff; }
 
 /* Inline code */
 .jv-inline-code {
-  background: rgba(0,255,136,0.08);
-  border: 1px solid rgba(0,255,136,0.2);
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.2);
   border-radius: 4px;
   padding: 1px 5px;
   font-family: "Courier New", Courier, monospace;
   font-size: 0.8em;
-  color: #a8ffce;
+  color: #a8d8ff;
 }
 
 /* Headers */
 .jv-h {
-  color: #00ff88;
+  color: #00d4ff;
   font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   margin: 8px 0 3px;
@@ -2201,8 +2201,8 @@ h4.jv-h { font-size: 0.82rem; }
 .jarvis-typing {
   align-self: flex-start;
   padding: 9px 14px;
-  background: rgba(0,255,136,0.06);
-  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,212,255,0.06);
+  border: 1px solid rgba(0,212,255,0.14);
   border-radius: 12px;
   border-bottom-left-radius: 3px;
   display: flex;
@@ -2212,7 +2212,7 @@ h4.jv-h { font-size: 0.82rem; }
 .jarvis-typing span {
   width: 5px;
   height: 5px;
-  background: #00ff88;
+  background: #00d4ff;
   border-radius: 50%;
   animation: jarvisDot 1.2s infinite;
 }
@@ -2224,13 +2224,13 @@ h4.jv-h { font-size: 0.82rem; }
   flex-wrap: wrap;
   gap: 6px;
   padding: 8px 11px 6px;
-  border-top: 1px solid rgba(0,255,136,0.07);
+  border-top: 1px solid rgba(0,212,255,0.07);
 }
 .jarvis-faq-chip {
-  background: rgba(0,255,136,0.06);
-  border: 1px solid rgba(0,255,136,0.28);
+  background: rgba(0,212,255,0.06);
+  border: 1px solid rgba(0,212,255,0.28);
   border-radius: 20px;
-  color: rgba(0,255,136,0.85);
+  color: rgba(0,212,255,0.85);
   font-size: 0.73rem;
   padding: 5px 11px;
   cursor: pointer;
@@ -2239,21 +2239,21 @@ h4.jv-h { font-size: 0.82rem; }
   white-space: nowrap;
 }
 .jarvis-faq-chip:hover {
-  background: rgba(0,255,136,0.16);
-  color: #00ff88;
-  box-shadow: 0 0 10px rgba(0,255,136,0.22);
+  background: rgba(0,212,255,0.16);
+  color: #00d4ff;
+  box-shadow: 0 0 10px rgba(0,212,255,0.22);
 }
 
 .jarvis-input-row {
   display: flex;
   gap: 7px;
   padding: 9px 11px 11px;
-  border-top: 1px solid rgba(0,255,136,0.09);
+  border-top: 1px solid rgba(0,212,255,0.09);
 }
 .jarvis-input-row input {
   flex: 1;
   background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(0,255,136,0.18);
+  border: 1px solid rgba(0,212,255,0.18);
   border-radius: 8px;
   padding: 8px 11px;
   color: #fff;
@@ -2262,13 +2262,13 @@ h4.jv-h { font-size: 0.82rem; }
   outline: none;
   transition: border-color 0.2s;
 }
-.jarvis-input-row input:focus { border-color: rgba(0,255,136,0.45); }
+.jarvis-input-row input:focus { border-color: rgba(0,212,255,0.45); }
 .jarvis-input-row input::placeholder { color: rgba(255,255,255,0.22); }
 .jarvis-input-row button {
-  background: rgba(0,255,136,0.1);
-  border: 1px solid rgba(0,255,136,0.32);
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.32);
   border-radius: 8px;
-  color: #00ff88;
+  color: #00d4ff;
   padding: 8px 13px;
   font-size: 0.82rem;
   cursor: pointer;
@@ -2277,8 +2277,8 @@ h4.jv-h { font-size: 0.82rem; }
   white-space: nowrap;
 }
 .jarvis-input-row button:hover {
-  background: rgba(0,255,136,0.2);
-  box-shadow: 0 0 14px rgba(0,255,136,0.28);
+  background: rgba(0,212,255,0.2);
+  box-shadow: 0 0 14px rgba(0,212,255,0.28);
 }
 
 @keyframes jarvisPulse {
