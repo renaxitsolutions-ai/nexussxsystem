@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VentaMax Pro — Multiplica tus ventas hoy</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --azul:#0a2540;--acento:#00c6ff;--dorado:#f59e0b;
+      --bg:#f8fafc;--texto:#1e293b;--muted:#64748b;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--texto);line-height:1.6;}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;
+      background:rgba(10,37,64,.97);backdrop-filter:blur(10px);
+      padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:66px;
+      border-bottom:1px solid rgba(0,198,255,.15);}
+    .nav-brand{font-size:1.35rem;font-weight:800;color:#fff;letter-spacing:-.5px;}
+    .nav-brand span{color:var(--acento);}
+    .nav-links{display:flex;gap:28px;list-style:none;}
+    .nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.93rem;transition:color .2s;}
+    .nav-links a:hover{color:var(--acento);}
+    .nav-cta{background:var(--acento);color:#0a2540;padding:9px 22px;border-radius:6px;
+      font-weight:700;font-size:.9rem;text-decoration:none;transition:all .2s;}
+    .nav-cta:hover{background:#fff;box-shadow:0 0 18px rgba(0,198,255,.5);}
+
+    /* HERO */
+    .hero{min-height:100vh;background:linear-gradient(135deg,#0a2540 0%,#0d3761 50%,#0a2540 100%);
+      display:flex;align-items:center;padding:90px 5% 60px;position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;inset:0;
+      background:radial-gradient(circle at 70% 50%,rgba(0,198,255,.12) 0%,transparent 60%);
+      pointer-events:none;}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto;width:100%;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;
+      background:rgba(0,198,255,.12);border:1px solid rgba(0,198,255,.3);
+      color:var(--acento);padding:6px 14px;border-radius:50px;font-size:.8rem;font-weight:600;
+      margin-bottom:20px;letter-spacing:.05em;}
+    .hero h1{font-size:clamp(2rem,4vw,3.4rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:18px;}
+    .hero h1 span{color:var(--acento);}
+    .hero p{color:rgba(255,255,255,.75);font-size:1.05rem;margin-bottom:28px;max-width:520px;}
+    .hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+    .btn-hero{padding:14px 30px;border-radius:8px;font-weight:700;font-size:1rem;
+      text-decoration:none;transition:all .25s;border:none;cursor:pointer;}
+    .btn-primary{background:linear-gradient(135deg,var(--acento),#0070d8);color:#fff;
+      box-shadow:0 6px 28px rgba(0,198,255,.4);}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,198,255,.55);}
+    .btn-ghost{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.35);}
+    .btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.08);}
+    .hero-trust{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+    .trust-item{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.65);font-size:.85rem;}
+    .trust-item span{color:var(--acento);}
+
+    /* Hero visual */
+    .hero-visual{position:relative;}
+    .dash-mockup{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      border-radius:16px;padding:20px;backdrop-filter:blur(10px);}
+    .dash-header{display:flex;gap:8px;margin-bottom:16px;}
+    .dash-dot{width:10px;height:10px;border-radius:50%;}
+    .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .kpi{background:rgba(255,255,255,.08);border-radius:10px;padding:14px;}
+    .kpi-val{font-size:1.6rem;font-weight:800;color:#fff;}
+    .kpi-val.up{color:#22c55e;}
+    .kpi-val.accent{color:var(--acento);}
+    .kpi-label{font-size:.75rem;color:rgba(255,255,255,.5);margin-top:2px;}
+    .kpi-change{font-size:.72rem;color:#22c55e;margin-top:4px;}
+    .chart-bar-wrap{background:rgba(255,255,255,.05);border-radius:8px;padding:12px;}
+    .chart-label{font-size:.7rem;color:rgba(255,255,255,.45);margin-bottom:8px;}
+    .bars{display:flex;align-items:flex-end;gap:5px;height:60px;}
+    .bar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--acento),rgba(0,198,255,.3));
+      transition:all .3s;}
+
+    /* STATS */
+    .stats{background:#0a2540;padding:50px 5%;}
+    .stats-inner{max-width:1100px;margin:0 auto;
+      display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center;}
+    .stat-val{font-size:2.5rem;font-weight:900;color:var(--acento);margin-bottom:6px;}
+    .stat-lbl{color:rgba(255,255,255,.6);font-size:.9rem;}
+
+    /* SECTION common */
+    .section{padding:80px 5%;}
+    .section-inner{max-width:1100px;margin:0 auto;}
+    .section-tag{display:inline-block;background:rgba(0,198,255,.1);color:var(--acento);
+      font-size:.78rem;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:50px;
+      margin-bottom:14px;border:1px solid rgba(0,198,255,.25);}
+    .section-title{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;color:var(--azul);
+      margin-bottom:12px;line-height:1.25;}
+    .section-sub{color:var(--muted);font-size:1rem;max-width:580px;margin:0 auto 40px;}
+    .text-center{text-align:center;}
+
+    /* FEATURES */
+    .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
+    .feat-card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 2px 16px rgba(0,0,0,.06);
+      border:1px solid #e2e8f0;transition:all .25s;}
+    .feat-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.1);
+      border-color:var(--acento);}
+    .feat-icon{font-size:2rem;margin-bottom:14px;}
+    .feat-title{font-size:1.05rem;font-weight:700;color:var(--azul);margin-bottom:8px;}
+    .feat-text{color:var(--muted);font-size:.9rem;line-height:1.65;}
+
+    /* HOW IT WORKS */
+    .how-bg{background:linear-gradient(180deg,#f0f9ff 0%,#fff 100%);}
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;position:relative;}
+    .steps::before{content:'';position:absolute;top:36px;left:10%;width:80%;height:2px;
+      background:linear-gradient(90deg,var(--acento),var(--dorado));
+      display:block;}
+    .step{text-align:center;padding:0 16px;position:relative;}
+    .step-num{width:72px;height:72px;border-radius:50%;
+      background:linear-gradient(135deg,var(--acento),#0070d8);
+      color:#fff;font-size:1.3rem;font-weight:900;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 16px;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,198,255,.4);}
+    .step-title{font-size:1rem;font-weight:700;color:var(--azul);margin-bottom:6px;}
+    .step-text{color:var(--muted);font-size:.85rem;}
+
+    /* PRICING */
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:960px;margin:0 auto;}
+    .price-card{background:#fff;border-radius:16px;padding:32px;
+      border:2px solid #e2e8f0;text-align:center;position:relative;transition:all .25s;}
+    .price-card.popular{border-color:var(--acento);box-shadow:0 8px 40px rgba(0,198,255,.2);}
+    .popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+      background:linear-gradient(135deg,var(--acento),#0070d8);
+      color:#fff;font-size:.72rem;font-weight:700;padding:4px 18px;border-radius:50px;white-space:nowrap;}
+    .price-name{font-size:.85rem;font-weight:700;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;}
+    .price-val{font-size:2.8rem;font-weight:900;color:var(--azul);margin-bottom:4px;}
+    .price-val sup{font-size:1.2rem;vertical-align:top;margin-top:8px;}
+    .price-period{color:var(--muted);font-size:.85rem;margin-bottom:20px;}
+    .price-features{list-style:none;margin-bottom:24px;text-align:left;}
+    .price-features li{padding:6px 0;color:#475569;font-size:.9rem;border-bottom:1px solid #f1f5f9;}
+    .price-features li::before{content:'✓ ';color:#22c55e;font-weight:700;}
+    .btn-price{display:block;padding:12px;border-radius:8px;font-weight:700;font-size:.95rem;
+      text-decoration:none;transition:all .2s;text-align:center;}
+    .btn-price.outline{border:2px solid var(--azul);color:var(--azul);}
+    .btn-price.outline:hover{background:var(--azul);color:#fff;}
+    .btn-price.filled{background:linear-gradient(135deg,var(--acento),#0070d8);color:#fff;
+      box-shadow:0 4px 18px rgba(0,198,255,.35);}
+    .btn-price.filled:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,198,255,.5);}
+
+    /* CTA */
+    .cta-section{background:linear-gradient(135deg,#0a2540,#0d3761);padding:80px 5%;text-align:center;}
+    .cta-section h2{font-size:clamp(1.6rem,3vw,2.6rem);font-weight:900;color:#fff;margin-bottom:14px;}
+    .cta-section p{color:rgba(255,255,255,.7);font-size:1rem;margin-bottom:32px;max-width:500px;margin-left:auto;margin-right:auto;}
+    .cta-form{display:flex;gap:12px;max-width:480px;margin:0 auto;flex-wrap:wrap;}
+    .cta-input{flex:1;padding:14px 18px;border-radius:8px;border:none;font-size:1rem;min-width:200px;}
+    .cta-btn{background:var(--acento);color:#0a2540;padding:14px 26px;border-radius:8px;
+      border:none;font-weight:800;font-size:1rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .cta-btn:hover{background:#fff;box-shadow:0 0 20px rgba(0,198,255,.5);}
+
+    /* FOOTER */
+    footer{background:#020c1a;color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:.85rem;}
+    footer a{color:var(--acento);text-decoration:none;}
+
+    @media(max-width:768px){
+      .hero-grid,.stats-inner,.steps{grid-template-columns:1fr;}
+      .steps::before{display:none;}
+      .hero-visual{display:none;}
+      nav{padding:0 4%;}
+      .nav-links{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">Venta<span>Max</span> Pro</div>
+  <ul class="nav-links">
+    <li><a href="#features">Características</a></li>
+    <li><a href="#como-funciona">Cómo funciona</a></li>
+    <li><a href="#precios">Precios</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="#contacto" class="nav-cta">Comenzar gratis →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge">🚀 <span>+340% en conversiones promedio</span></div>
+      <h1>Convierte visitantes en clientes.<br><span>Multiplica tus ventas</span> con tecnología que vende sola.</h1>
+      <p>La plataforma de landing pages más poderosa de LATAM. Diseñada para empresas que necesitan resultados reales, no solo presencia en internet.</p>
+      <div class="hero-btns">
+        <a href="#contacto" class="btn-hero btn-primary">Quiero más ventas →</a>
+        <a href="#como-funciona" class="btn-hero btn-ghost">Ver cómo funciona</a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item"><span>✓</span> Sin contrato mínimo</div>
+        <div class="trust-item"><span>✓</span> Resultados en 7 días</div>
+        <div class="trust-item"><span>✓</span> Soporte 24/7</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="dash-mockup">
+        <div class="dash-header">
+          <div class="dash-dot" style="background:#ff5f57"></div>
+          <div class="dash-dot" style="background:#fbbf24"></div>
+          <div class="dash-dot" style="background:#22c55e"></div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-val up">+84%</div>
+            <div class="kpi-label">Conversión</div>
+            <div class="kpi-change">↑ vs. mes anterior</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val accent">DOP 280k</div>
+            <div class="kpi-label">Ventas este mes</div>
+            <div class="kpi-change">↑ +120% YoY</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val" style="color:#f59e0b">1,842</div>
+            <div class="kpi-label">Leads captados</div>
+            <div class="kpi-change">↑ 38% más</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val" style="color:#a855f7">98%</div>
+            <div class="kpi-label">Satisfacción</div>
+            <div class="kpi-change">⭐⭐⭐⭐⭐</div>
+          </div>
+        </div>
+        <div class="chart-bar-wrap">
+          <div class="chart-label">Ventas últimos 7 días</div>
+          <div class="bars">
+            <div class="bar" style="height:35%"></div>
+            <div class="bar" style="height:52%"></div>
+            <div class="bar" style="height:44%"></div>
+            <div class="bar" style="height:68%"></div>
+            <div class="bar" style="height:75%"></div>
+            <div class="bar" style="height:90%"></div>
+            <div class="bar" style="height:100%;background:linear-gradient(180deg,#f59e0b,rgba(245,158,11,.3))"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div><div class="stat-val">+6</div><div class="stat-lbl">Proyectos entregados</div></div>
+    <div><div class="stat-val">2+</div><div class="stat-lbl">Años de experiencia</div></div>
+    <div><div class="stat-val">24/7</div><div class="stat-lbl">Soporte y mantenimiento</div></div>
+    <div><div class="stat-val">100%</div><div class="stat-lbl">Clientes satisfechos</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="text-center">
+      <div class="section-tag">✦ CARACTERÍSTICAS</div>
+      <h2 class="section-title">Todo lo que necesitas para <span style="color:var(--acento)">vender más</span></h2>
+      <p class="section-sub">Herramientas profesionales que combinan diseño, psicología del consumidor y tecnología.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Carga ultra rápida</div>
+        <div class="feat-text">Cada segundo de demora cuesta ventas. Nuestras páginas cargan en menos de 1.5 segundos y superan 95/100 en Google PageSpeed.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎯</div>
+        <div class="feat-title">Diseño orientado a conversión</div>
+        <div class="feat-text">Cada elemento — color, tipografía, copy y CTA — está posicionado estratégicamente para guiar al visitante hacia la compra.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📱</div>
+        <div class="feat-title">100% responsivo</div>
+        <div class="feat-text">El 72% del tráfico viene de móvil. Tus páginas se ven y convierten igual de bien en cualquier dispositivo o pantalla.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">Chatbot IA incluido</div>
+        <div class="feat-text">Jarvis responde las preguntas de tus clientes 24/7, captura leads y agenda citas mientras tú duermes.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Analytics en tiempo real</div>
+        <div class="feat-text">Dashboard con métricas de conversión, fuente de tráfico, heat maps y análisis de comportamiento del usuario.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔗</div>
+        <div class="feat-title">Integraciones sin límites</div>
+        <div class="feat-text">Conecta con WhatsApp Business, Stripe, PayPal, Mailchimp, Google Ads, Meta Pixel y más de 40 herramientas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section how-bg" id="como-funciona">
+  <div class="section-inner">
+    <div class="text-center">
+      <div class="section-tag">🔄 PROCESO</div>
+      <h2 class="section-title">De cero a ventas en <span style="color:var(--acento)">7 días</span></h2>
+      <p class="section-sub">Un proceso simple y probado que entrega resultados rápidos.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Diagnóstico</div>
+        <div class="step-text">Analizamos tu negocio, tu mercado y tu competencia para diseñar una estrategia ganadora.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Diseño</div>
+        <div class="step-text">Creamos el diseño visual y el copy persuasivo que conecta con tu cliente ideal.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Desarrollo</div>
+        <div class="step-text">Construimos la página con código limpio, optimizado para velocidad y SEO.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Lanzamiento</div>
+        <div class="step-text">Publicamos, configuramos analytics y te entregamos con soporte completo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="precios" style="background:#f8fafc;">
+  <div class="section-inner">
+    <div class="text-center">
+      <div class="section-tag">💎 PLANES</div>
+      <h2 class="section-title">Elige tu plan y <span style="color:var(--acento)">empieza a vender</span></h2>
+      <p class="section-sub">Precios transparentes. Sin sorpresas. Sin letras pequeñas.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">STARTER</div>
+        <div class="price-val"><sup>$</sup>299</div>
+        <div class="price-period">pago único</div>
+        <ul class="price-features">
+          <li>Landing page profesional</li>
+          <li>Formulario de contacto</li>
+          <li>Integración WhatsApp</li>
+          <li>Optimización SEO básica</li>
+          <li>30 días de soporte</li>
+        </ul>
+        <a href="#contacto" class="btn-price outline">Comenzar →</a>
+      </div>
+      <div class="price-card popular">
+        <div class="popular-badge">⭐ MÁS POPULAR</div>
+        <div class="price-name">GROWTH</div>
+        <div class="price-val"><sup>$</sup>599</div>
+        <div class="price-period">pago único</div>
+        <ul class="price-features">
+          <li>Landing page premium</li>
+          <li>Chatbot IA (Jarvis)</li>
+          <li>Dashboard de métricas</li>
+          <li>Integración Stripe / PayPal</li>
+          <li>Analytics avanzadas</li>
+          <li>3 meses de soporte</li>
+        </ul>
+        <a href="#contacto" class="btn-price filled">Quiero este plan →</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">ENTERPRISE</div>
+        <div class="price-val">A medida</div>
+        <div class="price-period">cotización personalizada</div>
+        <ul class="price-features">
+          <li>Sistema completo a medida</li>
+          <li>Múltiples páginas</li>
+          <li>CRM integrado</li>
+          <li>Automatizaciones IA</li>
+          <li>Soporte prioritario 24/7</li>
+        </ul>
+        <a href="#contacto" class="btn-price outline">Hablar con equipo →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contacto">
+  <h2>¿Listo para multiplicar tus ventas?</h2>
+  <p>Escríbenos ahora y recibe una propuesta personalizada sin costo en menos de 24 horas.</p>
+  <div class="cta-form">
+    <input class="cta-input" type="email" placeholder="tu@email.com" id="ctaEmail">
+    <button class="cta-btn" onclick="submitCta()">Quiero más ventas →</button>
+  </div>
+  <div style="margin-top:16px;color:rgba(255,255,255,.5);font-size:.82rem">
+    También puedes escribirnos por
+    <a href="https://wa.me/18293689630" target="_blank" style="color:#25d366;font-weight:600">WhatsApp</a>
+  </div>
+</section>
+
+<footer>
+  <p>Desarrollado por <a href="#">Nexuss X Sistems</a> · © 2026 · Todos los derechos reservados</p>
+</footer>
+
+<script>
+function submitCta() {
+  const email = document.getElementById('ctaEmail').value.trim();
+  if (!email || !email.includes('@')) { alert('Por favor ingresa un email válido'); return; }
+  alert('¡Gracias! Nos pondremos en contacto contigo en menos de 24 horas. 🚀');
+  document.getElementById('ctaEmail').value = '';
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+
+// Animate bars on load
+window.addEventListener('load', () => {
+  document.querySelectorAll('.bar').forEach((b,i) => {
+    const h = b.style.height;
+    b.style.height = '0%';
+    setTimeout(() => { b.style.transition='height .8s ease'; b.style.height = h; }, 300 + i*80);
+  });
+});
+</script>
+</body>
+</html>

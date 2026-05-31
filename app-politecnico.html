@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoliApp — App Politécnico</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--panel:#161b22;--border:#30363d;
+      --blue:#58a6ff;--green:#3fb950;--orange:#f0883e;
+      --purple:#a371f7;--red:#f85149;--yellow:#e3b341;
+      --text:#c9d1d9;--muted:#8b949e;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+    /* TOPBAR */
+    .topbar{background:var(--panel);border-bottom:1px solid var(--border);
+      padding:0 20px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50;}
+    .topbar-brand{font-weight:700;font-size:1rem;color:var(--blue);display:flex;align-items:center;gap:8px;}
+    .topbar-tabs{display:flex;gap:4px;margin-left:auto;}
+    .tab-btn{background:transparent;border:none;color:var(--muted);padding:6px 14px;
+      border-radius:6px;cursor:pointer;font-size:.85rem;transition:all .2s;}
+    .tab-btn:hover{color:var(--text);background:rgba(255,255,255,.06);}
+    .tab-btn.active{color:var(--blue);background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.2);}
+
+    /* CONTENT */
+    .app-content{flex:1;padding:20px;}
+    .screen{display:none;}
+    .screen.active{display:block;}
+
+    /* CARDS */
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+    .card-title{font-weight:700;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+    /* DASHBOARD */
+    .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px;}
+    .kpi-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;
+      display:flex;flex-direction:column;gap:4px;}
+    .kpi-icon{font-size:1.4rem;margin-bottom:4px;}
+    .kpi-val{font-size:1.7rem;font-weight:800;}
+    .kpi-lbl{font-size:.78rem;color:var(--muted);}
+    .grade-a{color:var(--green);}
+    .grade-b{color:var(--yellow);}
+    .grade-c{color:var(--orange);}
+
+    /* HORARIO */
+    .schedule-grid{display:grid;grid-template-columns:60px repeat(5,1fr);gap:2px;}
+    .sch-head{background:rgba(88,166,255,.1);border-radius:4px;padding:6px;text-align:center;
+      font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.05em;}
+    .sch-time{font-size:.7rem;color:var(--muted);padding:6px 4px;display:flex;align-items:center;justify-content:flex-end;}
+    .sch-cell{border-radius:4px;padding:4px 6px;font-size:.72rem;min-height:38px;cursor:default;}
+    .sch-cell.empty{background:transparent;}
+    .sch-cell.cls{border-left:3px solid;padding-left:7px;}
+    .cls-blue{background:rgba(88,166,255,.12);border-color:var(--blue);color:var(--blue);}
+    .cls-green{background:rgba(63,185,80,.1);border-color:var(--green);color:var(--green);}
+    .cls-orange{background:rgba(240,136,62,.1);border-color:var(--orange);color:var(--orange);}
+    .cls-purple{background:rgba(163,113,247,.1);border-color:var(--purple);color:var(--purple);}
+    .cls-yellow{background:rgba(227,179,65,.1);border-color:var(--yellow);color:var(--yellow);}
+
+    /* NOTAS */
+    .notas-table{width:100%;border-collapse:collapse;}
+    .notas-table th,.notas-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:.88rem;}
+    .notas-table th{color:var(--muted);font-size:.75rem;letter-spacing:.06em;font-weight:600;}
+    .badge{display:inline-block;padding:2px 8px;border-radius:50px;font-size:.72rem;font-weight:700;}
+    .badge-green{background:rgba(63,185,80,.15);color:var(--green);}
+    .badge-yellow{background:rgba(227,179,65,.15);color:var(--yellow);}
+    .badge-red{background:rgba(248,81,73,.15);color:var(--red);}
+    .badge-blue{background:rgba(88,166,255,.15);color:var(--blue);}
+
+    /* TAREAS */
+    .task-item{display:flex;align-items:center;gap:12px;padding:12px 0;
+      border-bottom:1px solid var(--border);}
+    .task-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);
+      cursor:pointer;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+    .task-check.done{background:var(--green);border-color:var(--green);}
+    .task-info{flex:1;}
+    .task-name{font-size:.9rem;font-weight:500;}
+    .task-name.done{text-decoration:line-through;color:var(--muted);}
+    .task-due{font-size:.75rem;color:var(--muted);margin-top:2px;}
+    .task-priority{font-size:.7rem;padding:2px 8px;border-radius:50px;font-weight:700;}
+    .p-alta{background:rgba(248,81,73,.15);color:var(--red);}
+    .p-media{background:rgba(227,179,65,.15);color:var(--yellow);}
+    .p-baja{background:rgba(63,185,80,.15);color:var(--green);}
+
+    /* MÚSICA */
+    .music-search-row{display:flex;gap:10px;margin-bottom:16px;}
+    .music-input{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);
+      color:var(--text);padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;}
+    .music-input:focus{border-color:var(--blue);}
+    .music-input::placeholder{color:var(--muted);}
+    .btn{background:var(--blue);color:#0d1117;padding:10px 18px;border-radius:8px;
+      border:none;cursor:pointer;font-weight:700;font-size:.85rem;transition:all .2s;white-space:nowrap;}
+    .btn:hover{background:#79bcff;}
+    .btn:disabled{opacity:.4;cursor:not-allowed;}
+    .btn-sm{padding:6px 12px;font-size:.75rem;}
+    .btn-outline{background:transparent;color:var(--blue);border:1px solid var(--blue);}
+    .btn-outline:hover{background:rgba(88,166,255,.1);}
+    .btn-red{background:var(--red);color:#fff;}
+    .btn-red:hover{background:#ff6961;}
+    .btn-green{background:var(--green);color:#0d1117;}
+    .btn-green:hover{background:#57d568;}
+
+    .results-list,.library-list{display:flex;flex-direction:column;gap:8px;}
+    .track-item{background:rgba(255,255,255,.04);border:1px solid var(--border);
+      border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+    .track-art{width:46px;height:46px;border-radius:6px;object-fit:cover;flex-shrink:0;
+      background:rgba(255,255,255,.08);}
+    .track-info{flex:1;min-width:0;}
+    .track-name{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .track-artist{font-size:.75rem;color:var(--muted);margin-top:2px;}
+    .track-actions{display:flex;gap:7px;flex-shrink:0;}
+
+    /* Player */
+    .player-bar{background:var(--panel);border:1px solid var(--border);
+      border-radius:10px;padding:16px;margin-bottom:16px;}
+    .player-top{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+    .player-art{width:52px;height:52px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.08);}
+    .player-info{flex:1;}
+    .player-name{font-weight:700;font-size:.95rem;}
+    .player-artist{font-size:.78rem;color:var(--muted);}
+    .player-btns{display:flex;gap:10px;align-items:center;}
+    .play-btn{width:40px;height:40px;border-radius:50%;background:var(--blue);border:none;
+      cursor:pointer;font-size:1rem;color:#0d1117;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+    .play-btn:hover{background:#79bcff;transform:scale(1.08);}
+    .prog-row{display:flex;align-items:center;gap:10px;}
+    .prog-time{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:36px;}
+    .prog-bar{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;cursor:pointer;position:relative;}
+    .prog-fill{height:100%;background:var(--blue);border-radius:2px;pointer-events:none;}
+    .vol-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+    .vol-slider{flex:1;accent-color:var(--blue);}
+
+    /* Status */
+    .status-msg{font-size:.8rem;color:var(--muted);padding:8px 0;min-height:22px;}
+    .status-msg.ok{color:var(--green);}
+    .status-msg.err{color:var(--red);}
+    .status-msg.loading{color:var(--yellow);}
+
+    /* Offline badge */
+    .offline-badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;
+      padding:2px 8px;border-radius:50px;background:rgba(63,185,80,.12);color:var(--green);border:1px solid rgba(63,185,80,.25);}
+    .online-badge{background:rgba(88,166,255,.12);color:var(--blue);border-color:rgba(88,166,255,.25);}
+
+    /* Progress anim */
+    .dl-progress{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:6px;}
+    .dl-progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));
+      width:0%;transition:width .3s;border-radius:2px;}
+    .dl-progress-fill.anim{animation:dlSpin 1.5s ease-in-out infinite;}
+    @keyframes dlSpin{0%,100%{width:20%;margin-left:0}50%{width:50%;margin-left:30%}}
+
+    @media(max-width:600px){
+      .topbar-tabs{gap:2px;}
+      .tab-btn{padding:6px 10px;font-size:.78rem;}
+      .schedule-grid{grid-template-columns:45px repeat(5,1fr);}
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">🎓 PoliApp</div>
+  <div class="topbar-tabs">
+    <button class="tab-btn active" onclick="showScreen('dashboard')">🏠 Inicio</button>
+    <button class="tab-btn" onclick="showScreen('horario')">📅 Horario</button>
+    <button class="tab-btn" onclick="showScreen('notas')">📊 Notas</button>
+    <button class="tab-btn" onclick="showScreen('tareas')">✅ Tareas</button>
+    <button class="tab-btn" onclick="showScreen('musica')">🎵 Música</button>
+  </div>
+</div>
+
+<div class="app-content">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="screen active" id="screen-dashboard">
+    <h2 style="margin-bottom:16px;font-size:1.2rem">👋 Bienvenido, Estudiante</h2>
+
+    <div class="dash-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">📚</div>
+        <div class="kpi-val" style="color:var(--blue)">6</div>
+        <div class="kpi-lbl">Materias activas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-val grade-b">8.4</div>
+        <div class="kpi-lbl">Promedio general</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-val grade-a">3</div>
+        <div class="kpi-lbl">Tareas pendientes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🎵</div>
+        <div class="kpi-val" style="color:var(--purple)" id="libCount">0</div>
+        <div class="kpi-lbl">Canciones offline</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📌 Próximas entregas</div>
+      <div id="nextTasks"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📣 Avisos</div>
+      <div style="font-size:.88rem;line-height:1.8;color:var(--muted)">
+        • Examen de Bases de Datos — Miércoles 4 de Junio · Aula 302<br>
+        • Entrega de proyecto final de Programación Web — Viernes 6 de Junio<br>
+        • Día festivo: Lunes 9 de Junio — No hay clases
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HORARIO ══ -->
+  <div class="screen" id="screen-horario">
+    <div class="card">
+      <div class="card-title">📅 Horario Semanal — 5to Año Informática</div>
+      <div style="overflow-x:auto">
+        <div class="schedule-grid" style="min-width:500px">
+          <div class="sch-head"></div>
+          <div class="sch-head">LUN</div>
+          <div class="sch-head">MAR</div>
+          <div class="sch-head">MIÉ</div>
+          <div class="sch-head">JUE</div>
+          <div class="sch-head">VIE</div>
+
+          <div class="sch-time">7:00</div>
+          <div class="sch-cell cls cls-blue">Prog. Web<br><span style="font-size:.65rem">Aula 201</span></div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell cls cls-orange">Base Datos<br><span style="font-size:.65rem">Lab 1</span></div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell cls cls-purple">Redes<br><span style="font-size:.65rem">Aula 301</span></div>
+
+          <div class="sch-time">9:00</div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell cls cls-green">Inglés Téc.<br><span style="font-size:.65rem">Aula 105</span></div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell cls cls-blue">Prog. Web<br><span style="font-size:.65rem">Lab 2</span></div>
+          <div class="sch-cell empty"></div>
+
+          <div class="sch-time">11:00</div>
+          <div class="sch-cell cls cls-yellow">FOL / SDSS<br><span style="font-size:.65rem">Aula 204</span></div>
+          <div class="sch-cell cls cls-orange">Base Datos<br><span style="font-size:.65rem">Lab 1</span></div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell cls cls-purple">Redes<br><span style="font-size:.65rem">Aula 301</span></div>
+          <div class="sch-cell cls cls-green">Inglés Téc.<br><span style="font-size:.65rem">Aula 105</span></div>
+
+          <div class="sch-time">13:00</div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell cls cls-yellow">FOL / SDSS<br><span style="font-size:.65rem">Aula 204</span></div>
+          <div class="sch-cell empty"></div>
+          <div class="sch-cell empty"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;font-size:.75rem">
+        <span style="color:var(--blue)">■ Prog. Web</span>
+        <span style="color:var(--orange)">■ Base Datos</span>
+        <span style="color:var(--green)">■ Inglés Téc.</span>
+        <span style="color:var(--purple)">■ Redes</span>
+        <span style="color:var(--yellow)">■ FOL/SDSS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTAS ══ -->
+  <div class="screen" id="screen-notas">
+    <div class="card">
+      <div class="card-title">📊 Calificaciones — 5to Año Informática</div>
+      <table class="notas-table">
+        <thead>
+          <tr>
+            <th>MATERIA</th>
+            <th>NOTA 1</th>
+            <th>NOTA 2</th>
+            <th>NOTA 3</th>
+            <th>PROMEDIO</th>
+            <th>ESTADO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Programación Web</td>
+            <td>9.2</td><td>8.8</td><td>9.5</td>
+            <td><strong>9.2</strong></td>
+            <td><span class="badge badge-green">APROBADO</span></td>
+          </tr>
+          <tr>
+            <td>Base de Datos</td>
+            <td>8.0</td><td>7.5</td><td>8.3</td>
+            <td><strong>7.9</strong></td>
+            <td><span class="badge badge-green">APROBADO</span></td>
+          </tr>
+          <tr>
+            <td>Redes Informáticas</td>
+            <td>7.2</td><td>6.8</td><td>7.0</td>
+            <td><strong>7.0</strong></td>
+            <td><span class="badge badge-yellow">REGULAR</span></td>
+          </tr>
+          <tr>
+            <td>Inglés Técnico</td>
+            <td>9.5</td><td>9.0</td><td>9.8</td>
+            <td><strong>9.4</strong></td>
+            <td><span class="badge badge-green">APROBADO</span></td>
+          </tr>
+          <tr>
+            <td>FOL / SDSS</td>
+            <td>8.5</td><td>8.0</td><td>8.7</td>
+            <td><strong>8.4</strong></td>
+            <td><span class="badge badge-green">APROBADO</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr style="font-weight:700">
+            <td colspan="4">PROMEDIO GENERAL</td>
+            <td>8.4</td>
+            <td><span class="badge badge-blue">HONOR</span></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAREAS ══ -->
+  <div class="screen" id="screen-tareas">
+    <div class="card">
+      <div class="card-title">✅ Tareas y Entregas</div>
+      <div id="taskList"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <input id="newTask" class="music-input" placeholder="Nueva tarea..." style="max-width:300px">
+        <input id="newDue" type="date" class="music-input" style="max-width:160px">
+        <button class="btn btn-sm" onclick="addTask()">+ Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MÚSICA ══ -->
+  <div class="screen" id="screen-musica">
+
+    <!-- Player -->
+    <div class="player-bar" id="playerBar">
+      <div class="player-top">
+        <img class="player-art" id="playerArt" src="" alt="">
+        <div class="player-info">
+          <div class="player-name" id="playerName">Sin reproducción</div>
+          <div class="player-artist" id="playerArtist">Selecciona una canción</div>
+          <div id="playerOfflineBadge" style="margin-top:4px"></div>
+        </div>
+        <div class="player-btns">
+          <button class="play-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
+        </div>
+      </div>
+      <div class="prog-row">
+        <span class="prog-time" id="currentTime">0:00</span>
+        <div class="prog-bar" id="progBar" onclick="seekAudio(event)">
+          <div class="prog-fill" id="progFill" style="width:0%"></div>
+        </div>
+        <span class="prog-time" id="totalTime">0:00</span>
+      </div>
+      <div class="vol-row">
+        <span style="font-size:.8rem">🔊</span>
+        <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.8" oninput="setVol()">
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card">
+      <div class="card-title">🔍 Buscar música <span style="font-size:.72rem;color:var(--muted);font-weight:400">— iTunes Search API (previewas de 30s)</span></div>
+      <div class="music-search-row">
+        <input class="music-input" id="searchInput" placeholder="Artista, canción, álbum..." onkeydown="if(event.key==='Enter')searchMusic()">
+        <button class="btn" id="searchBtn" onclick="searchMusic()">🔍 Buscar</button>
+      </div>
+      <div class="status-msg" id="searchStatus"></div>
+      <div class="results-list" id="resultsList"></div>
+    </div>
+
+    <!-- Library -->
+    <div class="card">
+      <div class="card-title">📦 Mi biblioteca offline <span id="offlineCount" style="font-size:.78rem;color:var(--muted);font-weight:400"></span></div>
+      <div class="status-msg" id="libStatus"></div>
+      <div class="library-list" id="libraryList"></div>
+    </div>
+  </div>
+
+</div><!-- /app-content -->
+
+<audio id="audioEl" style="display:none"></audio>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   PoliApp — Politécnico App
+   Módulos: Dashboard · Horario · Notas · Tareas · Música
+   Música: iTunes Search API + IndexedDB offline storage
+═══════════════════════════════════════════════════════════ */
+
+// ── NAVIGATION ──────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.toLowerCase().includes(name.slice(0,3))) b.classList.add('active');
+  });
+}
+
+// ── TAREAS (localStorage) ────────────────────────────────────────
+const DEF_TASKS = [
+  { id:1, name:'Proyecto final de Programación Web', due:'2026-06-06', done:false, priority:'alta' },
+  { id:2, name:'Estudiar Bases de Datos — Relaciones', due:'2026-06-04', done:false, priority:'alta' },
+  { id:3, name:'Entregar reporte de Redes', due:'2026-06-10', done:false, priority:'media' },
+  { id:4, name:'Ejercicio inglés — Vocabulary Ch.8', due:'2026-06-03', done:true,  priority:'baja' },
+];
+
+function getTasks() {
+  const stored = localStorage.getItem('poliapp_tasks');
+  return stored ? JSON.parse(stored) : DEF_TASKS;
+}
+function saveTasks(tasks) { localStorage.setItem('poliapp_tasks', JSON.stringify(tasks)); }
+
+function renderTasks() {
+  const tasks = getTasks();
+  const list = document.getElementById('taskList');
+  if (!tasks.length) { list.innerHTML='<div style="color:var(--muted);font-size:.88rem;padding:10px 0">Sin tareas pendientes 🎉</div>'; return; }
+  list.innerHTML = tasks.map((t,i) => `
+    <div class="task-item">
+      <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${i})">${t.done?'✓':''}</div>
+      <div class="task-info">
+        <div class="task-name ${t.done?'done':''}">${t.name}</div>
+        <div class="task-due">📅 ${t.due || '—'}</div>
+      </div>
+      <span class="task-priority p-${t.priority}">${t.priority}</span>
+      <button style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:.9rem" onclick="deleteTask(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function toggleTask(i) {
+  const tasks = getTasks(); tasks[i].done = !tasks[i].done; saveTasks(tasks); renderTasks(); renderNextTasks();
+}
+function deleteTask(i) {
+  const tasks = getTasks(); tasks.splice(i,1); saveTasks(tasks); renderTasks(); renderNextTasks();
+}
+function addTask() {
+  const name = document.getElementById('newTask').value.trim();
+  const due  = document.getElementById('newDue').value;
+  if (!name) return;
+  const tasks = getTasks();
+  tasks.unshift({ id: Date.now(), name, due, done:false, priority:'media' });
+  saveTasks(tasks); renderTasks(); renderNextTasks();
+  document.getElementById('newTask').value = '';
+  document.getElementById('newDue').value  = '';
+}
+
+function renderNextTasks() {
+  const tasks = getTasks().filter(t => !t.done).slice(0,3);
+  const el = document.getElementById('nextTasks');
+  if (!tasks.length) { el.innerHTML='<div style="color:var(--muted);font-size:.88rem">¡Sin pendientes! Todo listo. 🎉</div>'; return; }
+  el.innerHTML = tasks.map(t => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:.85rem;flex:1">${t.name}</span>
+      <span style="font-size:.72rem;color:var(--muted)">${t.due||'—'}</span>
+      <span class="task-priority p-${t.priority}" style="font-size:.68rem;padding:2px 7px">${t.priority}</span>
+    </div>
+  `).join('');
+}
+
+// ── IndexedDB ────────────────────────────────────────────────────
+const DB_NAME = 'poliapp_music', DB_VER = 1, STORE = 'tracks';
+let db = null;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: 'id' });
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+function dbSave(track) {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(track).onsuccess = () => res();
+    tx.onerror = e => rej(e.target.error);
+  });
+}
+function dbGetAll() {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(STORE,'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = e => res(e.target.result);
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+function dbDelete(id) {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).delete(id).onsuccess = () => res();
+    tx.onerror = e => rej(e.target.error);
+  });
+}
+
+// ── MÚSICA — Search ──────────────────────────────────────────────
+async function searchMusic() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  const btn = document.getElementById('searchBtn');
+  const status = document.getElementById('searchStatus');
+  const list   = document.getElementById('resultsList');
+  btn.disabled = true;
+  status.className = 'status-msg loading';
+  status.textContent = '🔍 Buscando...';
+  list.innerHTML = '';
+
+  try {
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=15&country=US`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.results.length) {
+      status.className = 'status-msg'; status.textContent = 'Sin resultados para "' + q + '"'; btn.disabled=false; return;
+    }
+
+    status.className = 'status-msg ok';
+    status.textContent = `✓ ${data.results.length} canciones encontradas`;
+
+    const saved = (await dbGetAll()).map(t => t.id);
+    list.innerHTML = data.results.map(t => {
+      const isSaved = saved.includes(String(t.trackId));
+      const art = t.artworkUrl100 || '';
+      return `<div class="track-item" id="result-${t.trackId}">
+        <img class="track-art" src="${art}" alt="" onerror="this.style.display='none'">
+        <div class="track-info">
+          <div class="track-name">${t.trackName}</div>
+          <div class="track-artist">${t.artistName} · ${t.collectionName||''}</div>
+        </div>
+        <div class="track-actions">
+          <button class="btn btn-sm btn-outline" onclick='playPreview(${JSON.stringify({id:String(t.trackId),name:t.trackName,artist:t.artistName,art:"${art}",url:t.previewUrl||""})})'>▶</button>
+          ${t.previewUrl ? `<button class="btn btn-sm btn-green" id="dl-${t.trackId}" onclick='downloadTrack(${JSON.stringify({id:String(t.trackId),name:t.trackName,artist:t.artistName,art:"${art}",url:t.previewUrl})})' ${isSaved?'disabled':''}>
+            ${isSaved?'✓ Guardado':'↓ Guardar'}
+          </button>` : '<span style="font-size:.72rem;color:var(--muted)">Sin preview</span>'}
+        </div>
+      </div>`;
+    }).join('');
+
+  } catch(e) {
+    status.className = 'status-msg err';
+    status.textContent = '✘ Error de red. Verifica tu conexión.';
+  }
+  btn.disabled = false;
+}
+
+// ── MÚSICA — Download (to IndexedDB) ────────────────────────────
+async function downloadTrack(track) {
+  const btn = document.getElementById('dl-' + track.id);
+  if (btn) { btn.disabled = true; btn.textContent = '⟳'; }
+
+  try {
+    const res = await fetch(track.url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const ab = await res.arrayBuffer();
+    await dbSave({ ...track, data: ab, savedAt: Date.now() });
+    if (btn) { btn.textContent = '✓ Guardado'; btn.className = 'btn btn-sm'; btn.style.opacity='.5'; }
+    await renderLibrary();
+    setStatus('libStatus', `✓ "${track.name}" guardada para escuchar offline`, 'ok');
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '↓ Guardar'; }
+    setStatus('libStatus', '✘ Error al descargar: ' + e.message, 'err');
+  }
+}
+
+// ── MÚSICA — Library ─────────────────────────────────────────────
+async function renderLibrary() {
+  const tracks = await dbGetAll();
+  const list = document.getElementById('libraryList');
+  const countEl = document.getElementById('offlineCount');
+  countEl.textContent = tracks.length ? `(${tracks.length} canción${tracks.length>1?'es':''})` : '';
+  document.getElementById('libCount').textContent = tracks.length;
+
+  if (!tracks.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:.88rem;padding:8px 0">Descarga canciones arriba para escucharlas sin internet 📥</div>';
+    return;
+  }
+
+  list.innerHTML = tracks.map(t => `
+    <div class="track-item">
+      <img class="track-art" src="${t.art||''}" alt="" onerror="this.style.display='none'">
+      <div class="track-info">
+        <div class="track-name">${t.name}</div>
+        <div class="track-artist">${t.artist}</div>
+        <span class="offline-badge" style="font-size:.65rem;margin-top:4px">📦 Offline</span>
+      </div>
+      <div class="track-actions">
+        <button class="btn btn-sm btn-outline" onclick='playOffline("${t.id}")'>▶</button>
+        <button class="btn btn-sm btn-red" onclick='deleteOffline("${t.id}")'>✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteOffline(id) {
+  await dbDelete(id);
+  await renderLibrary();
+}
+
+// ── MÚSICA — Player ──────────────────────────────────────────────
+const audioEl = document.getElementById('audioEl');
+let currentTrackOffline = false;
+
+function playPreview(track) {
+  if (!track.url) { setStatus('searchStatus','Sin preview disponible','err'); return; }
+  currentTrackOffline = false;
+  audioEl.src = track.url;
+  audioEl.volume = parseFloat(document.getElementById('volSlider').value);
+  audioEl.play().catch(e => setStatus('libStatus','Error de reproducción: '+e.message,'err'));
+  updatePlayerUI(track);
+  document.getElementById('playerOfflineBadge').innerHTML = '<span class="online-badge" style="font-size:.65rem">🌐 Stream</span>';
+}
+
+async function playOffline(id) {
+  const tracks = await dbGetAll();
+  const t = tracks.find(x => x.id === id);
+  if (!t) return;
+  const blob = new Blob([t.data], { type: 'audio/mpeg' });
+  const url  = URL.createObjectURL(blob);
+  currentTrackOffline = true;
+  audioEl.src = url;
+  audioEl.volume = parseFloat(document.getElementById('volSlider').value);
+  audioEl.play().catch(e => setStatus('libStatus','Error de reproducción: '+e.message,'err'));
+  updatePlayerUI({ name:t.name, artist:t.artist, art:t.art||'' });
+  document.getElementById('playerOfflineBadge').innerHTML = '<span class="offline-badge" style="font-size:.65rem">📦 Offline</span>';
+}
+
+function updatePlayerUI(track) {
+  document.getElementById('playerName').textContent   = track.name;
+  document.getElementById('playerArtist').textContent = track.artist;
+  const art = document.getElementById('playerArt');
+  if (track.art) { art.src = track.art; art.style.display='block'; }
+  document.getElementById('playPauseBtn').textContent = '⏸';
+}
+
+function togglePlay() {
+  if (audioEl.paused) { audioEl.play(); document.getElementById('playPauseBtn').textContent='⏸'; }
+  else { audioEl.pause(); document.getElementById('playPauseBtn').textContent='▶'; }
+}
+
+function setVol() {
+  audioEl.volume = parseFloat(document.getElementById('volSlider').value);
+}
+
+function seekAudio(e) {
+  if (!audioEl.duration) return;
+  const rect = document.getElementById('progBar').getBoundingClientRect();
+  const pct  = (e.clientX - rect.left) / rect.width;
+  audioEl.currentTime = pct * audioEl.duration;
+}
+
+audioEl.addEventListener('timeupdate', () => {
+  if (!audioEl.duration) return;
+  const pct = audioEl.currentTime / audioEl.duration * 100;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('currentTime').textContent = fmt(audioEl.currentTime);
+  document.getElementById('totalTime').textContent   = fmt(audioEl.duration);
+});
+
+audioEl.addEventListener('ended', () => {
+  document.getElementById('playPauseBtn').textContent = '▶';
+  document.getElementById('progFill').style.width = '0%';
+});
+
+function fmt(s) {
+  if (!s||isNaN(s)) return '0:00';
+  return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+}
+
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'status-msg ' + (type||'');
+  if (type !== 'loading') setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 5000);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+(async function init() {
+  await openDB();
+  renderTasks();
+  renderNextTasks();
+  await renderLibrary();
+  // Set today on date input
+  document.getElementById('newDue').valueAsDate = new Date();
+})();
+</script>
+</body>
+</html>
