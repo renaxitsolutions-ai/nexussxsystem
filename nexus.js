@@ -1,6 +1,12 @@
 ﻿// Nexuss X Sistems UI
 const NXS = {
-  API_BASE: window.location.origin,
+  API_BASE: (() => {
+    const o = window.location.origin;
+    // file:// o Live Server (puerto ≠ 3002) → usar servidor de producción
+    if (o === 'null' || window.location.protocol === 'file:') return 'https://nexussxsistems.onrender.com';
+    if (window.location.hostname === 'localhost' && window.location.port !== '3002') return 'https://nexussxsistems.onrender.com';
+    return o;
+  })(),
   CONTACT_ENDPOINT: 'https://formspree.io/f/mkozkvkz',
   requireAuth: true,
   // ── ElevenLabs API key (get free key at elevenlabs.io) ──
@@ -1368,8 +1374,7 @@ function bindCinematicIntro() {
   const path = window.location.pathname;
   const isIndex = path === '/' || path.endsWith('/index.html') || path.endsWith('\\index.html') || path === '';
   if (!isIndex) return;
-  if (sessionStorage.getItem('nxs_cinematic_shown')) return;
-  sessionStorage.setItem('nxs_cinematic_shown', '1');
+  // Siempre mostrar la intro al abrir index.html (no bloquear por sessionStorage)
 
   const W = window.innerWidth, H = window.innerHeight;
 

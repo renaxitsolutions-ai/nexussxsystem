@@ -541,9 +541,9 @@
 
   <script src="nexus.js"></script>
   <script>
-    // Si ya está autenticado, redirigir al home sin mostrar intro
+    // Señalar al intro que redirija a home DESPUÉS de que termine la animación
     if (localStorage.getItem('nxs_auth')) {
-      window.location.replace('home.html');
+      window.__nxsRedirectHome = true;
     }
   </script>
 </body>
