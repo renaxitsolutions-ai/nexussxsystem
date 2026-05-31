@@ -2207,13 +2207,23 @@ function jarvisAgentSpeak(text) {
 
   function doWebSpeech(voices) {
     if (!window.speechSynthesis) return;
+    // Lista completa de voces — misma prioridad en todo el sitio
     const voice = voices.find(v => v.name === 'Microsoft Raúl Online (Natural) - Spanish (Mexico)')
       || voices.find(v => v.name === 'Microsoft Rodrigo Online (Natural) - Spanish (Mexico)')
+      || voices.find(v => v.name === 'Microsoft Alvaro Online (Natural) - Spanish (Spain)')
+      || voices.find(v => v.name === 'Microsoft Jorge - Spanish (Spain)')
       || voices.find(v => /natural/i.test(v.name) && v.lang.startsWith('es'))
-      || voices.find(v => v.lang.startsWith('es')) || null;
+      || voices.find(v => v.name === 'Google español de Estados Unidos')
+      || voices.find(v => v.name === 'Google español')
+      || voices.find(v => /raúl|álvaro|jorge|pablo|rodrigo|diego|carlos|miguel/i.test(v.name) && v.lang.startsWith('es'))
+      || voices.find(v => v.lang === 'es-MX' && !/mujer|female|sabina|mónica|dalia|paulina/i.test(v.name))
+      || voices.find(v => v.lang === 'es-US' && !/mujer|female|sabina|mónica|dalia|paulina/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('es') && !/mujer|female|sabina|mónica|dalia|paulina/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('es'))
+      || null;
 
-    // Tomar solo la primera oración para no hablar demasiado largo
-    const sentence = phonetic.split(/[.!?]/)[0].trim() || phonetic.substring(0, 120);
+    // Solo primera oración para que no hable demasiado largo
+    const sentence = phonetic.split(/[.!?]/)[0].trim() || phonetic.substring(0, 140);
 
     if (!document.getElementById('nxs-intro')) {
       try { speechSynthesis.cancel(); } catch(_) {}
@@ -2221,8 +2231,8 @@ function jarvisAgentSpeak(text) {
 
     const u = new SpeechSynthesisUtterance(sentence);
     u.lang   = voice ? voice.lang : 'es-MX';
-    u.rate   = 0.92;
-    u.pitch  = 0.72;
+    u.rate   = 0.92;   // tono pausado — voz de Jarvis
+    u.pitch  = 0.72;   // tono grave — voz de Jarvis
     u.volume = 1.0;
     if (voice) u.voice = voice;
     u.onerror = (e) => { if (e.error !== 'canceled') console.warn('Jarvis TTS:', e.error); };
@@ -2398,28 +2408,10 @@ function initJarvisAgent() {
 }
 
 /* ══════════════════════════════════════════
-   SPEAK CUSTOM TEXT — misma voz de Jarvis en toda la plataforma
+   SPEAK CUSTOM TEXT — redirige a jarvisAgentSpeak para voz unificada
    ══════════════════════════════════════════ */
 function speakCustomText(text) {
-  if (!window.speechSynthesis) return;
-  try { speechSynthesis.cancel(); } catch(_){}
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang  = 'es-MX';
-  u.rate  = 1.05;
-  u.pitch = 1.0;
-  function doSpeak(voices) {
-    const voice = voices.find(v => v.name === 'Microsoft Raúl Online (Natural) - Spanish (Mexico)')
-      || voices.find(v => v.name === 'Microsoft Rodrigo Online (Natural) - Spanish (Mexico)')
-      || voices.find(v => /natural/i.test(v.name) && v.lang.startsWith('es'))
-      || voices.find(v => v.lang === 'es-MX' && !/mujer|female|sabina|mónica|dalia/i.test(v.name))
-      || voices.find(v => v.lang.startsWith('es') && !/mujer|female|sabina|mónica|dalia/i.test(v.name))
-      || voices.find(v => v.lang.startsWith('es'));
-    if (voice) { u.voice = voice; u.lang = voice.lang; }
-    try { speechSynthesis.speak(u); } catch(_){}
-  }
-  const voices = speechSynthesis.getVoices();
-  if (voices.length > 0) { doSpeak(voices); }
-  else { speechSynthesis.addEventListener('voiceschanged', () => doSpeak(speechSynthesis.getVoices()), { once: true }); }
+  jarvisAgentSpeak(text);
 }
 
 /* ══════════════════════════════════════════
