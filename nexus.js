@@ -2133,11 +2133,38 @@ NXS.apiDelete = async (path) => {
 function parseJarvisReply(raw) {
   const m = raw.match(/\[link:([^:\]]+):([^\]]+)\]/);
   const link = m ? { href: m[1].trim(), label: m[2].trim() } : null;
-  // Preservar saltos de línea; solo colapsar espacios múltiples en la misma línea
   const text = raw.replace(/\[link:[^\]]+\]/g, '')
     .split('\n').map(l => l.replace(/[ \t]{2,}/g, ' ').trim()).join('\n')
     .replace(/\n{3,}/g, '\n\n').trim();
   return { text, link };
+}
+
+/* Convierte markdown a HTML seguro para mensajes de Jarvis */
+function renderJarvisMarkdown(raw) {
+  // 1. Escapar HTML básico primero
+  let s = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // 2. Bloques de código (```lang\ncode\n```)
+  s = s.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+    const l = lang ? `<span class="jv-code-lang">${lang}</span>` : '';
+    const id = 'jvc_' + Math.random().toString(36).slice(2,8);
+    const escaped = code.trim();
+    return `<div class="jv-code-block">${l}<button class="jv-copy-btn" onclick="(function(b){const t=b.closest('.jv-code-block').querySelector('pre').innerText;navigator.clipboard.writeText(t).then(()=>{b.textContent='✓ Copiado';setTimeout(()=>b.textContent='Copiar',1500)});})(this)">Copiar</button><pre id="${id}">${escaped}</pre></div>`;
+  });
+  // 3. Código inline `code`
+  s = s.replace(/`([^`]+)`/g, '<code class="jv-inline-code">$1</code>');
+  // 4. Negrita **texto**
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // 5. Cursiva *texto*
+  s = s.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  // 6. Encabezados ## / ###
+  s = s.replace(/^### (.+)$/gm, '<h4 class="jv-h">$1</h4>');
+  s = s.replace(/^## (.+)$/gm, '<h3 class="jv-h">$1</h3>');
+  // 7. Bullet points • o - al inicio de línea
+  s = s.replace(/^[•\-] (.+)$/gm, '<li>$1</li>');
+  s = s.replace(/(<li>.*<\/li>)/gs, '<ul class="jv-ul">$1</ul>');
+  // 8. Saltos de línea (fuera de bloques de código)
+  s = s.replace(/\n/g, '<br>');
+  return s;
 }
 
 /* Llama al backend IA; si falla usa respuesta de emergencia local */
@@ -2146,10 +2173,9 @@ async function jarvisAskAI(message, history) {
     const res = await fetch(`${NXS.API_BASE}/api/jarvis`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, history: history.slice(-8) })
+      body: JSON.stringify({ message, history: history.slice(-20) })
     });
     const data = await res.json();
-    // El servidor siempre devuelve reply (con IA o con respuestas locales)
     if (data.reply) return parseJarvisReply(data.reply);
     throw new Error('no-reply');
   } catch(e) {
@@ -2242,9 +2268,9 @@ function initJarvisAgent() {
 
   const FAQ_QUESTIONS = [
     '¿Qué servicios ofrecen?',
+    'Escríbeme código en Python',
     '¿Cuánto cuesta un sitio web?',
-    '¿Cuánto tarda un proyecto?',
-    '¿Cómo puedo contratar?',
+    'Explícame cómo funciona la IA',
   ];
 
   const panel = document.createElement('div');
@@ -2253,9 +2279,10 @@ function initJarvisAgent() {
     <div class="jarvis-panel-header">
       <div class="jarvis-avatar">🤖</div>
       <div class="jarvis-panel-title">
-        <strong>JARVIS</strong>
-        <span>Nexuss eks Systems &middot; en línea</span>
+        <strong>JARVIS <span class="jv-agent-badge">AGENTE IA</span></strong>
+        <span>Nexuss X Sistems &middot; <span class="jv-online-dot"></span> en línea</span>
       </div>
+      <button class="jv-clear-btn" id="jarvis-clear" title="Limpiar conversación">⟳</button>
       <button class="jarvis-panel-close" title="Cerrar">✕</button>
     </div>
     <div class="jarvis-messages" id="jarvis-messages"></div>
@@ -2263,27 +2290,31 @@ function initJarvisAgent() {
       ${FAQ_QUESTIONS.map(q => `<button class="jarvis-faq-chip">${q}</button>`).join('')}
     </div>
     <div class="jarvis-input-row">
-      <input type="text" id="jarvis-input" placeholder="Escribe tu pregunta..." autocomplete="off" />
-      <button id="jarvis-send">Enviar</button>
+      <input type="text" id="jarvis-input" placeholder="Código, math, ciencias, negocios…" autocomplete="off" />
+      <button id="jarvis-send">➤</button>
     </div>
   `;
   document.body.appendChild(panel);
 
-  const msgs     = panel.querySelector('#jarvis-messages');
-  const faqBar   = panel.querySelector('#jarvis-faq');
-  const input    = panel.querySelector('#jarvis-input');
-  const sendBtn  = panel.querySelector('#jarvis-send');
-  const closeBtn = panel.querySelector('.jarvis-panel-close');
-  const history  = [];
-  let isSending  = false;
+  const msgs      = panel.querySelector('#jarvis-messages');
+  const faqBar    = panel.querySelector('#jarvis-faq');
+  const input     = panel.querySelector('#jarvis-input');
+  const sendBtn   = panel.querySelector('#jarvis-send');
+  const closeBtn  = panel.querySelector('.jarvis-panel-close');
+  const clearBtn  = panel.querySelector('#jarvis-clear');
+  const history   = [];
+  let isSending   = false;
 
   function addMsg(text, from, link) {
     const d = document.createElement('div');
     d.className = `jarvis-msg ${from}`;
-    // Renderizar saltos de línea y bullets como HTML
-    d.innerHTML = text
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/\n/g,'<br>');
+    if (from === 'jarvis') {
+      d.innerHTML = renderJarvisMarkdown(text);
+    } else {
+      d.innerHTML = text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\n/g,'<br>');
+    }
     if (link) {
       const br = document.createElement('br');
       const a  = document.createElement('a');
@@ -2339,6 +2370,14 @@ function initJarvisAgent() {
     const chip = e.target.closest('.jarvis-faq-chip');
     if (chip) handleSend(chip.textContent);
   });
+  clearBtn && clearBtn.addEventListener('click', () => {
+    msgs.innerHTML = '';
+    history.length = 0;
+    if (faqBar) faqBar.style.display = '';
+    const welcome = '¡Conversación reiniciada! Soy **Jarvis**, tu agente de IA. ¿En qué te ayudo?';
+    addMsg(welcome, 'jarvis');
+    history.push({ from: 'jarvis', text: welcome });
+  });
   closeBtn.addEventListener('click', () => panel.classList.remove('open'));
   document.addEventListener('click', e => {
     if (!panel.contains(e.target) && e.target !== btn) panel.classList.remove('open');
@@ -2347,7 +2386,7 @@ function initJarvisAgent() {
   btn.addEventListener('click', () => {
     const isOpen = panel.classList.toggle('open');
     if (isOpen && msgs.children.length === 0) {
-      const welcome = 'Hola, soy Jarvis. Tu asistente de Nexuss eks Systems. ¿En qué puedo ayudarte hoy?';
+      const welcome = '¡Hola! Soy **Jarvis**, agente de IA de Nexuss X Sistems.\n\nPuedo ayudarte con **código**, **matemáticas**, **ciencias**, **negocios**, **análisis de datos**, escritura y mucho más — además de todo lo relacionado con nuestros servicios.\n\n¿En qué te ayudo hoy?';
       setTimeout(() => {
         addMsg(welcome, 'jarvis');
         history.push({ from: 'jarvis', text: welcome });

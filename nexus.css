@@ -1973,8 +1973,8 @@ header{isolation:auto}
   position: fixed;
   bottom: 86px;
   right: 24px;
-  width: 340px;
-  max-height: 520px;
+  width: 420px;
+  max-height: 620px;
   z-index: 901;
   background: rgba(6,14,28,0.97);
   border: 1px solid rgba(0,255,136,0.22);
@@ -2080,6 +2080,124 @@ header{isolation:auto}
 }
 .jarvis-msg a:hover { opacity: 1; }
 
+/* ── Jarvis Markdown ─────────────────────── */
+.jv-agent-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: .8px;
+  color: #080c14;
+  background: #00ff88;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 5px;
+  vertical-align: middle;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.jv-online-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  background: #00ff88;
+  border-radius: 50%;
+  margin-right: 3px;
+  vertical-align: middle;
+  box-shadow: 0 0 6px #00ff88;
+  animation: jarvisPulse 1.8s ease-in-out infinite;
+}
+.jv-clear-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+.jv-clear-btn:hover { color: rgba(0,255,136,0.7); }
+
+/* Code blocks */
+.jv-code-block {
+  position: relative;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(0,255,136,0.18);
+  border-radius: 8px;
+  margin: 6px 0;
+  padding: 10px 12px 10px;
+  overflow-x: auto;
+}
+.jv-code-block pre {
+  margin: 0;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #a8ffce;
+  white-space: pre;
+  overflow-x: auto;
+}
+.jv-code-lang {
+  display: inline-block;
+  font-size: 0.65rem;
+  color: rgba(0,255,136,0.55);
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  font-family: inherit;
+}
+.jv-copy-btn {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  background: rgba(0,255,136,0.08);
+  border: 1px solid rgba(0,255,136,0.28);
+  border-radius: 5px;
+  color: rgba(0,255,136,0.75);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.18s;
+}
+.jv-copy-btn:hover { background: rgba(0,255,136,0.2); color: #00ff88; }
+
+/* Inline code */
+.jv-inline-code {
+  background: rgba(0,255,136,0.08);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8em;
+  color: #a8ffce;
+}
+
+/* Headers */
+.jv-h {
+  color: #00ff88;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  margin: 8px 0 3px;
+  line-height: 1.3;
+}
+h3.jv-h { font-size: 0.88rem; }
+h4.jv-h { font-size: 0.82rem; }
+
+/* Lists */
+.jv-ul {
+  padding-left: 16px;
+  margin: 4px 0;
+}
+.jv-ul li {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  list-style: disc;
+  padding-left: 2px;
+}
+/* ─────────────────────────────────────────── */
+
 .jarvis-typing {
   align-self: flex-start;
   padding: 9px 14px;
@@ -2177,7 +2295,7 @@ header{isolation:auto}
 }
 
 @media (max-width: 480px) {
-  #jarvis-panel { width: calc(100vw - 32px); right: 16px; bottom: 80px; }
+  #jarvis-panel { width: calc(100vw - 28px); right: 14px; bottom: 80px; max-height: 75vh; }
   #jarvis-agent-btn { right: 16px; bottom: 16px; }
 }
 
