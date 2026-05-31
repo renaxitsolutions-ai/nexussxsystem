@@ -96,41 +96,8 @@
 
         <!-- Robot Jarvis flotando -->
         <div style="position:relative;animation:jarvisFloat 4s ease-in-out infinite;z-index:2;text-align:center">
-          <canvas id="jarvisCanvasHome" width="290" height="330"
-            style="display:block;margin:0 auto;background:transparent;filter:drop-shadow(0 0 18px rgba(0,212,255,0.85)) drop-shadow(0 0 42px rgba(121,38,255,0.55))"></canvas>
-          <script>
-          (function(){
-            const cv  = document.getElementById('jarvisCanvasHome');
-            const ctx = cv.getContext('2d');
-            // fetch → blob URL garantiza que getImageData no esté bloqueado por CORS
-            fetch('jarvis.jpg')
-              .then(function(r){ return r.blob(); })
-              .then(function(blob){
-                const blobUrl = URL.createObjectURL(blob);
-                const img = new Image();
-                img.onload = function(){
-                  ctx.drawImage(img, 0, 0, cv.width, cv.height);
-                  try {
-                    const id = ctx.getImageData(0, 0, cv.width, cv.height);
-                    const d  = id.data;
-                    for(var i = 0; i < d.length; i += 4){
-                      var r = d[i], g = d[i+1], b = d[i+2];
-                      var bright = (r + g + b) / 3;
-                      if(bright > 230 && Math.abs(r-g) < 22 && Math.abs(g-b) < 22){
-                        d[i+3] = 0;
-                      } else if(bright > 200 && Math.abs(r-g) < 30 && Math.abs(g-b) < 30){
-                        d[i+3] = Math.round((bright - 200) / 30 * 180);
-                      }
-                    }
-                    ctx.putImageData(id, 0, 0);
-                  } catch(e){}
-                  URL.revokeObjectURL(blobUrl);
-                };
-                img.src = blobUrl;
-              })
-              .catch(function(){});
-          })();
-          </script>
+          <img src="jarvis.jpg" alt="Jarvis AI"
+            style="display:block;margin:0 auto;width:290px;height:330px;object-fit:contain;mix-blend-mode:screen;filter:drop-shadow(0 0 18px rgba(0,212,255,0.85)) drop-shadow(0 0 42px rgba(121,38,255,0.55))">
         </div>
       </div>
     </section>
