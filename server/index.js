@@ -14,6 +14,7 @@ import cors             from 'cors';
 import bcrypt           from 'bcryptjs';
 import jwt              from 'jsonwebtoken';
 import Anthropic        from '@anthropic-ai/sdk';
+import Groq            from 'groq-sdk';
 import compression      from 'compression';
 import { rateLimit }    from 'express-rate-limit';
 
@@ -30,6 +31,7 @@ const PORT       = process.env.PORT       || 3002;
 const JWT_SECRET = process.env.JWT_SECRET || 'nexus_secret_change_in_production_2025';
 const ADMIN_EMAIL= (process.env.ADMIN_EMAIL || '').toLowerCase();
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
+const GROQ_KEY      = process.env.GROQ_API_KEY      || '';
 
 // ─── MULTER (file uploads) ─────────────────────────────────────────────────────
 const upload = multer ? multer({
@@ -1323,7 +1325,10 @@ app.post('/api/upload', auth, upload.single('file'), (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: AI — JARVIS + TOOLS
 // ─────────────────────────────────────────────────────────────────────────────
-const _ai = ANTHROPIC_KEY ? new Anthropic({ apiKey: ANTHROPIC_KEY }) : null;
+const _anthropic = ANTHROPIC_KEY ? new Anthropic({ apiKey: ANTHROPIC_KEY }) : null;
+const _groq      = GROQ_KEY      ? new Groq({ apiKey: GROQ_KEY })           : null;
+// Usa Groq primero (gratis), cae a Anthropic si está disponible, o fallback local
+const _ai = _groq || _anthropic;
 
 const JARVIS_SYSTEM = `Eres Jarvis, un agente de inteligencia artificial avanzado integrado en Nexuss X Sistems. Eres sumamente capaz, inteligente y versátil — puedes responder CUALQUIER pregunta con precisión, profundidad y creatividad.
 
@@ -1433,9 +1438,21 @@ app.post('/api/jarvis', async (req, res) => {
   // Intentar con Claude IA primero (si hay API key y créditos)
   if (_ai) {
     try {
-      const messages = [...history.slice(-20).map(m=>({ role: m.from==='user'?'user':'assistant', content: m.text })), { role:'user', content: message }];
-      const r = await _ai.messages.create({ model:'claude-sonnet-4-5-20251001', max_tokens:2048, system: JARVIS_SYSTEM, messages });
-      const reply = r.content[0].text;
+      const msgs = [...history.slice(-20).map(m=>({ role: m.from==='user'?'user':'assistant', content: m.text })), { role:'user', content: message }];
+      let reply;
+      if (_groq) {
+        // Groq (gratis) — formato OpenAI-compatible
+        const r = await _groq.chat.completions.create({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 2048,
+          messages: [{ role: 'system', content: JARVIS_SYSTEM }, ...msgs]
+        });
+        reply = r.choices[0].message.content;
+      } else {
+        // Anthropic Claude (fallback de pago)
+        const r = await _anthropic.messages.create({ model:'claude-sonnet-4-5-20251001', max_tokens:2048, system: JARVIS_SYSTEM, messages: msgs });
+        reply = r.content[0].text;
+      }
       if (session_id) {
         try {
           const conv = await db.prepare('SELECT * FROM ai_conversations WHERE session_id=?').get(session_id);
