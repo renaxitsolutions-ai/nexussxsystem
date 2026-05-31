@@ -1368,6 +1368,8 @@ function bindCinematicIntro() {
   const path = window.location.pathname;
   const isIndex = path === '/' || path.endsWith('/index.html') || path.endsWith('\\index.html') || path === '';
   if (!isIndex) return;
+  if (sessionStorage.getItem('nxs_cinematic_shown')) return;
+  sessionStorage.setItem('nxs_cinematic_shown', '1');
 
   const W = window.innerWidth, H = window.innerHeight;
 
@@ -1454,22 +1456,11 @@ function bindCinematicIntro() {
       <div class="intro-bar-wrap"><div class="intro-bar-fill" id="introBarFill"></div></div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:4px">
         <button class="intro-skip" id="introSkip">OMITIR ›</button>
-        <button class="intro-skip" id="introVoiceBtn" style="background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.35);color:#00ff88">🔊 OÍR A JARVIS</button>
       </div>
     </div>
   `;
   document.body.prepend(intro);
   document.body.style.overflow = 'hidden';
-
-  // ── Voice button triggers Jarvis ──
-  const voiceBtn = intro.querySelector('#introVoiceBtn');
-  if (voiceBtn) {
-    voiceBtn.addEventListener('click', () => {
-      speakJarvis();
-      voiceBtn.style.opacity = '0.4';
-      voiceBtn.disabled = true;
-    });
-  }
 
   // ── HUD clock ──
   const hudTime = intro.querySelector('#hudTime');
@@ -2245,7 +2236,7 @@ function jarvisAgentSpeak(text) {
 function initJarvisAgent() {
   const btn = document.createElement('button');
   btn.id = 'jarvis-agent-btn';
-  btn.title = 'Hablar con Jarvina';
+  btn.title = 'Hablar con Jarvis';
   btn.innerHTML = '🤖<span class="jarvis-badge"></span>';
   document.body.appendChild(btn);
 
@@ -2262,7 +2253,7 @@ function initJarvisAgent() {
     <div class="jarvis-panel-header">
       <div class="jarvis-avatar">🤖</div>
       <div class="jarvis-panel-title">
-        <strong>JARVINA</strong>
+        <strong>JARVIS</strong>
         <span>Nexuss eks Systems &middot; en línea</span>
       </div>
       <button class="jarvis-panel-close" title="Cerrar">✕</button>
@@ -2356,7 +2347,7 @@ function initJarvisAgent() {
   btn.addEventListener('click', () => {
     const isOpen = panel.classList.toggle('open');
     if (isOpen && msgs.children.length === 0) {
-      const welcome = 'Hola, soy Jarvina. Tu asistente de Nexuss eks Systems. ¿En qué puedo ayudarte hoy?';
+      const welcome = 'Hola, soy Jarvis. Tu asistente de Nexuss eks Systems. ¿En qué puedo ayudarte hoy?';
       setTimeout(() => {
         addMsg(welcome, 'jarvis');
         history.push({ from: 'jarvis', text: welcome });
@@ -2365,6 +2356,144 @@ function initJarvisAgent() {
       }, 180);
     }
   });
+}
+
+/* ══════════════════════════════════════════
+   SPEAK CUSTOM TEXT — misma voz de Jarvis en toda la plataforma
+   ══════════════════════════════════════════ */
+function speakCustomText(text) {
+  if (!window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); } catch(_){}
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang  = 'es-MX';
+  u.rate  = 1.05;
+  u.pitch = 1.0;
+  function doSpeak(voices) {
+    const voice = voices.find(v => v.name === 'Microsoft Raúl Online (Natural) - Spanish (Mexico)')
+      || voices.find(v => v.name === 'Microsoft Rodrigo Online (Natural) - Spanish (Mexico)')
+      || voices.find(v => /natural/i.test(v.name) && v.lang.startsWith('es'))
+      || voices.find(v => v.lang === 'es-MX' && !/mujer|female|sabina|mónica|dalia/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('es') && !/mujer|female|sabina|mónica|dalia/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('es'));
+    if (voice) { u.voice = voice; u.lang = voice.lang; }
+    try { speechSynthesis.speak(u); } catch(_){}
+  }
+  const voices = speechSynthesis.getVoices();
+  if (voices.length > 0) { doSpeak(voices); }
+  else { speechSynthesis.addEventListener('voiceschanged', () => doSpeak(speechSynthesis.getVoices()), { once: true }); }
+}
+
+/* ══════════════════════════════════════════
+   PAGE JARVIS — Jarvis describe cada página al cargar
+   ══════════════════════════════════════════ */
+const PAGE_DESCRIPTIONS = {
+  'index':       'Bienvenido a Nexuss X Sistems. Soy Jarvis, tu asistente. Aquí encontrarás información sobre nuestros servicios de desarrollo web e inteligencia artificial.',
+  'servicios':   'Estás en la página de servicios. Aquí puedes explorar todo lo que Nexuss X Sistems ofrece: desde sitios web corporativos hasta chatbots con inteligencia artificial.',
+  'contacto':    'Estás en la página de contacto. Envíanos un mensaje y nuestro equipo te responderá en menos de 24 horas.',
+  'blog':        'Bienvenido al blog de Nexuss X Sistems. Aquí compartimos artículos, tutoriales y novedades de tecnología e inteligencia artificial.',
+  'calculadora': 'Esta es la calculadora de precios. Ingresa los detalles de tu proyecto y obtén un presupuesto estimado al instante.',
+  'plans':       'Aquí están nuestros planes de suscripción. Desde Starter hasta Enterprise, hay una opción perfecta para cada negocio.',
+  'productos':   'Estás en nuestra página de productos y planes. Explora las soluciones digitales disponibles para tu empresa.',
+  'faq':         'Esta es la sección de preguntas frecuentes. Si tienes dudas sobre nuestros servicios, probablemente ya las respondimos aquí.',
+  'sobre':       'Estás conociendo al equipo de Nexuss X Sistems. Somos apasionados por la tecnología y el desarrollo web.',
+  'games':       '¡Bienvenido al área de juegos! Aquí puedes disfrutar de cuatro juegos interactivos. Que te diviertas.',
+  'tareas':      'Este es el sistema de gestión de tareas. Crea, asigna y da seguimiento a tareas con diferentes prioridades y categorías.',
+  'crm':         'Estás en el CRM de Nexuss. Gestiona contactos, pipelines de ventas y el seguimiento de tus clientes.',
+  'tickets':     'Bienvenido al sistema de soporte. Aquí puedes crear y dar seguimiento a tickets de ayuda técnica.',
+  'dashboard':   'Este es el panel de control principal. Visualiza todas las métricas clave de tu negocio en un solo lugar.',
+  'fol':         'Esta es la página del módulo FOL, Formación y Orientación Laboral. Aprende sobre el Sistema Dominicano de Seguridad Social.',
+  'casos':       'Estás viendo los casos de éxito de Nexuss X Sistems. Conoce los proyectos que hemos realizado para nuestros clientes.',
+  'knowledge':   'Esta es la base de conocimiento. Encuentra artículos y guías para resolver tus preguntas técnicas.',
+  'pipeline':    'Estás en el pipeline de ventas. Visualiza y gestiona todas las oportunidades en tu proceso comercial.',
+};
+
+function showPageJarvis(text) {
+  if (document.getElementById('nxs-page-jarvis')) return;
+
+  const el = document.createElement('div');
+  el.id = 'nxs-page-jarvis';
+  el.style.cssText = `
+    position:fixed;bottom:90px;left:20px;z-index:8800;
+    max-width:320px;min-width:240px;
+    background:rgba(2,6,23,0.93);
+    border:1px solid rgba(0,212,255,0.4);
+    border-radius:14px;
+    box-shadow:0 0 30px rgba(0,212,255,0.15),0 4px 24px rgba(0,0,0,0.6);
+    backdrop-filter:blur(14px);
+    font-family:'Segoe UI',Arial,sans-serif;
+    animation:pjSlide .45s cubic-bezier(.16,1,.3,1);
+    overflow:hidden;
+  `;
+  el.innerHTML = `
+    <style>
+      @keyframes pjSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+      @keyframes pjOut{to{opacity:0;transform:translateY(16px)}}
+      @keyframes pjOrb{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      @keyframes pjBar{from{width:100%}to{width:0%}}
+      .pj-exit{animation:pjOut .35s ease-in forwards!important}
+    </style>
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:13px 14px">
+      <div style="position:relative;width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(0,212,255,.2),rgba(121,38,255,.1));border-radius:50%">
+        <div style="position:absolute;width:52px;height:52px;border-radius:50%;border:1px solid rgba(0,212,255,0.35);animation:pjOrb 5s linear infinite"></div>
+        <div style="position:absolute;width:64px;height:64px;border-radius:50%;border:1px solid rgba(121,38,255,0.22);animation:pjOrb 9s linear infinite reverse"></div>
+        <span style="font-size:13px;font-weight:900;color:#00d4ff;letter-spacing:1px;z-index:1;text-shadow:0 0 10px rgba(0,212,255,.8)">NX</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.6rem;letter-spacing:2px;color:rgba(0,212,255,.75);margin-bottom:4px;font-weight:700">JARVIS</div>
+        <div id="pjTyped" style="font-size:.8rem;color:rgba(210,225,255,.9);line-height:1.52"></div>
+      </div>
+      <button id="pjClose" style="background:none;border:none;cursor:pointer;color:rgba(140,155,200,.6);font-size:15px;padding:2px 4px;line-height:1;flex-shrink:0;margin-top:-1px;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(140,155,200,.6)'">✕</button>
+    </div>
+    <div style="height:2px;background:rgba(255,255,255,.05)">
+      <div id="pjBar" style="height:100%;background:linear-gradient(90deg,#00d4ff,#7926ff);animation:pjBar 7s linear forwards"></div>
+    </div>
+  `;
+  document.body.appendChild(el);
+
+  // Typewriter effect
+  const typed = document.getElementById('pjTyped');
+  let i = 0;
+  const ti = setInterval(() => {
+    if (i < text.length) { typed.textContent += text[i++]; }
+    else { clearInterval(ti); }
+  }, 26);
+
+  // Auto-speak using consistent Jarvis voice
+  speakCustomText(text);
+
+  // Close logic
+  const close = () => {
+    clearInterval(ti);
+    el.classList.add('pj-exit');
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 380);
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_){}
+  };
+  document.getElementById('pjClose').addEventListener('click', close);
+  setTimeout(close, 7500);
+}
+
+function bindPageJarvis() {
+  const page = (window.location.pathname.split('/').pop().replace('.html','') || 'index').toLowerCase();
+  const desc = PAGE_DESCRIPTIONS[page];
+  if (!desc) return;
+
+  // On index.html: wait for cinematic intro to finish before showing page description
+  if (page === 'index' || page === '' || page === '/') {
+    const check = setInterval(() => {
+      if (!document.getElementById('nxs-intro')) {
+        clearInterval(check);
+        setTimeout(() => showPageJarvis(desc), 900);
+      }
+    }, 200);
+    // Fallback if intro never appeared
+    setTimeout(() => {
+      clearInterval(check);
+      if (!document.getElementById('nxs-page-jarvis')) showPageJarvis(desc);
+    }, 15000);
+    return;
+  }
+
+  setTimeout(() => showPageJarvis(desc), 1000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2387,6 +2516,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindCounters();
   bindMusicControl();
   initJarvisAgent();
+  bindPageJarvis();
   bindExpandableList();
   bindCartBadge();
   bindThemeToggle();

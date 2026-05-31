@@ -24,7 +24,7 @@ try { nodemailer = (await import('nodemailer')).default; } catch {}
 try { const m = await import('otplib'); otplib = m; } catch {}
 try { qrcode     = (await import('qrcode')).default; } catch {}
 
-import { db, j, jObj, now, slug, nextTicketNumber, createNotification, createAuditLog, runAutomations } from './db.js';
+import { db, pool, j, jObj, now, slug, nextTicketNumber, createNotification, createAuditLog, runAutomations } from './db.js';
 
 const PORT       = process.env.PORT       || 3002;
 const JWT_SECRET = process.env.JWT_SECRET || 'nexus_secret_change_in_production_2025';
@@ -114,13 +114,13 @@ function randomCode(len=8) { return crypto.randomBytes(len).toString('hex').slic
 function hashKey(key) { return crypto.createHash('sha256').update(key).digest('hex'); }
 
 // ─── API KEY AUTH ─────────────────────────────────────────────────────────────
-function apiKeyAuth(req, res, next) {
+async function apiKeyAuth(req, res, next) {
   const key = req.headers['x-api-key'];
   if (!key) return auth(req, res, next);
   const prefix = key.slice(0, 8);
-  const row = db.prepare('SELECT k.*, u.email, u.role, u.tenant_id FROM api_keys k JOIN users u ON k.user_id=u.id WHERE k.key_prefix=? AND k.key_hash=?').get(prefix, hashKey(key));
+  const row = await db.prepare('SELECT k.*, u.email, u.role, u.tenant_id FROM api_keys k JOIN users u ON k.user_id=u.id WHERE k.key_prefix=? AND k.key_hash=?').get(prefix, hashKey(key));
   if (!row) return res.status(401).json({ error: 'Invalid API key' });
-  db.prepare('UPDATE api_keys SET last_used_at=? WHERE id=?').run(now(), row.id);
+  await db.prepare('UPDATE api_keys SET last_used_at=? WHERE id=?').run(now(), row.id);
   req.user = { id: row.user_id, email: row.email, role: row.role, tenant_id: row.tenant_id };
   next();
 }
@@ -137,26 +137,26 @@ app.post('/api/register', async (req, res) => {
     if (!password) password = 'nxs-demo';
     if (password.length < 6) return res.status(400).json({ error: 'Contraseña mínimo 6 caracteres' });
 
-    const existing = db.prepare('SELECT id FROM users WHERE email=? AND tenant_id=1').get(email);
+    const existing = await db.prepare('SELECT id FROM users WHERE email=? AND tenant_id=1').get(email);
     if (existing) return res.status(409).json({ error: 'Email ya registrado' });
 
     const hash = bcrypt.hashSync(password, 12);
     const role = ADMIN_EMAIL && email === ADMIN_EMAIL ? 'owner' : 'viewer';
     const code = String(Math.floor(100000 + Math.random()*900000));
 
-    const userId = db.prepare(`INSERT INTO users (tenant_id, email, password_hash, name, role, verification_code) VALUES (1,?,?,?,?,?)`).run(email, hash, name, role, code).lastInsertRowid;
+    const { lastInsertRowid: userId } = await db.prepare(`INSERT INTO users (tenant_id, email, password_hash, name, role, verification_code) VALUES (1,?,?,?,?,?)`).run(email, hash, name, role, code);
 
     // Handle referral
     if (referral_code) {
-      const ref = db.prepare('SELECT * FROM referrals WHERE code=?').get(referral_code.toUpperCase());
-      if (ref) db.prepare('UPDATE referrals SET uses=uses+1 WHERE id=?').run(ref.id);
+      const ref = await db.prepare('SELECT * FROM referrals WHERE code=?').get(referral_code.toUpperCase());
+      if (ref) await db.prepare('UPDATE referrals SET uses=uses+1 WHERE id=?').run(ref.id);
     }
 
     // Notify admins
-    const admins = db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner')").all();
-    admins.forEach(a => createNotification(1, a.id, a.email, 'success', 'Nuevo usuario registrado', `${name} (${email}) se registró en la plataforma.`));
+    const admins = await db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner')").all();
+    for (const a of admins) await createNotification(1, a.id, a.email, 'success', 'Nuevo usuario registrado', `${name} (${email}) se registró en la plataforma.`);
 
-    createAuditLog(1, userId, email, 'user.register', 'user', userId, { name, email, role }, ip(req));
+    await createAuditLog(1, userId, email, 'user.register', 'user', userId, { name, email, role }, ip(req));
 
     // Email de verificación al usuario que se registró
     await sendEmail(email, 'Verifica tu cuenta — Nexuss X Sistems',
@@ -188,7 +188,7 @@ app.post('/api/register', async (req, res) => {
         </div>`);
     }
 
-    const user = db.prepare('SELECT id, email, role, name, verified FROM users WHERE id=?').get(userId);
+    const user = await db.prepare('SELECT id, email, role, name, verified FROM users WHERE id=?').get(userId);
     res.json({ token: signToken(user), user: { id: user.id, email: user.email, role: user.role, name: user.name, verified: !!user.verified } });
   } catch(e) { console.error(e); res.status(500).json({ error: e.message }); }
 });
@@ -200,7 +200,7 @@ app.post('/api/login', async (req, res) => {
     email = email.toLowerCase().trim();
     if (!password) password = 'nxs-demo';
 
-    const user = db.prepare('SELECT * FROM users WHERE email=? AND tenant_id=1').get(email);
+    const user = await db.prepare('SELECT * FROM users WHERE email=? AND tenant_id=1').get(email);
     if (!user || !bcrypt.compareSync(password, user.password_hash))
       return res.status(401).json({ error: 'Credenciales inválidas' });
 
@@ -211,8 +211,8 @@ app.post('/api/login', async (req, res) => {
       if (!valid) return res.status(401).json({ error: 'Código 2FA inválido' });
     }
 
-    db.prepare('UPDATE users SET last_login_at=?, login_count=login_count+1, updated_at=? WHERE id=?').run(now(), now(), user.id);
-    createAuditLog(1, user.id, user.email, 'user.login', 'user', user.id, {}, ip(req));
+    await db.prepare('UPDATE users SET last_login_at=?, login_count=login_count+1, updated_at=? WHERE id=?').run(now(), now(), user.id);
+    await createAuditLog(1, user.id, user.email, 'user.login', 'user', user.id, {}, ip(req));
 
     res.json({
       token: signToken(user),
@@ -221,60 +221,70 @@ app.post('/api/login', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/me', auth, (req, res) => {
-  const user = db.prepare('SELECT id, email, role, name, verified, totp_enabled, avatar_url, phone, created_at, last_login_at, login_count FROM users WHERE id=?').get(req.user.id);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  res.json({ user: { ...user, verified: !!user.verified, totp_enabled: !!user.totp_enabled } });
+app.get('/api/me', auth, async (req, res) => {
+  try {
+    const user = await db.prepare('SELECT id, email, role, name, verified, totp_enabled, avatar_url, phone, created_at, last_login_at, login_count FROM users WHERE id=?').get(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ user: { ...user, verified: !!user.verified, totp_enabled: !!user.totp_enabled } });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/me', auth, (req, res) => {
-  const { name, phone, avatar_url } = req.body || {};
-  db.prepare('UPDATE users SET name=COALESCE(?,name), phone=COALESCE(?,phone), avatar_url=COALESCE(?,avatar_url), updated_at=? WHERE id=?').run(name||null, phone||null, avatar_url||null, now(), req.user.id);
-  createAuditLog(1, req.user.id, req.user.email, 'user.update_profile', 'user', req.user.id, {}, ip(req));
-  res.json({ ok: true });
+app.patch('/api/me', auth, async (req, res) => {
+  try {
+    const { name, phone, avatar_url } = req.body || {};
+    await db.prepare('UPDATE users SET name=COALESCE(?,name), phone=COALESCE(?,phone), avatar_url=COALESCE(?,avatar_url), updated_at=? WHERE id=?').run(name||null, phone||null, avatar_url||null, now(), req.user.id);
+    await createAuditLog(1, req.user.id, req.user.email, 'user.update_profile', 'user', req.user.id, {}, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/me/change-password', auth, (req, res) => {
-  const { current, newPassword } = req.body || {};
-  if (!current || !newPassword) return res.status(400).json({ error: 'Campos requeridos' });
-  if (newPassword.length < 6) return res.status(400).json({ error: 'Mínimo 6 caracteres' });
-  const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
-  if (!bcrypt.compareSync(current, user.password_hash)) return res.status(401).json({ error: 'Contraseña actual incorrecta' });
-  db.prepare('UPDATE users SET password_hash=?, updated_at=? WHERE id=?').run(bcrypt.hashSync(newPassword, 12), now(), req.user.id);
-  createAuditLog(1, req.user.id, req.user.email, 'user.change_password', 'user', req.user.id, {}, ip(req));
-  res.json({ ok: true });
+app.post('/api/me/change-password', auth, async (req, res) => {
+  try {
+    const { current, newPassword } = req.body || {};
+    if (!current || !newPassword) return res.status(400).json({ error: 'Campos requeridos' });
+    if (newPassword.length < 6) return res.status(400).json({ error: 'Mínimo 6 caracteres' });
+    const user = await db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
+    if (!bcrypt.compareSync(current, user.password_hash)) return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+    await db.prepare('UPDATE users SET password_hash=?, updated_at=? WHERE id=?').run(bcrypt.hashSync(newPassword, 12), now(), req.user.id);
+    await createAuditLog(1, req.user.id, req.user.email, 'user.change_password', 'user', req.user.id, {}, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─── 2FA ──────────────────────────────────────────────────────────────────────
 app.post('/api/me/2fa/setup', auth, async (req, res) => {
   if (!otplib || !qrcode) return res.status(503).json({ error: 'otplib/qrcode no disponible. Instala: npm install otplib qrcode' });
   const secret = otplib.authenticator.generateSecret();
-  db.prepare('UPDATE users SET totp_secret=? WHERE id=?').run(secret, req.user.id);
-  const user = db.prepare('SELECT email FROM users WHERE id=?').get(req.user.id);
+  await db.prepare('UPDATE users SET totp_secret=? WHERE id=?').run(secret, req.user.id);
+  const user = await db.prepare('SELECT email FROM users WHERE id=?').get(req.user.id);
   const otpauth = otplib.authenticator.keyuri(user.email, 'NexussXsistems', secret);
   const qr = await qrcode.toDataURL(otpauth);
   res.json({ secret, qr });
 });
 
-app.post('/api/me/2fa/enable', auth, (req, res) => {
-  if (!otplib) return res.status(503).json({ error: 'otplib no disponible' });
-  const { code } = req.body || {};
-  const user = db.prepare('SELECT totp_secret FROM users WHERE id=?').get(req.user.id);
-  if (!user?.totp_secret) return res.status(400).json({ error: 'Primero configura el 2FA' });
-  if (!otplib.authenticator.check(code, user.totp_secret)) return res.status(401).json({ error: 'Código inválido' });
-  db.prepare('UPDATE users SET totp_enabled=1 WHERE id=?').run(req.user.id);
-  createAuditLog(1, req.user.id, req.user.email, 'user.2fa_enabled', 'user', req.user.id, {}, ip(req));
-  res.json({ ok: true });
+app.post('/api/me/2fa/enable', auth, async (req, res) => {
+  try {
+    if (!otplib) return res.status(503).json({ error: 'otplib no disponible' });
+    const { code } = req.body || {};
+    const user = await db.prepare('SELECT totp_secret FROM users WHERE id=?').get(req.user.id);
+    if (!user?.totp_secret) return res.status(400).json({ error: 'Primero configura el 2FA' });
+    if (!otplib.authenticator.check(code, user.totp_secret)) return res.status(401).json({ error: 'Código inválido' });
+    await db.prepare('UPDATE users SET totp_enabled=1 WHERE id=?').run(req.user.id);
+    await createAuditLog(1, req.user.id, req.user.email, 'user.2fa_enabled', 'user', req.user.id, {}, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/me/2fa/disable', auth, (req, res) => {
-  if (!otplib) return res.status(503).json({ error: 'otplib no disponible' });
-  const { code } = req.body || {};
-  const user = db.prepare('SELECT totp_secret FROM users WHERE id=?').get(req.user.id);
-  if (!otplib.authenticator.check(code, user.totp_secret)) return res.status(401).json({ error: 'Código inválido' });
-  db.prepare('UPDATE users SET totp_enabled=0, totp_secret=NULL WHERE id=?').run(req.user.id);
-  createAuditLog(1, req.user.id, req.user.email, 'user.2fa_disabled', 'user', req.user.id, {}, ip(req));
-  res.json({ ok: true });
+app.post('/api/me/2fa/disable', auth, async (req, res) => {
+  try {
+    if (!otplib) return res.status(503).json({ error: 'otplib no disponible' });
+    const { code } = req.body || {};
+    const user = await db.prepare('SELECT totp_secret FROM users WHERE id=?').get(req.user.id);
+    if (!otplib.authenticator.check(code, user.totp_secret)) return res.status(401).json({ error: 'Código inválido' });
+    await db.prepare('UPDATE users SET totp_enabled=0, totp_secret=NULL WHERE id=?').run(req.user.id);
+    await createAuditLog(1, req.user.id, req.user.email, 'user.2fa_disabled', 'user', req.user.id, {}, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─── PASSWORD RESET ───────────────────────────────────────────────────────────
@@ -282,104 +292,120 @@ app.post('/auth/forgot-password', authLimiter, async (req, res) => {
   let { email } = req.body || {};
   if (!email) return res.status(400).json({ error: 'Email requerido' });
   email = email.toLowerCase().trim();
-  const user = db.prepare('SELECT id, name FROM users WHERE email=?').get(email);
+  const user = await db.prepare('SELECT id, name FROM users WHERE email=?').get(email);
   if (!user) return res.json({ ok: true }); // security: don't reveal
   const token = randomCode(32);
-  db.prepare('UPDATE users SET reset_token=?, reset_expires=? WHERE id=?').run(token, Date.now() + 86400000, user.id);
+  await db.prepare('UPDATE users SET reset_token=?, reset_expires=? WHERE id=?').run(token, Date.now() + 86400000, user.id);
   await sendEmail(email, 'Recuperar contraseña — Nexuss X Sistems',
     `<p>Hola ${user.name || ''},</p><p>Tu enlace para restablecer la contraseña:</p><p><a href="${process.env.APP_URL||'http://localhost:3002'}/reset-password.html?token=${token}">Restablecer contraseña</a></p><p>Válido por 24 horas.</p>`);
   console.log(`[MOCK RESET] token for ${email}: ${token}`);
   res.json({ ok: true, token }); // token returned for dev/demo only
 });
 
-app.post('/auth/reset-password', (req, res) => {
-  const { token, email, password } = req.body || {};
-  if (!token || !email || !password) return res.status(400).json({ error: 'Campos requeridos' });
-  const user = db.prepare('SELECT * FROM users WHERE reset_token=? AND email=?').get(token, email.toLowerCase().trim());
-  if (!user || user.reset_expires < Date.now()) return res.status(401).json({ error: 'Token inválido o expirado' });
-  db.prepare('UPDATE users SET password_hash=?, reset_token=NULL, reset_expires=NULL, updated_at=? WHERE id=?').run(bcrypt.hashSync(password, 12), now(), user.id);
-  createAuditLog(1, user.id, user.email, 'user.password_reset', 'user', user.id, {}, ip(req));
-  res.json({ ok: true });
+app.post('/auth/reset-password', async (req, res) => {
+  try {
+    const { token, email, password } = req.body || {};
+    if (!token || !email || !password) return res.status(400).json({ error: 'Campos requeridos' });
+    const user = await db.prepare('SELECT * FROM users WHERE reset_token=? AND email=?').get(token, email.toLowerCase().trim());
+    if (!user || user.reset_expires < Date.now()) return res.status(401).json({ error: 'Token inválido o expirado' });
+    await db.prepare('UPDATE users SET password_hash=?, reset_token=NULL, reset_expires=NULL, updated_at=? WHERE id=?').run(bcrypt.hashSync(password, 12), now(), user.id);
+    await createAuditLog(1, user.id, user.email, 'user.password_reset', 'user', user.id, {}, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/auth/verify-email', (req, res) => {
-  const { email, code } = req.body || {};
-  if (!email || !code) return res.status(400).json({ error: 'Campos requeridos' });
-  const user = db.prepare('SELECT * FROM users WHERE email=?').get(email.toLowerCase().trim());
-  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-  if (user.verification_code !== code) return res.status(401).json({ error: 'Código inválido' });
-  db.prepare('UPDATE users SET verified=1, verification_code=NULL, updated_at=? WHERE id=?').run(now(), user.id);
-  createAuditLog(1, user.id, user.email, 'user.email_verified', 'user', user.id, {}, ip(req));
-  res.json({ ok: true, token: signToken(user), user: { id: user.id, email: user.email, role: user.role, verified: true } });
+app.post('/auth/verify-email', async (req, res) => {
+  try {
+    const { email, code } = req.body || {};
+    if (!email || !code) return res.status(400).json({ error: 'Campos requeridos' });
+    const user = await db.prepare('SELECT * FROM users WHERE email=?').get(email.toLowerCase().trim());
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (user.verification_code !== code) return res.status(401).json({ error: 'Código inválido' });
+    await db.prepare('UPDATE users SET verified=1, verification_code=NULL, updated_at=? WHERE id=?').run(now(), user.id);
+    await createAuditLog(1, user.id, user.email, 'user.email_verified', 'user', user.id, {}, ip(req));
+    res.json({ ok: true, token: signToken(user), user: { id: user.id, email: user.email, role: user.role, verified: true } });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/auth/resend-code', authLimiter, async (req, res) => {
   let { email } = req.body || {};
   if (!email) return res.status(400).json({ error: 'Email requerido' });
   email = email.toLowerCase().trim();
-  const user = db.prepare('SELECT id, name FROM users WHERE email=?').get(email);
+  const user = await db.prepare('SELECT id, name FROM users WHERE email=?').get(email);
   if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
   const code = String(Math.floor(100000 + Math.random()*900000));
-  db.prepare('UPDATE users SET verification_code=? WHERE id=?').run(code, user.id);
+  await db.prepare('UPDATE users SET verification_code=? WHERE id=?').run(code, user.id);
   await sendEmail(email, 'Código de verificación — Nexuss X Sistems', `<p>Tu código: <strong style="font-size:24px">${code}</strong></p>`);
   console.log(`[MOCK CODE] ${email}: ${code}`);
   res.json({ ok: true });
 });
 
 // ─── API KEYS ─────────────────────────────────────────────────────────────────
-app.get('/api/api-keys', auth, (req, res) => {
-  const keys = db.prepare('SELECT id, name, key_prefix, permissions_json, last_used_at, created_at FROM api_keys WHERE user_id=?').all(req.user.id);
-  res.json({ items: keys.map(k => ({ ...k, permissions: j(k.permissions_json) })) });
+app.get('/api/api-keys', auth, async (req, res) => {
+  try {
+    const keys = await db.prepare('SELECT id, name, key_prefix, permissions_json, last_used_at, created_at FROM api_keys WHERE user_id=?').all(req.user.id);
+    res.json({ items: keys.map(k => ({ ...k, permissions: j(k.permissions_json) })) });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/api-keys', auth, (req, res) => {
-  const { name, permissions = ['read'] } = req.body || {};
-  if (!name) return res.status(400).json({ error: 'Nombre requerido' });
-  const rawKey = `nxs_${randomCode(32).toLowerCase()}`;
-  const prefix = rawKey.slice(0, 8);
-  const hash   = hashKey(rawKey);
-  db.prepare('INSERT INTO api_keys (tenant_id, user_id, name, key_prefix, key_hash, permissions_json) VALUES (1,?,?,?,?,?)').run(req.user.id, name, prefix, hash, JSON.stringify(permissions));
-  createAuditLog(1, req.user.id, req.user.email, 'api_key.created', 'api_key', prefix, { name }, ip(req));
-  res.json({ ok: true, key: rawKey, prefix }); // key shown ONCE
+app.post('/api/api-keys', auth, async (req, res) => {
+  try {
+    const { name, permissions = ['read'] } = req.body || {};
+    if (!name) return res.status(400).json({ error: 'Nombre requerido' });
+    const rawKey = `nxs_${randomCode(32).toLowerCase()}`;
+    const prefix = rawKey.slice(0, 8);
+    const hash   = hashKey(rawKey);
+    await db.prepare('INSERT INTO api_keys (tenant_id, user_id, name, key_prefix, key_hash, permissions_json) VALUES (1,?,?,?,?,?)').run(req.user.id, name, prefix, hash, JSON.stringify(permissions));
+    await createAuditLog(1, req.user.id, req.user.email, 'api_key.created', 'api_key', prefix, { name }, ip(req));
+    res.json({ ok: true, key: rawKey, prefix }); // key shown ONCE
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/api-keys/:id', auth, (req, res) => {
-  db.prepare('DELETE FROM api_keys WHERE id=? AND user_id=?').run(Number(req.params.id), req.user.id);
-  res.json({ ok: true });
+app.delete('/api/api-keys/:id', auth, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM api_keys WHERE id=? AND user_id=?').run(Number(req.params.id), req.user.id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: ADMIN — USERS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/admin/users', auth, requireAdmin, (req, res) => {
-  const { q, role, limit = 50, offset = 0 } = req.query;
-  let sql = 'SELECT id, email, name, role, verified, totp_enabled, created_at, last_login_at, login_count FROM users WHERE tenant_id=1';
-  const params = [];
-  if (q) { sql += ' AND (name LIKE ? OR email LIKE ?)'; params.push(`%${q}%`, `%${q}%`); }
-  if (role) { sql += ' AND role=?'; params.push(role); }
-  sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
-  const items = db.prepare(sql).all(...params).map(u => ({ ...u, verified: !!u.verified, totp_enabled: !!u.totp_enabled }));
-  const total = db.prepare('SELECT COUNT(*) as c FROM users WHERE tenant_id=1').get().c;
-  res.json({ items, total });
+app.get('/api/admin/users', auth, requireAdmin, async (req, res) => {
+  try {
+    const { q, role, limit = 50, offset = 0 } = req.query;
+    let sql = 'SELECT id, email, name, role, verified, totp_enabled, created_at, last_login_at, login_count FROM users WHERE tenant_id=1';
+    const params = [];
+    if (q) { sql += ' AND (name LIKE ? OR email LIKE ?)'; params.push(`%${q}%`, `%${q}%`); }
+    if (role) { sql += ' AND role=?'; params.push(role); }
+    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+    params.push(Number(limit), Number(offset));
+    const items = (await db.prepare(sql).all(...params)).map(u => ({ ...u, verified: !!u.verified, totp_enabled: !!u.totp_enabled }));
+    const total = (await db.prepare('SELECT COUNT(*) as c FROM users WHERE tenant_id=1').get()).c;
+    res.json({ items, total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/admin/users/:id', auth, requireAdmin, (req, res) => {
-  const id = Number(req.params.id);
-  const { role, name } = req.body || {};
-  const ROLES = ['viewer','agent','manager','admin','owner'];
-  if (role && !ROLES.includes(role)) return res.status(400).json({ error: 'Rol inválido' });
-  db.prepare('UPDATE users SET role=COALESCE(?,role), name=COALESCE(?,name), updated_at=? WHERE id=? AND tenant_id=1').run(role||null, name||null, now(), id);
-  createAuditLog(1, req.user.id, req.user.email, 'admin.update_user', 'user', id, { role }, ip(req));
-  res.json({ ok: true });
+app.patch('/api/admin/users/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { role, name } = req.body || {};
+    const ROLES = ['viewer','agent','manager','admin','owner'];
+    if (role && !ROLES.includes(role)) return res.status(400).json({ error: 'Rol inválido' });
+    await db.prepare('UPDATE users SET role=COALESCE(?,role), name=COALESCE(?,name), updated_at=? WHERE id=? AND tenant_id=1').run(role||null, name||null, now(), id);
+    await createAuditLog(1, req.user.id, req.user.email, 'admin.update_user', 'user', id, { role }, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/admin/users/:id', auth, requireAdmin, (req, res) => {
-  const id = Number(req.params.id);
-  if (id === req.user.id) return res.status(400).json({ error: 'No puedes eliminarte a ti mismo' });
-  db.prepare('DELETE FROM users WHERE id=? AND tenant_id=1').run(id);
-  createAuditLog(1, req.user.id, req.user.email, 'admin.delete_user', 'user', id, {}, ip(req));
-  res.json({ ok: true });
+app.delete('/api/admin/users/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (id === req.user.id) return res.status(400).json({ error: 'No puedes eliminarte a ti mismo' });
+    await db.prepare('DELETE FROM users WHERE id=? AND tenant_id=1').run(id);
+    await createAuditLog(1, req.user.id, req.user.email, 'admin.delete_user', 'user', id, {}, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -388,12 +414,12 @@ app.delete('/api/admin/users/:id', auth, requireAdmin, (req, res) => {
 app.post('/api/contact', async (req, res) => {
   const { name, email, message, phone, subject } = req.body || {};
   if (!name || !email || !message) return res.status(400).json({ error: 'Campos requeridos' });
-  const id = db.prepare('INSERT INTO messages (tenant_id, name, email, phone, subject, message) VALUES (1,?,?,?,?,?)').run(name, email.toLowerCase(), phone||null, subject||null, message).lastInsertRowid;
+  const { lastInsertRowid: id } = await db.prepare('INSERT INTO messages (tenant_id, name, email, phone, subject, message) VALUES (1,?,?,?,?,?)').run(name, email.toLowerCase(), phone||null, subject||null, message);
   // Auto-create contact in CRM if not exists
-  const existing = db.prepare('SELECT id FROM contacts WHERE email=? AND tenant_id=1').get(email.toLowerCase());
-  if (!existing) db.prepare('INSERT INTO contacts (tenant_id, name, email, phone, source, status) VALUES (1,?,?,?,?,?)').run(name, email.toLowerCase(), phone||null, 'contact_form', 'lead');
-  const admins = db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner')").all();
-  admins.forEach(a => createNotification(1, a.id, a.email, 'info', 'Nuevo mensaje de contacto', `${name} (${email}) envió un mensaje.`, '/admin.html'));
+  const existing = await db.prepare('SELECT id FROM contacts WHERE email=? AND tenant_id=1').get(email.toLowerCase());
+  if (!existing) await db.prepare('INSERT INTO contacts (tenant_id, name, email, phone, source, status) VALUES (1,?,?,?,?,?)').run(name, email.toLowerCase(), phone||null, 'contact_form', 'lead');
+  const admins = await db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner')").all();
+  for (const a of admins) await createNotification(1, a.id, a.email, 'info', 'Nuevo mensaje de contacto', `${name} (${email}) envió un mensaje.`, '/admin.html');
 
   // Auto-respuesta al usuario que envió el formulario
   await sendEmail(email, '¡Recibimos tu mensaje! — Nexuss X Sistems',
@@ -435,95 +461,113 @@ app.post('/api/contact', async (req, res) => {
   res.json({ ok: true });
 });
 
-app.get('/api/messages', auth, requireAgent, (req, res) => {
-  const { q, status, from, to, limit = 50, offset = 0 } = req.query;
-  let sql = 'SELECT * FROM messages WHERE tenant_id=1';
-  const params = [];
-  if (q) { sql += ' AND (name LIKE ? OR email LIKE ? OR message LIKE ?)'; params.push(`%${q}%`,`%${q}%`,`%${q}%`); }
-  if (status) { sql += ' AND status=?'; params.push(status); }
-  if (from) { sql += ' AND created_at>=?'; params.push(from); }
-  if (to)   { sql += ' AND created_at<=?'; params.push(to); }
-  const total = db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c'), ...params).get(...params)?.c || 0;
-  sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
-  res.json({ items: db.prepare(sql).all(...params), total });
+app.get('/api/messages', auth, requireAgent, async (req, res) => {
+  try {
+    const { q, status, from, to, limit = 50, offset = 0 } = req.query;
+    let sql = 'SELECT * FROM messages WHERE tenant_id=1';
+    const params = [];
+    if (q) { sql += ' AND (name LIKE ? OR email LIKE ? OR message LIKE ?)'; params.push(`%${q}%`,`%${q}%`,`%${q}%`); }
+    if (status) { sql += ' AND status=?'; params.push(status); }
+    if (from) { sql += ' AND created_at>=?'; params.push(from); }
+    if (to)   { sql += ' AND created_at<=?'; params.push(to); }
+    const total = (await db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c')).get(...params))?.c || 0;
+    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+    params.push(Number(limit), Number(offset));
+    res.json({ items: await db.prepare(sql).all(...params), total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/messages/:id', auth, requireAgent, (req, res) => {
-  db.prepare('UPDATE messages SET status=?, replied_at=? WHERE id=?').run(req.body.status||'replied', now(), Number(req.params.id));
-  res.json({ ok: true });
+app.patch('/api/messages/:id', auth, requireAgent, async (req, res) => {
+  try {
+    await db.prepare('UPDATE messages SET status=?, replied_at=? WHERE id=?').run(req.body.status||'replied', now(), Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/messages/:id', auth, requireAdmin, (req, res) => {
-  db.prepare('DELETE FROM messages WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/messages/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM messages WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/messages.csv', auth, requireAgent, (req, res) => {
-  const items = db.prepare('SELECT * FROM messages WHERE tenant_id=1 ORDER BY id DESC LIMIT 1000').all();
+app.get('/api/messages.csv', auth, requireAgent, async (req, res) => {
+  try {
+  const items = await db.prepare('SELECT * FROM messages WHERE tenant_id=1 ORDER BY id DESC LIMIT 1000').all();
   const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
   const hdr = ['id','name','email','phone','subject','message','status','created_at'].join(',');
   const body = items.map(r => [r.id,r.name,r.email,r.phone,r.subject,r.message,r.status,r.created_at].map(esc).join(',')).join('\n');
   res.setHeader('Content-Type','text/csv; charset=utf-8');
   res.setHeader('Content-Disposition','attachment; filename="messages.csv"');
   res.send(hdr+'\n'+body);
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: CRM — CONTACTS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/crm/contacts', auth, requireAgent, (req, res) => {
-  const { q, status, stage, assigned_to, limit=50, offset=0 } = req.query;
-  let sql = 'SELECT c.*, u.name as assigned_name FROM contacts c LEFT JOIN users u ON c.assigned_to=u.id WHERE c.tenant_id=1';
-  const params = [];
-  if (q) { sql += ' AND (c.name LIKE ? OR c.email LIKE ? OR c.company LIKE ?)'; params.push(`%${q}%`,`%${q}%`,`%${q}%`); }
-  if (status) { sql += ' AND c.status=?'; params.push(status); }
-  if (stage) { sql += ' AND c.stage=?'; params.push(stage); }
-  if (assigned_to) { sql += ' AND c.assigned_to=?'; params.push(Number(assigned_to)); }
-  const cSql = sql.replace('SELECT c.*, u.name as assigned_name FROM contacts c LEFT JOIN users u ON c.assigned_to=u.id','SELECT COUNT(*) as c FROM contacts c LEFT JOIN users u ON c.assigned_to=u.id');
-  const total = db.prepare(cSql).get(...params)?.c || 0;
-  sql += ' ORDER BY c.updated_at DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
-  const items = db.prepare(sql).all(...params).map(c => ({ ...c, tags: j(c.tags_json) }));
-  res.json({ items, total });
+app.get('/api/crm/contacts', auth, requireAgent, async (req, res) => {
+  try {
+    const { q, status, stage, assigned_to, limit=50, offset=0 } = req.query;
+    let sql = 'SELECT c.*, u.name as assigned_name FROM contacts c LEFT JOIN users u ON c.assigned_to=u.id WHERE c.tenant_id=1';
+    const params = [];
+    if (q) { sql += ' AND (c.name LIKE ? OR c.email LIKE ? OR c.company LIKE ?)'; params.push(`%${q}%`,`%${q}%`,`%${q}%`); }
+    if (status) { sql += ' AND c.status=?'; params.push(status); }
+    if (stage) { sql += ' AND c.stage=?'; params.push(stage); }
+    if (assigned_to) { sql += ' AND c.assigned_to=?'; params.push(Number(assigned_to)); }
+    const cSql = sql.replace('SELECT c.*, u.name as assigned_name FROM contacts c LEFT JOIN users u ON c.assigned_to=u.id','SELECT COUNT(*) as c FROM contacts c LEFT JOIN users u ON c.assigned_to=u.id');
+    const total = (await db.prepare(cSql).get(...params))?.c || 0;
+    sql += ' ORDER BY c.updated_at DESC LIMIT ? OFFSET ?';
+    params.push(Number(limit), Number(offset));
+    const items = (await db.prepare(sql).all(...params)).map(c => ({ ...c, tags: j(c.tags_json) }));
+    res.json({ items, total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/crm/contacts', auth, requireAgent, (req, res) => {
-  const { name, email, phone, company, position, status='lead', stage='new', source='manual', value=0, assigned_to, tags=[], notes, linkedin, website, address } = req.body || {};
-  if (!name) return res.status(400).json({ error: 'Nombre requerido' });
-  const id = db.prepare('INSERT INTO contacts (tenant_id, name, email, phone, company, position, status, stage, source, value, assigned_to, tags_json, notes, linkedin, website, address) VALUES (1,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(name, email?.toLowerCase()||null, phone||null, company||null, position||null, status, stage, source, Number(value), assigned_to||null, JSON.stringify(tags), notes||null, linkedin||null, website||null, address||null).lastInsertRowid;
-  createAuditLog(1, req.user.id, req.user.email, 'contact.created', 'contact', id, { name, email }, ip(req));
-  res.json({ ok: true, id });
+app.post('/api/crm/contacts', auth, requireAgent, async (req, res) => {
+  try {
+    const { name, email, phone, company, position, status='lead', stage='new', source='manual', value=0, assigned_to, tags=[], notes, linkedin, website, address } = req.body || {};
+    if (!name) return res.status(400).json({ error: 'Nombre requerido' });
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO contacts (tenant_id, name, email, phone, company, position, status, stage, source, value, assigned_to, tags_json, notes, linkedin, website, address) VALUES (1,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(name, email?.toLowerCase()||null, phone||null, company||null, position||null, status, stage, source, Number(value), assigned_to||null, JSON.stringify(tags), notes||null, linkedin||null, website||null, address||null);
+    await createAuditLog(1, req.user.id, req.user.email, 'contact.created', 'contact', id, { name, email }, ip(req));
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/crm/contacts/:id', auth, requireAgent, (req, res) => {
-  const c = db.prepare('SELECT * FROM contacts WHERE id=? AND tenant_id=1').get(Number(req.params.id));
-  if (!c) return res.status(404).json({ error: 'Not found' });
-  const notes    = db.prepare('SELECT n.*, u.name as author FROM crm_notes n LEFT JOIN users u ON n.created_by=u.id WHERE n.contact_id=? ORDER BY n.created_at DESC').all(c.id);
-  const deals    = db.prepare('SELECT * FROM deals WHERE contact_id=? AND tenant_id=1 ORDER BY created_at DESC').all(c.id);
-  const tickets  = db.prepare("SELECT id, number, title, status, priority, created_at FROM tickets WHERE user_email=? AND tenant_id=1 ORDER BY created_at DESC LIMIT 10").all(c.email || '');
-  const activities = db.prepare('SELECT * FROM crm_activities WHERE contact_id=? ORDER BY created_at DESC LIMIT 20').all(c.id);
-  res.json({ contact: { ...c, tags: j(c.tags_json) }, notes, deals: deals.map(d=>({...d})), tickets, activities });
+app.get('/api/crm/contacts/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const c = await db.prepare('SELECT * FROM contacts WHERE id=? AND tenant_id=1').get(Number(req.params.id));
+    if (!c) return res.status(404).json({ error: 'Not found' });
+    const notes    = await db.prepare('SELECT n.*, u.name as author FROM crm_notes n LEFT JOIN users u ON n.created_by=u.id WHERE n.contact_id=? ORDER BY n.created_at DESC').all(c.id);
+    const deals    = await db.prepare('SELECT * FROM deals WHERE contact_id=? AND tenant_id=1 ORDER BY created_at DESC').all(c.id);
+    const tickets  = await db.prepare("SELECT id, number, title, status, priority, created_at FROM tickets WHERE user_email=? AND tenant_id=1 ORDER BY created_at DESC LIMIT 10").all(c.email || '');
+    const activities = await db.prepare('SELECT * FROM crm_activities WHERE contact_id=? ORDER BY created_at DESC LIMIT 20').all(c.id);
+    res.json({ contact: { ...c, tags: j(c.tags_json) }, notes, deals: deals.map(d=>({...d})), tickets, activities });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/crm/contacts/:id', auth, requireAgent, (req, res) => {
-  const id = Number(req.params.id);
-  const fields = ['name','email','phone','company','position','status','stage','source','value','assigned_to','notes','linkedin','website','address'];
-  const updates = []; const params = [];
-  fields.forEach(f => { if (req.body[f] !== undefined) { updates.push(`${f}=?`); params.push(f==='email'?req.body[f]?.toLowerCase():req.body[f]); } });
-  if (req.body.tags !== undefined) { updates.push('tags_json=?'); params.push(JSON.stringify(req.body.tags)); }
-  if (!updates.length) return res.json({ ok: true });
-  updates.push("updated_at=datetime('now')");
-  db.prepare(`UPDATE contacts SET ${updates.join(',')} WHERE id=? AND tenant_id=1`).run(...params, id);
-  createAuditLog(1, req.user.id, req.user.email, 'contact.updated', 'contact', id, req.body, ip(req));
-  res.json({ ok: true });
+app.patch('/api/crm/contacts/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const fields = ['name','email','phone','company','position','status','stage','source','value','assigned_to','notes','linkedin','website','address'];
+    const updates = []; const params = [];
+    fields.forEach(f => { if (req.body[f] !== undefined) { updates.push(`${f}=?`); params.push(f==='email'?req.body[f]?.toLowerCase():req.body[f]); } });
+    if (req.body.tags !== undefined) { updates.push('tags_json=?'); params.push(JSON.stringify(req.body.tags)); }
+    if (!updates.length) return res.json({ ok: true });
+    updates.push("updated_at=NOW()");
+    await db.prepare(`UPDATE contacts SET ${updates.join(',')} WHERE id=? AND tenant_id=1`).run(...params, id);
+    await createAuditLog(1, req.user.id, req.user.email, 'contact.updated', 'contact', id, req.body, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/crm/contacts/:id', auth, requireManager, (req, res) => {
-  const id = Number(req.params.id);
-  db.prepare('DELETE FROM contacts WHERE id=? AND tenant_id=1').run(id);
-  createAuditLog(1, req.user.id, req.user.email, 'contact.deleted', 'contact', id, {}, ip(req));
-  res.json({ ok: true });
+app.delete('/api/crm/contacts/:id', auth, requireManager, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    await db.prepare('DELETE FROM contacts WHERE id=? AND tenant_id=1').run(id);
+    await createAuditLog(1, req.user.id, req.user.email, 'contact.deleted', 'contact', id, {}, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // Import contacts CSV
@@ -533,123 +577,138 @@ app.post('/api/crm/contacts/import', auth, requireManager, upload.single('file')
   const lines = content.split('\n').filter(l => l.trim());
   const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,'').toLowerCase());
   let imported = 0, skipped = 0;
-  const insert = db.prepare('INSERT OR IGNORE INTO contacts (tenant_id, name, email, phone, company, source) VALUES (1,?,?,?,?,?)');
-  const trx = db.transaction(() => {
-    for (let i = 1; i < lines.length; i++) {
-      const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g,''));
-      const row = {}; headers.forEach((h,idx) => row[h] = vals[idx]||'');
-      if (!row.name && !row.nombre) { skipped++; continue; }
-      const r = insert.run(row.name||row.nombre||'', row.email||null, row.phone||row.telefono||null, row.company||row.empresa||null, 'import');
-      r.changes ? imported++ : skipped++;
-    }
-  });
-  trx();
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g,''));
+    const row = {}; headers.forEach((h,idx) => row[h] = vals[idx]||'');
+    if (!row.name && !row.nombre) { skipped++; continue; }
+    try {
+      await db.prepare('INSERT INTO contacts (tenant_id, name, email, phone, company, source) VALUES (1,?,?,?,?,?)').run(row.name||row.nombre||'', row.email||null, row.phone||row.telefono||null, row.company||row.empresa||null, 'import');
+      imported++;
+    } catch(e) { skipped++; }
+  }
   fs.unlinkSync(req.file.path);
-  createAuditLog(1, req.user.id, req.user.email, 'contacts.import', 'contact', 'bulk', { imported, skipped }, ip(req));
+  await createAuditLog(1, req.user.id, req.user.email, 'contacts.import', 'contact', 'bulk', { imported, skipped }, ip(req));
   res.json({ ok: true, imported, skipped });
 });
 
 // Export contacts CSV
-app.get('/api/crm/contacts.csv', auth, requireAgent, (req, res) => {
-  const items = db.prepare('SELECT * FROM contacts WHERE tenant_id=1 ORDER BY id DESC').all();
+app.get('/api/crm/contacts.csv', auth, requireAgent, async (req, res) => {
+  try {
+  const items = await db.prepare('SELECT * FROM contacts WHERE tenant_id=1 ORDER BY id DESC').all();
   const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
   const hdr = ['id','name','email','phone','company','position','status','stage','source','value','notes','created_at'].join(',');
   const body = items.map(r=>[r.id,r.name,r.email,r.phone,r.company,r.position,r.status,r.stage,r.source,r.value,r.notes,r.created_at].map(esc).join(',')).join('\n');
   res.setHeader('Content-Type','text/csv; charset=utf-8');
   res.setHeader('Content-Disposition','attachment; filename="contacts.csv"');
   res.send(hdr+'\n'+body);
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─── CRM NOTES ────────────────────────────────────────────────────────────────
-app.get('/api/crm/clients', auth, requireAgent, (req, res) => {
-  const users = db.prepare('SELECT id, name, email, role, created_at FROM users WHERE tenant_id=1 ORDER BY id DESC').all();
-  const items = users.map(u => {
-    const orders_count  = db.prepare("SELECT COUNT(*) as c FROM orders WHERE json_extract(customer_json,'$.email')=? AND tenant_id=1").get(u.email)?.c || 0;
-    const total_spent   = db.prepare("SELECT SUM(total) as s FROM orders WHERE json_extract(customer_json,'$.email')=? AND tenant_id=1").get(u.email)?.s || 0;
-    const tickets_count = db.prepare('SELECT COUNT(*) as c FROM tickets WHERE user_email=? AND tenant_id=1').get(u.email)?.c || 0;
-    const notes = db.prepare('SELECT * FROM crm_notes WHERE client_email=? ORDER BY created_at DESC').all(u.email);
-    return { ...u, orders_count, total_spent, tickets_count, notes };
-  });
-  res.json({ items });
+app.get('/api/crm/clients', auth, requireAgent, async (req, res) => {
+  try {
+    const users = await db.prepare('SELECT id, name, email, role, created_at FROM users WHERE tenant_id=1 ORDER BY id DESC').all();
+    const items = [];
+    for (const u of users) {
+      const orders_count  = (await db.prepare("SELECT COUNT(*) as c FROM orders WHERE json_extract(customer_json,'$.email')=? AND tenant_id=1").get(u.email))?.c || 0;
+      const total_spent   = (await db.prepare("SELECT SUM(total) as s FROM orders WHERE json_extract(customer_json,'$.email')=? AND tenant_id=1").get(u.email))?.s || 0;
+      const tickets_count = (await db.prepare('SELECT COUNT(*) as c FROM tickets WHERE user_email=? AND tenant_id=1').get(u.email))?.c || 0;
+      const notes = await db.prepare('SELECT * FROM crm_notes WHERE client_email=? ORDER BY created_at DESC').all(u.email);
+      items.push({ ...u, orders_count, total_spent, tickets_count, notes });
+    }
+    res.json({ items });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/crm/notes', auth, requireAgent, (req, res) => {
-  const { client_email, contact_id, text } = req.body || {};
-  if (!text) return res.status(400).json({ error: 'Texto requerido' });
-  db.prepare('INSERT INTO crm_notes (tenant_id, contact_id, client_email, text, created_by) VALUES (1,?,?,?,?)').run(contact_id||null, client_email||null, text, req.user.id);
-  res.json({ ok: true });
+app.post('/api/crm/notes', auth, requireAgent, async (req, res) => {
+  try {
+    const { client_email, contact_id, text } = req.body || {};
+    if (!text) return res.status(400).json({ error: 'Texto requerido' });
+    await db.prepare('INSERT INTO crm_notes (tenant_id, contact_id, client_email, text, created_by) VALUES (1,?,?,?,?)').run(contact_id||null, client_email||null, text, req.user.id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/crm/notes/:id', auth, requireAgent, (req, res) => {
-  db.prepare('DELETE FROM crm_notes WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/crm/notes/:id', auth, requireAgent, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM crm_notes WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─── CRM ACTIVITIES ───────────────────────────────────────────────────────────
-app.post('/api/crm/activities', auth, requireAgent, (req, res) => {
-  const { contact_id, deal_id, type, note } = req.body || {};
-  if (!type) return res.status(400).json({ error: 'Tipo requerido' });
-  db.prepare('INSERT INTO crm_activities (tenant_id, contact_id, deal_id, type, note, created_by) VALUES (1,?,?,?,?,?)').run(contact_id||null, deal_id||null, type, note||null, req.user.id);
-  res.json({ ok: true });
+app.post('/api/crm/activities', auth, requireAgent, async (req, res) => {
+  try {
+    const { contact_id, deal_id, type, note } = req.body || {};
+    if (!type) return res.status(400).json({ error: 'Tipo requerido' });
+    await db.prepare('INSERT INTO crm_activities (tenant_id, contact_id, deal_id, type, note, created_by) VALUES (1,?,?,?,?,?)').run(contact_id||null, deal_id||null, type, note||null, req.user.id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: CRM — DEALS / PIPELINE
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/crm/deals', auth, requireAgent, (req, res) => {
-  const { stage, assigned_to, contact_id } = req.query;
-  let sql = 'SELECT d.*, c.name as contact_name, c.company as contact_company FROM deals d LEFT JOIN contacts c ON d.contact_id=c.id WHERE d.tenant_id=1';
-  const params = [];
-  if (stage) { sql += ' AND d.stage=?'; params.push(stage); }
-  if (assigned_to) { sql += ' AND d.assigned_to=?'; params.push(Number(assigned_to)); }
-  if (contact_id) { sql += ' AND d.contact_id=?'; params.push(Number(contact_id)); }
-  sql += ' ORDER BY d.updated_at DESC';
-  const items = db.prepare(sql).all(...params);
-  // Pipeline summary
-  const pipeline = ['prospecting','qualified','proposal','negotiation','won','lost'].map(s => ({
-    stage: s,
-    count: items.filter(d=>d.stage===s).length,
-    value: items.filter(d=>d.stage===s).reduce((a,d)=>a+(d.value||0),0)
-  }));
-  res.json({ items, pipeline });
+app.get('/api/crm/deals', auth, requireAgent, async (req, res) => {
+  try {
+    const { stage, assigned_to, contact_id } = req.query;
+    let sql = 'SELECT d.*, c.name as contact_name, c.company as contact_company FROM deals d LEFT JOIN contacts c ON d.contact_id=c.id WHERE d.tenant_id=1';
+    const params = [];
+    if (stage) { sql += ' AND d.stage=?'; params.push(stage); }
+    if (assigned_to) { sql += ' AND d.assigned_to=?'; params.push(Number(assigned_to)); }
+    if (contact_id) { sql += ' AND d.contact_id=?'; params.push(Number(contact_id)); }
+    sql += ' ORDER BY d.updated_at DESC';
+    const items = await db.prepare(sql).all(...params);
+    const pipeline = ['prospecting','qualified','proposal','negotiation','won','lost'].map(s => ({
+      stage: s,
+      count: items.filter(d=>d.stage===s).length,
+      value: items.filter(d=>d.stage===s).reduce((a,d)=>a+(d.value||0),0)
+    }));
+    res.json({ items, pipeline });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/crm/deals', auth, requireAgent, (req, res) => {
-  const { contact_id, title, value=0, currency='DOP', stage='prospecting', probability=20, close_date, assigned_to, notes } = req.body || {};
-  if (!title) return res.status(400).json({ error: 'Título requerido' });
-  const id = db.prepare('INSERT INTO deals (tenant_id, contact_id, title, value, currency, stage, probability, close_date, assigned_to, notes) VALUES (1,?,?,?,?,?,?,?,?,?)').run(contact_id||null, title, Number(value), currency, stage, Number(probability), close_date||null, assigned_to||null, notes||null).lastInsertRowid;
-  createAuditLog(1, req.user.id, req.user.email, 'deal.created', 'deal', id, { title, value }, ip(req));
-  // Activity
-  if (contact_id) db.prepare('INSERT INTO crm_activities (tenant_id, contact_id, deal_id, type, note, created_by) VALUES (1,?,?,?,?,?)').run(contact_id, id, 'deal_created', `Deal creado: ${title}`, req.user.id);
-  res.json({ ok: true, id });
+app.post('/api/crm/deals', auth, requireAgent, async (req, res) => {
+  try {
+    const { contact_id, title, value=0, currency='DOP', stage='prospecting', probability=20, close_date, assigned_to, notes } = req.body || {};
+    if (!title) return res.status(400).json({ error: 'Título requerido' });
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO deals (tenant_id, contact_id, title, value, currency, stage, probability, close_date, assigned_to, notes) VALUES (1,?,?,?,?,?,?,?,?,?)').run(contact_id||null, title, Number(value), currency, stage, Number(probability), close_date||null, assigned_to||null, notes||null);
+    await createAuditLog(1, req.user.id, req.user.email, 'deal.created', 'deal', id, { title, value }, ip(req));
+    if (contact_id) await db.prepare('INSERT INTO crm_activities (tenant_id, contact_id, deal_id, type, note, created_by) VALUES (1,?,?,?,?,?)').run(contact_id, id, 'deal_created', `Deal creado: ${title}`, req.user.id);
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/crm/deals/:id', auth, requireAgent, (req, res) => {
-  const id = Number(req.params.id);
-  const deal = db.prepare('SELECT * FROM deals WHERE id=? AND tenant_id=1').get(id);
-  if (!deal) return res.status(404).json({ error: 'Not found' });
-  const { title, value, currency, stage, probability, close_date, assigned_to, notes, lost_reason } = req.body;
-  const updates = []; const params = [];
-  if (title!==undefined)       { updates.push('title=?'); params.push(title); }
-  if (value!==undefined)       { updates.push('value=?'); params.push(Number(value)); }
-  if (currency!==undefined)    { updates.push('currency=?'); params.push(currency); }
-  if (stage!==undefined)       { updates.push('stage=?'); params.push(stage);
-    if (stage==='won')  { updates.push("won_at=datetime('now')"); }
-    if (stage==='lost') { updates.push("lost_at=datetime('now')"); if(lost_reason){updates.push('lost_reason=?');params.push(lost_reason);} }
-  }
-  if (probability!==undefined) { updates.push('probability=?'); params.push(Number(probability)); }
-  if (close_date!==undefined)  { updates.push('close_date=?'); params.push(close_date); }
-  if (assigned_to!==undefined) { updates.push('assigned_to=?'); params.push(assigned_to); }
-  if (notes!==undefined)       { updates.push('notes=?'); params.push(notes); }
-  updates.push("updated_at=datetime('now')");
-  db.prepare(`UPDATE deals SET ${updates.join(',')} WHERE id=? AND tenant_id=1`).run(...params, id);
-  createAuditLog(1, req.user.id, req.user.email, 'deal.updated', 'deal', id, req.body, ip(req));
-  res.json({ ok: true });
+app.patch('/api/crm/deals/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const deal = await db.prepare('SELECT * FROM deals WHERE id=? AND tenant_id=1').get(id);
+    if (!deal) return res.status(404).json({ error: 'Not found' });
+    const { title, value, currency, stage, probability, close_date, assigned_to, notes, lost_reason } = req.body;
+    const updates = []; const params = [];
+    if (title!==undefined)       { updates.push('title=?'); params.push(title); }
+    if (value!==undefined)       { updates.push('value=?'); params.push(Number(value)); }
+    if (currency!==undefined)    { updates.push('currency=?'); params.push(currency); }
+    if (stage!==undefined)       { updates.push('stage=?'); params.push(stage);
+      if (stage==='won')  { updates.push("won_at=NOW()"); }
+      if (stage==='lost') { updates.push("lost_at=NOW()"); if(lost_reason){updates.push('lost_reason=?');params.push(lost_reason);} }
+    }
+    if (probability!==undefined) { updates.push('probability=?'); params.push(Number(probability)); }
+    if (close_date!==undefined)  { updates.push('close_date=?'); params.push(close_date); }
+    if (assigned_to!==undefined) { updates.push('assigned_to=?'); params.push(assigned_to); }
+    if (notes!==undefined)       { updates.push('notes=?'); params.push(notes); }
+    updates.push("updated_at=NOW()");
+    await db.prepare(`UPDATE deals SET ${updates.join(',')} WHERE id=? AND tenant_id=1`).run(...params, id);
+    await createAuditLog(1, req.user.id, req.user.email, 'deal.updated', 'deal', id, req.body, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/crm/deals/:id', auth, requireManager, (req, res) => {
-  db.prepare('DELETE FROM deals WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/crm/deals/:id', auth, requireManager, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM deals WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -657,203 +716,235 @@ app.delete('/api/crm/deals/:id', auth, requireManager, (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const SLA_HOURS = { urgent: 4, high: 8, normal: 24, low: 72 };
 
-app.get('/api/tickets', auth, (req, res) => {
-  const { status, priority, category, assigned_to, q, limit=50, offset=0 } = req.query;
-  const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
-  let sql = 'SELECT t.*, u.name as assigned_name FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id WHERE t.tenant_id=1';
-  const params = [];
-  if (!isAgent) { sql += ' AND t.user_email=?'; params.push(req.user.email); }
-  if (status)   { sql += ' AND t.status=?'; params.push(status); }
-  if (priority) { sql += ' AND t.priority=?'; params.push(priority); }
-  if (category) { sql += ' AND t.category=?'; params.push(category); }
-  if (assigned_to) { sql += ' AND t.assigned_to=?'; params.push(Number(assigned_to)); }
-  if (q) { sql += ' AND (t.title LIKE ? OR t.description LIKE ? OR t.number LIKE ?)'; params.push(`%${q}%`,`%${q}%`,`%${q}%`); }
-  const cSql = sql.replace('SELECT t.*, u.name as assigned_name FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id','SELECT COUNT(*) as c FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id');
-  const total = db.prepare(cSql).get(...params)?.c || 0;
-  sql += ' ORDER BY t.id DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
-  const items = db.prepare(sql).all(...params).map(t => {
+app.get('/api/tickets', auth, async (req, res) => {
+  try {
+    const { status, priority, category, assigned_to, q, limit=50, offset=0 } = req.query;
+    const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
+    let sql = 'SELECT t.*, u.name as assigned_name FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id WHERE t.tenant_id=1';
+    const params = [];
+    if (!isAgent) { sql += ' AND t.user_email=?'; params.push(req.user.email); }
+    if (status)   { sql += ' AND t.status=?'; params.push(status); }
+    if (priority) { sql += ' AND t.priority=?'; params.push(priority); }
+    if (category) { sql += ' AND t.category=?'; params.push(category); }
+    if (assigned_to) { sql += ' AND t.assigned_to=?'; params.push(Number(assigned_to)); }
+    if (q) { sql += ' AND (t.title LIKE ? OR t.description LIKE ? OR t.number LIKE ?)'; params.push(`%${q}%`,`%${q}%`,`%${q}%`); }
+    const cSql = sql.replace('SELECT t.*, u.name as assigned_name FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id','SELECT COUNT(*) as c FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id');
+    const total = (await db.prepare(cSql).get(...params))?.c || 0;
+    sql += ' ORDER BY t.id DESC LIMIT ? OFFSET ?';
+    params.push(Number(limit), Number(offset));
+    const items = (await db.prepare(sql).all(...params)).map(t => {
+      const sla_breached = t.sla_due_at && t.status !== 'closed' && new Date(t.sla_due_at) < new Date();
+      return { ...t, tags: j(t.tags_json), sla_breached };
+    });
+    res.json({ items, total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/tickets', auth, async (req, res) => {
+  try {
+    const { title, description, priority='normal', category='general', tags=[] } = req.body || {};
+    if (!title || !description) return res.status(400).json({ error: 'Título y descripción requeridos' });
+    const slaH = SLA_HOURS[priority] || 24;
+    const slaDue = new Date(Date.now() + slaH * 3600000).toISOString();
+    const number = await nextTicketNumber(1);
+    const user = await db.prepare('SELECT id, name FROM users WHERE id=?').get(req.user.id);
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO tickets (tenant_id, number, title, description, priority, category, sla_hours, sla_due_at, user_id, user_email, user_name, tags_json) VALUES (1,?,?,?,?,?,?,?,?,?,?,?)').run(number, title, description, priority, category, slaH, slaDue, req.user.id, req.user.email, user?.name||req.user.email, JSON.stringify(tags));
+    const agents = await db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner','manager','agent')").all();
+    for (const a of agents) await createNotification(1, a.id, a.email, priority==='urgent'?'error':'info', `Nuevo ticket ${priority==='urgent'?'URGENTE':''} #${number}`, title, '/tickets.html');
+    await runAutomations(1, 'ticket.created', { priority, category, title, _ticketId: id, user_id: req.user.id, user_email: req.user.email, link: '/tickets.html' });
+    await createAuditLog(1, req.user.id, req.user.email, 'ticket.created', 'ticket', id, { title, priority }, ip(req));
+    res.json({ ok: true, id, number });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/tickets/:id', auth, async (req, res) => {
+  try {
+    const t = await db.prepare('SELECT t.*, u.name as assigned_name FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id WHERE t.id=? AND t.tenant_id=1').get(Number(req.params.id));
+    if (!t) return res.status(404).json({ error: 'Not found' });
+    const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
+    if (!isAgent && t.user_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
+    const comments = await db.prepare('SELECT * FROM ticket_comments WHERE ticket_id=? ORDER BY created_at ASC').all(t.id);
     const sla_breached = t.sla_due_at && t.status !== 'closed' && new Date(t.sla_due_at) < new Date();
-    return { ...t, tags: j(t.tags_json), sla_breached };
-  });
-  res.json({ items, total });
+    res.json({ ticket: { ...t, tags: j(t.tags_json), sla_breached }, comments });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/tickets', auth, (req, res) => {
-  const { title, description, priority='normal', category='general', tags=[] } = req.body || {};
-  if (!title || !description) return res.status(400).json({ error: 'Título y descripción requeridos' });
-  const slaH = SLA_HOURS[priority] || 24;
-  const slaDue = new Date(Date.now() + slaH * 3600000).toISOString();
-  const number = nextTicketNumber(1);
-  const user = db.prepare('SELECT id, name FROM users WHERE id=?').get(req.user.id);
-  const id = db.prepare('INSERT INTO tickets (tenant_id, number, title, description, priority, category, sla_hours, sla_due_at, user_id, user_email, user_name, tags_json) VALUES (1,?,?,?,?,?,?,?,?,?,?,?)').run(number, title, description, priority, category, slaH, slaDue, req.user.id, req.user.email, user?.name||req.user.email, JSON.stringify(tags)).lastInsertRowid;
-
-  // Notify agents
-  const agents = db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner','manager','agent')").all();
-  agents.forEach(a => createNotification(1, a.id, a.email, priority==='urgent'?'error':'info', `Nuevo ticket ${priority==='urgent'?'URGENTE':''} #${number}`, title, '/tickets.html'));
-
-  // Run automations
-  runAutomations(1, 'ticket.created', { priority, category, title, _ticketId: id, user_id: req.user.id, user_email: req.user.email, link: '/tickets.html' });
-  createAuditLog(1, req.user.id, req.user.email, 'ticket.created', 'ticket', id, { title, priority }, ip(req));
-  res.json({ ok: true, id, number });
+app.patch('/api/tickets/:id', auth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const t = await db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(id);
+    if (!t) return res.status(404).json({ error: 'Not found' });
+    const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
+    if (!isAgent && t.user_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
+    const updates = []; const params = [];
+    if (req.body.status && isAgent) {
+      updates.push('status=?'); params.push(req.body.status);
+      if (req.body.status === 'closed') { updates.push("closed_at=NOW()"); }
+      if (req.body.status !== t.status) await createNotification(1, t.user_id, t.user_email, 'info', `Ticket #${t.number} actualizado`, `Estado: ${req.body.status}`, '/tickets.html');
+    }
+    if (req.body.priority && isAgent)    { updates.push('priority=?'); params.push(req.body.priority); }
+    if (req.body.assigned_to !== undefined && isAgent) { updates.push('assigned_to=?'); params.push(req.body.assigned_to||null); }
+    if (req.body.category && isAgent)    { updates.push('category=?'); params.push(req.body.category); }
+    if (req.body.csat_score !== undefined) { updates.push('csat_score=?'); params.push(Number(req.body.csat_score)); }
+    if (req.body.response && isAgent) {
+      await db.prepare('INSERT INTO ticket_comments (ticket_id, text, from_email, from_name, is_internal, is_ai) VALUES (?,?,?,?,?,?)').run(id, req.body.response, req.user.email, req.user.email, req.body.is_internal?1:0, 0);
+      if (!updates.includes('status=?') && t.status === 'open') { updates.push('status=?'); params.push('in_progress'); }
+      if (!req.body.is_internal) await createNotification(1, t.user_id, t.user_email, 'success', `Respuesta en ticket #${t.number}`, req.body.response.slice(0,100), '/tickets.html');
+    }
+    if (req.body.comment) {
+      await db.prepare('INSERT INTO ticket_comments (ticket_id, text, from_email, from_name, is_internal) VALUES (?,?,?,?,0)').run(id, req.body.comment, req.user.email, req.user.email);
+    }
+    if (req.body.ai_summary && isAgent) { updates.push('ai_summary=?'); params.push(req.body.ai_summary); }
+    if (updates.length) {
+      updates.push("updated_at=NOW()");
+      await db.prepare(`UPDATE tickets SET ${updates.join(',')} WHERE id=? AND tenant_id=1`).run(...params, id);
+    }
+    await createAuditLog(1, req.user.id, req.user.email, 'ticket.updated', 'ticket', id, req.body, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/tickets/:id', auth, (req, res) => {
-  const t = db.prepare('SELECT t.*, u.name as assigned_name FROM tickets t LEFT JOIN users u ON t.assigned_to=u.id WHERE t.id=? AND t.tenant_id=1').get(Number(req.params.id));
-  if (!t) return res.status(404).json({ error: 'Not found' });
-  const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
-  if (!isAgent && t.user_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
-  const comments = db.prepare('SELECT * FROM ticket_comments WHERE ticket_id=? ORDER BY created_at ASC').all(t.id);
-  const sla_breached = t.sla_due_at && t.status !== 'closed' && new Date(t.sla_due_at) < new Date();
-  res.json({ ticket: { ...t, tags: j(t.tags_json), sla_breached }, comments });
-});
-
-app.patch('/api/tickets/:id', auth, (req, res) => {
-  const id = Number(req.params.id);
-  const t = db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(id);
-  if (!t) return res.status(404).json({ error: 'Not found' });
-  const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
-  if (!isAgent && t.user_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
-
-  const updates = []; const params = [];
-  if (req.body.status && isAgent) {
-    updates.push('status=?'); params.push(req.body.status);
-    if (req.body.status === 'closed') { updates.push("closed_at=datetime('now')"); }
-    // Notify user
-    if (req.body.status !== t.status) createNotification(1, t.user_id, t.user_email, 'info', `Ticket #${t.number} actualizado`, `Estado: ${req.body.status}`, '/tickets.html');
-  }
-  if (req.body.priority && isAgent)    { updates.push('priority=?'); params.push(req.body.priority); }
-  if (req.body.assigned_to !== undefined && isAgent) { updates.push('assigned_to=?'); params.push(req.body.assigned_to||null); }
-  if (req.body.category && isAgent)    { updates.push('category=?'); params.push(req.body.category); }
-  if (req.body.csat_score !== undefined) { updates.push('csat_score=?'); params.push(Number(req.body.csat_score)); }
-  if (req.body.response && isAgent) {
-    db.prepare('INSERT INTO ticket_comments (ticket_id, text, from_email, from_name, is_internal, is_ai) VALUES (?,?,?,?,?,?)').run(id, req.body.response, req.user.email, req.user.email, req.body.is_internal?1:0, 0);
-    if (!updates.includes('status=?') && t.status === 'open') { updates.push('status=?'); params.push('in_progress'); }
-    if (!req.body.is_internal) createNotification(1, t.user_id, t.user_email, 'success', `Respuesta en ticket #${t.number}`, req.body.response.slice(0,100), '/tickets.html');
-  }
-  if (req.body.comment) {
-    db.prepare('INSERT INTO ticket_comments (ticket_id, text, from_email, from_name, is_internal) VALUES (?,?,?,?,0)').run(id, req.body.comment, req.user.email, req.user.email);
-  }
-  if (req.body.ai_summary && isAgent) { updates.push('ai_summary=?'); params.push(req.body.ai_summary); }
-  if (updates.length) {
-    updates.push("updated_at=datetime('now')");
-    db.prepare(`UPDATE tickets SET ${updates.join(',')} WHERE id=? AND tenant_id=1`).run(...params, id);
-  }
-  createAuditLog(1, req.user.id, req.user.email, 'ticket.updated', 'ticket', id, req.body, ip(req));
-  res.json({ ok: true });
-});
-
-app.delete('/api/tickets/:id', auth, requireManager, (req, res) => {
-  db.prepare('DELETE FROM tickets WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/tickets/:id', auth, requireManager, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM tickets WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // Ticket templates
-app.get('/api/tickets/templates', auth, requireAgent, (req, res) => {
-  res.json({ items: db.prepare('SELECT * FROM ticket_templates WHERE tenant_id=1 ORDER BY name').all() });
+app.get('/api/tickets/templates', auth, requireAgent, async (req, res) => {
+  try { res.json({ items: await db.prepare('SELECT * FROM ticket_templates WHERE tenant_id=1 ORDER BY name').all() }); }
+  catch(e) { res.status(500).json({ error: e.message }); }
 });
-app.post('/api/tickets/templates', auth, requireManager, (req, res) => {
-  const { name, body, category } = req.body || {};
-  if (!name || !body) return res.status(400).json({ error: 'Nombre y cuerpo requeridos' });
-  const id = db.prepare('INSERT INTO ticket_templates (tenant_id, name, body, category) VALUES (1,?,?,?)').run(name, body, category||'general').lastInsertRowid;
-  res.json({ ok: true, id });
+app.post('/api/tickets/templates', auth, requireManager, async (req, res) => {
+  try {
+    const { name, body, category } = req.body || {};
+    if (!name || !body) return res.status(400).json({ error: 'Nombre y cuerpo requeridos' });
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO ticket_templates (tenant_id, name, body, category) VALUES (1,?,?,?)').run(name, body, category||'general');
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // CSAT
-app.post('/api/tickets/:id/csat', auth, (req, res) => {
-  const { score } = req.body || {};
-  if (!score || score < 1 || score > 5) return res.status(400).json({ error: 'Score 1-5 requerido' });
-  const t = db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(Number(req.params.id));
-  if (!t || t.user_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
-  db.prepare('UPDATE tickets SET csat_score=? WHERE id=?').run(Number(score), t.id);
-  res.json({ ok: true });
+app.post('/api/tickets/:id/csat', auth, async (req, res) => {
+  try {
+    const { score } = req.body || {};
+    if (!score || score < 1 || score > 5) return res.status(400).json({ error: 'Score 1-5 requerido' });
+    const t = await db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(Number(req.params.id));
+    if (!t || t.user_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
+    await db.prepare('UPDATE tickets SET csat_score=? WHERE id=?').run(Number(score), t.id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: KNOWLEDGE BASE
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/kb/categories', (req, res) => {
-  const cats = db.prepare('SELECT * FROM kb_categories WHERE tenant_id=1 ORDER BY order_num').all();
-  const result = cats.map(c => ({
-    ...c,
-    article_count: db.prepare('SELECT COUNT(*) as c FROM kb_articles WHERE category_id=? AND is_published=1').get(c.id)?.c || 0
-  }));
-  res.json({ items: result });
+app.get('/api/kb/categories', async (req, res) => {
+  try {
+    const cats = await db.prepare('SELECT * FROM kb_categories WHERE tenant_id=1 ORDER BY order_num').all();
+    const result = [];
+    for (const c of cats) {
+      const row = await db.prepare('SELECT COUNT(*) as c FROM kb_articles WHERE category_id=? AND is_published=1').get(c.id);
+      result.push({ ...c, article_count: row?.c || 0 });
+    }
+    res.json({ items: result });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/kb/articles', (req, res) => {
-  const { category_id, published_only = '1', q } = req.query;
-  let sql = 'SELECT a.*, c.name as category_name, c.icon as category_icon FROM kb_articles a LEFT JOIN kb_categories c ON a.category_id=c.id WHERE a.tenant_id=1';
-  const params = [];
-  if (published_only === '1') { sql += ' AND a.is_published=1'; }
-  if (category_id) { sql += ' AND a.category_id=?'; params.push(Number(category_id)); }
-  if (q) { sql += ' AND (a.title LIKE ? OR a.content LIKE ?)'; params.push(`%${q}%`,`%${q}%`); }
-  sql += ' ORDER BY a.updated_at DESC';
-  res.json({ items: db.prepare(sql).all(...params) });
+app.get('/api/kb/articles', async (req, res) => {
+  try {
+    const { category_id, published_only = '1', q } = req.query;
+    let sql = 'SELECT a.*, c.name as category_name, c.icon as category_icon FROM kb_articles a LEFT JOIN kb_categories c ON a.category_id=c.id WHERE a.tenant_id=1';
+    const params = [];
+    if (published_only === '1') { sql += ' AND a.is_published=1'; }
+    if (category_id) { sql += ' AND a.category_id=?'; params.push(Number(category_id)); }
+    if (q) { sql += ' AND (a.title LIKE ? OR a.content LIKE ?)'; params.push(`%${q}%`,`%${q}%`); }
+    sql += ' ORDER BY a.updated_at DESC';
+    res.json({ items: await db.prepare(sql).all(...params) });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/kb/articles/:id', (req, res) => {
-  const a = db.prepare('SELECT a.*, c.name as category_name FROM kb_articles a LEFT JOIN kb_categories c ON a.category_id=c.id WHERE a.id=?').get(Number(req.params.id));
-  if (!a || (!a.is_published && !req.query.preview)) return res.status(404).json({ error: 'Not found' });
-  db.prepare('UPDATE kb_articles SET views=views+1 WHERE id=?').run(a.id);
-  res.json({ article: a });
+app.get('/api/kb/articles/:id', async (req, res) => {
+  try {
+    const a = await db.prepare('SELECT a.*, c.name as category_name FROM kb_articles a LEFT JOIN kb_categories c ON a.category_id=c.id WHERE a.id=?').get(Number(req.params.id));
+    if (!a || (!a.is_published && !req.query.preview)) return res.status(404).json({ error: 'Not found' });
+    await db.prepare('UPDATE kb_articles SET views=views+1 WHERE id=?').run(a.id);
+    res.json({ article: a });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/kb/articles', auth, requireAgent, (req, res) => {
-  const { category_id, title, content, is_published=false } = req.body || {};
-  if (!title || !content) return res.status(400).json({ error: 'Título y contenido requeridos' });
-  const s = slug(title);
-  const id = db.prepare('INSERT INTO kb_articles (tenant_id, category_id, title, slug, content, is_published, created_by) VALUES (1,?,?,?,?,?,?)').run(category_id||null, title, s, content, is_published?1:0, req.user.id).lastInsertRowid;
-  res.json({ ok: true, id });
+app.post('/api/kb/articles', auth, requireAgent, async (req, res) => {
+  try {
+    const { category_id, title, content, is_published=false } = req.body || {};
+    if (!title || !content) return res.status(400).json({ error: 'Título y contenido requeridos' });
+    const s = slug(title);
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO kb_articles (tenant_id, category_id, title, slug, content, is_published, created_by) VALUES (1,?,?,?,?,?,?)').run(category_id||null, title, s, content, is_published?1:0, req.user.id);
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/kb/articles/:id', auth, requireAgent, (req, res) => {
-  const id = Number(req.params.id);
-  const { title, content, category_id, is_published } = req.body || {};
-  db.prepare(`UPDATE kb_articles SET title=COALESCE(?,title), content=COALESCE(?,content), category_id=COALESCE(?,category_id), is_published=COALESCE(?,is_published), updated_at=datetime('now') WHERE id=? AND tenant_id=1`).run(title||null, content||null, category_id||null, is_published!==undefined?(is_published?1:0):null, id);
-  res.json({ ok: true });
+app.patch('/api/kb/articles/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { title, content, category_id, is_published } = req.body || {};
+    await db.prepare(`UPDATE kb_articles SET title=COALESCE(?,title), content=COALESCE(?,content), category_id=COALESCE(?,category_id), is_published=COALESCE(?,is_published), updated_at=NOW() WHERE id=? AND tenant_id=1`).run(title||null, content||null, category_id||null, is_published!==undefined?(is_published?1:0):null, id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/kb/articles/:id', auth, requireManager, (req, res) => {
-  db.prepare('DELETE FROM kb_articles WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/kb/articles/:id', auth, requireManager, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM kb_articles WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/kb/articles/:id/helpful', (req, res) => {
-  const { helpful } = req.body || {};
-  const col = helpful ? 'helpful_yes' : 'helpful_no';
-  db.prepare(`UPDATE kb_articles SET ${col}=${col}+1 WHERE id=?`).run(Number(req.params.id));
-  res.json({ ok: true });
+app.post('/api/kb/articles/:id/helpful', async (req, res) => {
+  try {
+    const { helpful } = req.body || {};
+    const col = helpful ? 'helpful_yes' : 'helpful_no';
+    await db.prepare(`UPDATE kb_articles SET ${col}=${col}+1 WHERE id=?`).run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/kb/categories', auth, requireManager, (req, res) => {
-  const { name, icon='📄', description, order_num=0 } = req.body || {};
-  if (!name) return res.status(400).json({ error: 'Nombre requerido' });
-  const id = db.prepare('INSERT INTO kb_categories (tenant_id, name, icon, description, order_num) VALUES (1,?,?,?,?)').run(name, icon, description||null, Number(order_num)).lastInsertRowid;
-  res.json({ ok: true, id });
+app.post('/api/kb/categories', auth, requireManager, async (req, res) => {
+  try {
+    const { name, icon='📄', description, order_num=0 } = req.body || {};
+    if (!name) return res.status(400).json({ error: 'Nombre requerido' });
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO kb_categories (tenant_id, name, icon, description, order_num) VALUES (1,?,?,?,?)').run(name, icon, description||null, Number(order_num));
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: NOTIFICATIONS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/notifications', auth, (req, res) => {
-  const { unread_only } = req.query;
-  let sql = 'SELECT * FROM notifications WHERE user_id=? AND tenant_id=1';
-  if (unread_only === '1') sql += ' AND is_read=0';
-  sql += ' ORDER BY id DESC LIMIT 50';
-  const items = db.prepare(sql).all(req.user.id);
-  const unread_count = db.prepare('SELECT COUNT(*) as c FROM notifications WHERE user_id=? AND is_read=0').get(req.user.id)?.c || 0;
-  res.json({ items, unread_count });
+app.get('/api/notifications', auth, async (req, res) => {
+  try {
+    const { unread_only } = req.query;
+    let sql = 'SELECT * FROM notifications WHERE user_id=? AND tenant_id=1';
+    if (unread_only === '1') sql += ' AND is_read=0';
+    sql += ' ORDER BY id DESC LIMIT 50';
+    const items = await db.prepare(sql).all(req.user.id);
+    const unread_count = (await db.prepare('SELECT COUNT(*) as c FROM notifications WHERE user_id=? AND is_read=0').get(req.user.id))?.c || 0;
+    res.json({ items, unread_count });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/notifications/:id/read', auth, (req, res) => {
-  db.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND user_id=?').run(Number(req.params.id), req.user.id);
-  res.json({ ok: true });
+app.patch('/api/notifications/:id/read', auth, async (req, res) => {
+  try {
+    await db.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND user_id=?').run(Number(req.params.id), req.user.id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/notifications/read-all', auth, (req, res) => {
-  db.prepare('UPDATE notifications SET is_read=1 WHERE user_id=? AND tenant_id=1').run(req.user.id);
-  res.json({ ok: true });
+app.post('/api/notifications/read-all', auth, async (req, res) => {
+  try {
+    await db.prepare('UPDATE notifications SET is_read=1 WHERE user_id=? AND tenant_id=1').run(req.user.id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // SSE — real-time notifications
@@ -875,32 +966,37 @@ app.get('/api/notifications/stream', auth, (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: AUDIT LOGS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/audit', auth, requireAdmin, (req, res) => {
-  const { action, entity_type, user_email, from, to, limit=100, offset=0 } = req.query;
-  let sql = 'SELECT * FROM audit_logs WHERE tenant_id=1';
-  const params = [];
-  if (action)      { sql += ' AND action LIKE ?'; params.push(`%${action}%`); }
-  if (entity_type) { sql += ' AND entity_type=?'; params.push(entity_type); }
-  if (user_email)  { sql += ' AND user_email LIKE ?'; params.push(`%${user_email}%`); }
-  if (from) { sql += ' AND created_at>=?'; params.push(from); }
-  if (to)   { sql += ' AND created_at<=?'; params.push(to); }
-  const total = db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c')).get(...params)?.c || 0;
-  sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
-  res.json({ items: db.prepare(sql).all(...params), total });
+app.get('/api/audit', auth, requireAdmin, async (req, res) => {
+  try {
+    const { action, entity_type, user_email, from, to, limit=100, offset=0 } = req.query;
+    let sql = 'SELECT * FROM audit_logs WHERE tenant_id=1';
+    const params = [];
+    if (action)      { sql += ' AND action LIKE ?'; params.push(`%${action}%`); }
+    if (entity_type) { sql += ' AND entity_type=?'; params.push(entity_type); }
+    if (user_email)  { sql += ' AND user_email LIKE ?'; params.push(`%${user_email}%`); }
+    if (from) { sql += ' AND created_at>=?'; params.push(from); }
+    if (to)   { sql += ' AND created_at<=?'; params.push(to); }
+    const total = (await db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c')).get(...params))?.c || 0;
+    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+    params.push(Number(limit), Number(offset));
+    res.json({ items: await db.prepare(sql).all(...params), total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: METRICS / ANALYTICS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/metrics', auth, requireAgent, (req, res) => {
+app.get('/api/metrics', auth, requireAgent, async (req, res) => {
+  try {
   const tid = 1;
-  const orders  = db.prepare('SELECT * FROM orders WHERE tenant_id=?').all(tid);
-  const users   = db.prepare('SELECT COUNT(*) as c FROM users WHERE tenant_id=?').get(tid);
-  const msgs    = db.prepare('SELECT COUNT(*) as c FROM messages WHERE tenant_id=?').get(tid);
-  const tickets = db.prepare('SELECT * FROM tickets WHERE tenant_id=?').all(tid);
-  const contacts= db.prepare('SELECT COUNT(*) as c FROM contacts WHERE tenant_id=?').get(tid);
-  const deals   = db.prepare('SELECT * FROM deals WHERE tenant_id=?').all(tid);
+  const orders  = await db.prepare('SELECT * FROM orders WHERE tenant_id=?').all(tid);
+  const users   = await db.prepare('SELECT COUNT(*) as c FROM users WHERE tenant_id=?').get(tid);
+  const msgs    = await db.prepare('SELECT COUNT(*) as c FROM messages WHERE tenant_id=?').get(tid);
+  const tickets = await db.prepare('SELECT * FROM tickets WHERE tenant_id=?').all(tid);
+  const contacts= await db.prepare('SELECT COUNT(*) as c FROM contacts WHERE tenant_id=?').get(tid);
+  const deals   = await db.prepare('SELECT * FROM deals WHERE tenant_id=?').all(tid);
+  const messagesAll = await db.prepare('SELECT created_at FROM messages WHERE tenant_id=1').all();
+  const contactsAll = await db.prepare('SELECT created_at FROM contacts WHERE tenant_id=1').all();
 
   const totalRevenue   = orders.reduce((s,o)=>s+(o.total||0),0);
   const openTickets    = tickets.filter(t=>t.status==='open').length;
@@ -917,26 +1013,26 @@ app.get('/api/metrics', auth, requireAgent, (req, res) => {
   const inMonth = (items, dateField, y, m) => items.filter(it => { const d=new Date(it[dateField]); return d.getFullYear()===y && d.getMonth()===m; });
 
   const revenueByMonth = months.map(m => ({ label: m.label, value: inMonth(orders,'created_at',m.year,m.month).reduce((s,o)=>s+(o.total||0),0) }));
-  const leadsByMonth   = months.map(m => ({ label: m.label, value: inMonth(db.prepare('SELECT created_at FROM messages WHERE tenant_id=1').all(),'created_at',m.year,m.month).length }));
+  const leadsByMonth   = months.map(m => ({ label: m.label, value: inMonth(messagesAll,'created_at',m.year,m.month).length }));
   const ticketsByMonth = months.map(m => ({ label: m.label, value: inMonth(tickets,'created_at',m.year,m.month).length }));
-  const newContactsByMonth = months.map(m => ({ label: m.label, value: inMonth(db.prepare('SELECT created_at FROM contacts WHERE tenant_id=1').all(),'created_at',m.year,m.month).length }));
+  const newContactsByMonth = months.map(m => ({ label: m.label, value: inMonth(contactsAll,'created_at',m.year,m.month).length }));
 
   const dealsByStage = ['prospecting','qualified','proposal','negotiation','won','lost'].map(s => ({
     stage: s, count: deals.filter(d=>d.stage===s).length, value: deals.filter(d=>d.stage===s).reduce((a,d)=>a+(d.value||0),0)
   }));
 
-  const ticketsByCategory = db.prepare("SELECT category, COUNT(*) as count FROM tickets WHERE tenant_id=1 GROUP BY category").all();
-  const ticketsByPriority = db.prepare("SELECT priority, COUNT(*) as count FROM tickets WHERE tenant_id=1 GROUP BY priority").all();
-  const tasksByStatus = db.prepare("SELECT status, COUNT(*) as count FROM tasks WHERE tenant_id=1 GROUP BY status ORDER BY count DESC").all();
-  const tasksByUser   = db.prepare(`
+  const ticketsByCategory = await db.prepare("SELECT category, COUNT(*) as count FROM tickets WHERE tenant_id=1 GROUP BY category").all();
+  const ticketsByPriority = await db.prepare("SELECT priority, COUNT(*) as count FROM tickets WHERE tenant_id=1 GROUP BY priority").all();
+  const tasksByStatus = await db.prepare("SELECT status, COUNT(*) as count FROM tasks WHERE tenant_id=1 GROUP BY status ORDER BY count DESC").all();
+  const tasksByUser   = await db.prepare(`
     SELECT assigned_email,
       COUNT(*) as total,
       SUM(CASE WHEN status='completada'  THEN 1 ELSE 0 END) as completadas,
       SUM(CASE WHEN status='en_progreso' THEN 1 ELSE 0 END) as en_progreso,
       SUM(CASE WHEN status='pendiente'   THEN 1 ELSE 0 END) as pendientes,
       ROUND(AVG(CASE WHEN status='completada' THEN
-        (julianday(updated_at)-julianday(created_at))*24
-      END),1) as avg_horas
+        EXTRACT(EPOCH FROM (updated_at - created_at))::numeric/3600
+      END)::numeric, 1) as avg_horas
     FROM tasks WHERE tenant_id=1 AND assigned_email IS NOT NULL
     GROUP BY assigned_email ORDER BY completadas DESC LIMIT 10
   `).all();
@@ -960,15 +1056,17 @@ app.get('/api/metrics', auth, requireAgent, (req, res) => {
     tasks_by_status: tasksByStatus,
     tasks_by_user: tasksByUser
   });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // Export metrics CSV
-app.get('/api/metrics.csv', auth, requireAdmin, (req, res) => {
+app.get('/api/metrics.csv', auth, requireAdmin, async (req, res) => {
+  try {
   const metrics = {
-    orders: db.prepare('SELECT * FROM orders WHERE tenant_id=1').all(),
-    tickets: db.prepare('SELECT * FROM tickets WHERE tenant_id=1').all(),
-    contacts: db.prepare('SELECT * FROM contacts WHERE tenant_id=1').all(),
-    deals: db.prepare('SELECT * FROM deals WHERE tenant_id=1').all(),
+    orders:   await db.prepare('SELECT * FROM orders WHERE tenant_id=1').all(),
+    tickets:  await db.prepare('SELECT * FROM tickets WHERE tenant_id=1').all(),
+    contacts: await db.prepare('SELECT * FROM contacts WHERE tenant_id=1').all(),
+    deals:    await db.prepare('SELECT * FROM deals WHERE tenant_id=1').all(),
   };
   const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
   let csv = 'Tipo,Métrica,Valor\n';
@@ -982,175 +1080,213 @@ app.get('/api/metrics.csv', auth, requireAdmin, (req, res) => {
   res.setHeader('Content-Type','text/csv; charset=utf-8');
   res.setHeader('Content-Disposition','attachment; filename="metrics.csv"');
   res.send(csv);
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: ORDERS
 // ─────────────────────────────────────────────────────────────────────────────
-app.post('/api/orders', (req, res) => {
-  const { customer, items, total, referral_code } = req.body || {};
-  if (!customer || !items || !Array.isArray(items)) return res.status(400).json({ error: 'Campos requeridos' });
-  const ref = referral_code ? db.prepare('SELECT * FROM referrals WHERE code=?').get(referral_code.toUpperCase()) : null;
-  const discount = ref ? ref.discount : 0;
-  const id = db.prepare('INSERT INTO orders (tenant_id, customer_json, items_json, total, discount, referral_code, status) VALUES (1,?,?,?,?,?,?)').run(JSON.stringify(customer), JSON.stringify(items), Number(total||0), discount, ref?.code||null, 'pending').lastInsertRowid;
-  if (ref) db.prepare('UPDATE referrals SET uses=uses+1, earnings=earnings+? WHERE id=?').run(Number(total||0)*0.1, ref.id);
-  const admins = db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner')").all();
-  admins.forEach(a => createNotification(1, a.id, a.email, 'success', 'Nueva orden recibida', `${customer.name||'Cliente'} — $${total}`, '/admin.html'));
-  res.json({ ok: true, id });
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { customer, items, total, referral_code } = req.body || {};
+    if (!customer || !items || !Array.isArray(items)) return res.status(400).json({ error: 'Campos requeridos' });
+    const ref = referral_code ? await db.prepare('SELECT * FROM referrals WHERE code=?').get(referral_code.toUpperCase()) : null;
+    const discount = ref ? ref.discount : 0;
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO orders (tenant_id, customer_json, items_json, total, discount, referral_code, status) VALUES (1,?,?,?,?,?,?)').run(JSON.stringify(customer), JSON.stringify(items), Number(total||0), discount, ref?.code||null, 'pending');
+    if (ref) await db.prepare('UPDATE referrals SET uses=uses+1, earnings=earnings+? WHERE id=?').run(Number(total||0)*0.1, ref.id);
+    const admins = await db.prepare("SELECT id, email FROM users WHERE tenant_id=1 AND role IN ('admin','owner')").all();
+    for (const a of admins) await createNotification(1, a.id, a.email, 'success', 'Nueva orden recibida', `${customer.name||'Cliente'} — $${total}`, '/admin.html');
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/orders', auth, requireAgent, (req, res) => {
-  const { status, limit=50, offset=0 } = req.query;
-  let sql = 'SELECT * FROM orders WHERE tenant_id=1';
-  const params = [];
-  if (status) { sql += ' AND status=?'; params.push(status); }
-  const total = db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c')).get(...params)?.c || 0;
-  sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
-  const items = db.prepare(sql).all(...params).map(o=>({...o, customer:jObj(o.customer_json), items:j(o.items_json)}));
-  res.json({ items, total });
+app.get('/api/orders', auth, requireAgent, async (req, res) => {
+  try {
+    const { status, limit=50, offset=0 } = req.query;
+    let sql = 'SELECT * FROM orders WHERE tenant_id=1';
+    const params = [];
+    if (status) { sql += ' AND status=?'; params.push(status); }
+    const total = (await db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c')).get(...params))?.c || 0;
+    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+    params.push(Number(limit), Number(offset));
+    const items = (await db.prepare(sql).all(...params)).map(o=>({...o, customer:jObj(o.customer_json), items:j(o.items_json)}));
+    res.json({ items, total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/orders/:id', auth, requireAgent, (req, res) => {
-  const id = Number(req.params.id);
-  if (req.body.status) db.prepare('UPDATE orders SET status=?, updated_at=? WHERE id=? AND tenant_id=1').run(req.body.status, now(), id);
-  if (req.body.notes) db.prepare('UPDATE orders SET notes=? WHERE id=? AND tenant_id=1').run(req.body.notes, id);
-  createAuditLog(1, req.user.id, req.user.email, 'order.updated', 'order', id, req.body, ip(req));
-  res.json({ ok: true });
+app.patch('/api/orders/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (req.body.status) await db.prepare('UPDATE orders SET status=?, updated_at=? WHERE id=? AND tenant_id=1').run(req.body.status, now(), id);
+    if (req.body.notes) await db.prepare('UPDATE orders SET notes=? WHERE id=? AND tenant_id=1').run(req.body.notes, id);
+    await createAuditLog(1, req.user.id, req.user.email, 'order.updated', 'order', id, req.body, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: REFERRALS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/referrals', auth, (req, res) => {
-  const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
-  const items = isAgent
-    ? db.prepare('SELECT * FROM referrals WHERE tenant_id=1 ORDER BY uses DESC').all()
-    : db.prepare('SELECT * FROM referrals WHERE email=? AND tenant_id=1').all(req.user.email);
-  res.json({ items });
+app.get('/api/referrals', auth, async (req, res) => {
+  try {
+    const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
+    const items = isAgent
+      ? await db.prepare('SELECT * FROM referrals WHERE tenant_id=1 ORDER BY uses DESC').all()
+      : await db.prepare('SELECT * FROM referrals WHERE email=? AND tenant_id=1').all(req.user.email);
+    res.json({ items });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/referrals/generate', auth, (req, res) => {
-  const existing = db.prepare('SELECT * FROM referrals WHERE email=? AND tenant_id=1').get(req.user.email);
-  if (existing) return res.json({ code: existing.code, uses: existing.uses, earnings: existing.earnings });
-  const code = randomCode(8);
-  db.prepare('INSERT INTO referrals (tenant_id, user_id, email, name, code, discount) VALUES (1,?,?,?,?,10)').run(req.user.id, req.user.email, req.user.email, code);
-  res.json({ code, uses: 0, earnings: 0 });
+app.post('/api/referrals/generate', auth, async (req, res) => {
+  try {
+    const existing = await db.prepare('SELECT * FROM referrals WHERE email=? AND tenant_id=1').get(req.user.email);
+    if (existing) return res.json({ code: existing.code, uses: existing.uses, earnings: existing.earnings });
+    const code = randomCode(8);
+    await db.prepare('INSERT INTO referrals (tenant_id, user_id, email, name, code, discount) VALUES (1,?,?,?,?,10)').run(req.user.id, req.user.email, req.user.email, code);
+    res.json({ code, uses: 0, earnings: 0 });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/referrals/:code', (req, res) => {
-  const ref = db.prepare('SELECT * FROM referrals WHERE code=?').get(req.params.code.toUpperCase());
-  if (!ref) return res.status(404).json({ error: 'Código inválido' });
-  res.json({ valid: true, discount: ref.discount, uses: ref.uses });
+app.get('/api/referrals/:code', async (req, res) => {
+  try {
+    const ref = await db.prepare('SELECT * FROM referrals WHERE code=?').get(req.params.code.toUpperCase());
+    if (!ref) return res.status(404).json({ error: 'Código inválido' });
+    res.json({ valid: true, discount: ref.discount, uses: ref.uses });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: PROJECTS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/projects', auth, (req, res) => {
-  const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
-  const items = isAgent
-    ? db.prepare('SELECT * FROM projects WHERE tenant_id=1 ORDER BY id DESC').all()
-    : db.prepare('SELECT * FROM projects WHERE client_email=? AND tenant_id=1 ORDER BY id DESC').all(req.user.email);
-  res.json({ items: items.map(p=>({...p, stages:j(p.stages_json)})) });
+app.get('/api/projects', auth, async (req, res) => {
+  try {
+    const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
+    const items = isAgent
+      ? await db.prepare('SELECT * FROM projects WHERE tenant_id=1 ORDER BY id DESC').all()
+      : await db.prepare('SELECT * FROM projects WHERE client_email=? AND tenant_id=1 ORDER BY id DESC').all(req.user.email);
+    res.json({ items: items.map(p=>({...p, stages:j(p.stages_json)})) });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/projects', auth, requireManager, (req, res) => {
-  const { client_email, name, stages, start_date, due_date } = req.body || {};
-  if (!client_email || !name) return res.status(400).json({ error: 'Campos requeridos' });
-  const defaultStages = stages || ['Análisis','Diseño','Desarrollo','Revisión','Entrega'].map(l=>({label:l,done:false}));
-  const id = db.prepare('INSERT INTO projects (tenant_id, client_email, name, stages_json, start_date, due_date) VALUES (1,?,?,?,?,?)').run(client_email, name, JSON.stringify(defaultStages), start_date||null, due_date||null).lastInsertRowid;
-  const user = db.prepare('SELECT id FROM users WHERE email=? AND tenant_id=1').get(client_email);
-  if (user) createNotification(1, user.id, client_email, 'success', 'Nuevo proyecto asignado', `El proyecto "${name}" ha sido creado.`, '/timeline.html');
-  createAuditLog(1, req.user.id, req.user.email, 'project.created', 'project', id, { name, client_email }, ip(req));
-  res.json({ ok: true, id });
+app.post('/api/projects', auth, requireManager, async (req, res) => {
+  try {
+    const { client_email, name, stages, start_date, due_date } = req.body || {};
+    if (!client_email || !name) return res.status(400).json({ error: 'Campos requeridos' });
+    const defaultStages = stages || ['Análisis','Diseño','Desarrollo','Revisión','Entrega'].map(l=>({label:l,done:false}));
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO projects (tenant_id, client_email, name, stages_json, start_date, due_date) VALUES (1,?,?,?,?,?)').run(client_email, name, JSON.stringify(defaultStages), start_date||null, due_date||null);
+    const user = await db.prepare('SELECT id FROM users WHERE email=? AND tenant_id=1').get(client_email);
+    if (user) await createNotification(1, user.id, client_email, 'success', 'Nuevo proyecto asignado', `El proyecto "${name}" ha sido creado.`, '/timeline.html');
+    await createAuditLog(1, req.user.id, req.user.email, 'project.created', 'project', id, { name, client_email }, ip(req));
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/projects/:id', auth, requireAgent, (req, res) => {
-  const id = Number(req.params.id);
-  const proj = db.prepare('SELECT * FROM projects WHERE id=? AND tenant_id=1').get(id);
-  if (!proj) return res.status(404).json({ error: 'Not found' });
-  const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
-  if (!isAgent && proj.client_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
-  const updates = []; const params = [];
-  if (req.body.stages) {
-    const stages = req.body.stages;
-    const done = stages.filter(s=>s.done).length;
-    const progress = Math.round((done/stages.length)*100);
-    updates.push('stages_json=?','progress=?'); params.push(JSON.stringify(stages), progress);
-  }
-  if (req.body.notes !== undefined) { updates.push('notes=?'); params.push(req.body.notes); }
-  if (req.body.status) { updates.push('status=?'); params.push(req.body.status); }
-  if (req.body.due_date) { updates.push('due_date=?'); params.push(req.body.due_date); }
-  updates.push("updated_at=datetime('now')");
-  db.prepare(`UPDATE projects SET ${updates.join(',')} WHERE id=?`).run(...params, id);
-  const updated = db.prepare('SELECT * FROM projects WHERE id=?').get(id);
-  res.json({ ok: true, progress: updated.progress });
+app.patch('/api/projects/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const proj = await db.prepare('SELECT * FROM projects WHERE id=? AND tenant_id=1').get(id);
+    if (!proj) return res.status(404).json({ error: 'Not found' });
+    const isAgent = ['admin','owner','manager','agent'].includes(req.user.role);
+    if (!isAgent && proj.client_email !== req.user.email) return res.status(403).json({ error: 'Forbidden' });
+    const updates = []; const params = [];
+    if (req.body.stages) {
+      const stages = req.body.stages;
+      const done = stages.filter(s=>s.done).length;
+      const progress = Math.round((done/stages.length)*100);
+      updates.push('stages_json=?','progress=?'); params.push(JSON.stringify(stages), progress);
+    }
+    if (req.body.notes !== undefined) { updates.push('notes=?'); params.push(req.body.notes); }
+    if (req.body.status) { updates.push('status=?'); params.push(req.body.status); }
+    if (req.body.due_date) { updates.push('due_date=?'); params.push(req.body.due_date); }
+    updates.push("updated_at=NOW()");
+    await db.prepare(`UPDATE projects SET ${updates.join(',')} WHERE id=?`).run(...params, id);
+    const updated = await db.prepare('SELECT * FROM projects WHERE id=?').get(id);
+    res.json({ ok: true, progress: updated.progress });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/projects/:id', auth, requireManager, (req, res) => {
-  db.prepare('DELETE FROM projects WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/projects/:id', auth, requireManager, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM projects WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: PLANS & SUBSCRIPTION
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/plans', (req, res) => {
-  const items = db.prepare('SELECT * FROM plans WHERE is_active=1 ORDER BY price_monthly').all().map(p=>({...p, features:j(p.features_json), limits:jObj(p.limits_json)}));
-  res.json({ items });
+app.get('/api/plans', async (req, res) => {
+  try {
+    const items = (await db.prepare('SELECT * FROM plans WHERE is_active=1 ORDER BY price_monthly').all()).map(p=>({...p, features:j(p.features_json), limits:jObj(p.limits_json)}));
+    res.json({ items });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/subscription', auth, requireAdmin, (req, res) => {
-  const sub = db.prepare('SELECT * FROM subscriptions WHERE tenant_id=1').get();
-  const tenant = db.prepare('SELECT * FROM tenants WHERE id=1').get();
-  res.json({ subscription: sub, plan: tenant?.plan, tenant: { name: tenant?.name, slug: tenant?.slug, logo_url: tenant?.logo_url, primary_color: tenant?.primary_color } });
+app.get('/api/subscription', auth, requireAdmin, async (req, res) => {
+  try {
+    const sub = await db.prepare('SELECT * FROM subscriptions WHERE tenant_id=1').get();
+    const tenant = await db.prepare('SELECT * FROM tenants WHERE id=1').get();
+    res.json({ subscription: sub, plan: tenant?.plan, tenant: { name: tenant?.name, slug: tenant?.slug, logo_url: tenant?.logo_url, primary_color: tenant?.primary_color } });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/subscription/plan', auth, requireAdmin, (req, res) => {
-  const { plan } = req.body || {};
-  const valid = db.prepare('SELECT id FROM plans WHERE name=?').get(plan);
-  if (!valid) return res.status(400).json({ error: 'Plan inválido' });
-  db.prepare("UPDATE tenants SET plan=? WHERE id=1").run(plan);
-  createAuditLog(1, req.user.id, req.user.email, 'subscription.plan_changed', 'tenant', 1, { plan }, ip(req));
-  res.json({ ok: true, message: `Plan actualizado a ${plan}. Contacta soporte para activar el pago.` });
+app.patch('/api/subscription/plan', auth, requireAdmin, async (req, res) => {
+  try {
+    const { plan } = req.body || {};
+    const valid = await db.prepare('SELECT id FROM plans WHERE name=?').get(plan);
+    if (!valid) return res.status(400).json({ error: 'Plan inválido' });
+    await db.prepare("UPDATE tenants SET plan=? WHERE id=1").run(plan);
+    await createAuditLog(1, req.user.id, req.user.email, 'subscription.plan_changed', 'tenant', 1, { plan }, ip(req));
+    res.json({ ok: true, message: `Plan actualizado a ${plan}. Contacta soporte para activar el pago.` });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: AUTOMATION RULES
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/automations', auth, requireManager, (req, res) => {
-  res.json({ items: db.prepare('SELECT * FROM automation_rules WHERE tenant_id=1 ORDER BY id').all().map(r=>({...r, conditions:j(r.conditions_json), actions:j(r.actions_json)})) });
+app.get('/api/automations', auth, requireManager, async (req, res) => {
+  try { res.json({ items: (await db.prepare('SELECT * FROM automation_rules WHERE tenant_id=1 ORDER BY id').all()).map(r=>({...r, conditions:j(r.conditions_json), actions:j(r.actions_json)})) }); }
+  catch(e) { res.status(500).json({ error: e.message }); }
 });
-app.post('/api/automations', auth, requireManager, (req, res) => {
-  const { name, trigger_event, conditions=[], actions } = req.body || {};
-  if (!name || !trigger_event || !actions?.length) return res.status(400).json({ error: 'Campos requeridos' });
-  const id = db.prepare('INSERT INTO automation_rules (tenant_id, name, trigger_event, conditions_json, actions_json) VALUES (1,?,?,?,?)').run(name, trigger_event, JSON.stringify(conditions), JSON.stringify(actions)).lastInsertRowid;
-  res.json({ ok: true, id });
+app.post('/api/automations', auth, requireManager, async (req, res) => {
+  try {
+    const { name, trigger_event, conditions=[], actions } = req.body || {};
+    if (!name || !trigger_event || !actions?.length) return res.status(400).json({ error: 'Campos requeridos' });
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO automation_rules (tenant_id, name, trigger_event, conditions_json, actions_json) VALUES (1,?,?,?,?)').run(name, trigger_event, JSON.stringify(conditions), JSON.stringify(actions));
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
-app.patch('/api/automations/:id', auth, requireManager, (req, res) => {
-  const id = Number(req.params.id);
-  const { name, is_active } = req.body || {};
-  db.prepare('UPDATE automation_rules SET name=COALESCE(?,name), is_active=COALESCE(?,is_active) WHERE id=? AND tenant_id=1').run(name||null, is_active!==undefined?Number(is_active):null, id);
-  res.json({ ok: true });
+app.patch('/api/automations/:id', auth, requireManager, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { name, is_active } = req.body || {};
+    await db.prepare('UPDATE automation_rules SET name=COALESCE(?,name), is_active=COALESCE(?,is_active) WHERE id=? AND tenant_id=1').run(name||null, is_active!==undefined?Number(is_active):null, id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
-app.delete('/api/automations/:id', auth, requireManager, (req, res) => {
-  db.prepare('DELETE FROM automation_rules WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/automations/:id', auth, requireManager, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM automation_rules WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: BRANDING / WHITE-LABEL
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/branding', (req, res) => {
-  const t = db.prepare('SELECT name, logo_url, primary_color, custom_domain FROM tenants WHERE id=1').get();
-  res.json({ branding: t });
+app.get('/api/branding', async (req, res) => {
+  try {
+    const t = await db.prepare('SELECT name, logo_url, primary_color, custom_domain FROM tenants WHERE id=1').get();
+    res.json({ branding: t });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
-app.patch('/api/branding', auth, requireAdmin, (req, res) => {
-  const { name, logo_url, primary_color } = req.body || {};
-  db.prepare('UPDATE tenants SET name=COALESCE(?,name), logo_url=COALESCE(?,logo_url), primary_color=COALESCE(?,primary_color) WHERE id=1').run(name||null, logo_url||null, primary_color||null);
-  createAuditLog(1, req.user.id, req.user.email, 'branding.updated', 'tenant', 1, req.body, ip(req));
-  res.json({ ok: true });
+app.patch('/api/branding', auth, requireAdmin, async (req, res) => {
+  try {
+    const { name, logo_url, primary_color } = req.body || {};
+    await db.prepare('UPDATE tenants SET name=COALESCE(?,name), logo_url=COALESCE(?,logo_url), primary_color=COALESCE(?,primary_color) WHERE id=1').run(name||null, logo_url||null, primary_color||null);
+    await createAuditLog(1, req.user.id, req.user.email, 'branding.updated', 'tenant', 1, req.body, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // SMTP config (admin only)
@@ -1189,7 +1325,7 @@ app.post('/api/upload', auth, upload.single('file'), (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const _ai = ANTHROPIC_KEY ? new Anthropic({ apiKey: ANTHROPIC_KEY }) : null;
 
-const JARVIS_SYSTEM = `Eres Jarvina, asistente de inteligencia artificial de Nexuss eks Systems. Eres profesional, cálida y útil. Hablas SIEMPRE en español. Puedes responder cualquier pregunta: sobre la empresa, tecnología, programación, negocios, o temas generales. Eres una asistente completa.
+const JARVIS_SYSTEM = `Eres Jarvis, asistente de inteligencia artificial de Nexuss eks Systems. Eres profesional, directo y útil. Hablas SIEMPRE en español. Puedes responder cualquier pregunta: sobre la empresa, tecnología, programación, negocios, o temas generales. Eres un asistente completo.
 
 EMPRESA:
 - Nombre: Nexuss eks Systems (la X se pronuncia "eks" en inglés)
@@ -1262,14 +1398,14 @@ function localJarvisReply(msg) {
 
   // Saludo
   if (/^(hola|hey|buenos|buenas|ola|hi|hello|que tal|saludos)/.test(m))
-    return `¡Hola! Soy Jarvina, tu asistente de Nexuss eks Systems. Estoy aquí para ayudarte con información sobre nuestros servicios, precios y proyectos. ¿En qué puedo ayudarte hoy?`;
+    return `¡Hola! Soy Jarvis, tu asistente de Nexuss eks Systems. Estoy aquí para ayudarte con información sobre nuestros servicios, precios y proyectos. ¿En qué puedo ayudarte hoy?`;
 
   // Gracias
   if (/gracias|thank|perfecto|genial|excelente|buenisimo/.test(m))
     return `¡Con gusto! Si tienes más preguntas o quieres iniciar un proyecto, no dudes en escribirnos. [link:contacto.html:Contactar →]`;
 
   // Default inteligente
-  return `Soy Jarvina, la asistente de Nexuss eks Systems. Puedo ayudarte con información sobre nuestros servicios de desarrollo web, precios, tiempos de entrega y más.\n\n¿Sobre qué te gustaría saber? [link:contacto.html:Hablar con un asesor →]`;
+  return `Soy Jarvis, el asistente de Nexuss eks Systems. Puedo ayudarte con información sobre nuestros servicios de desarrollo web, precios, tiempos de entrega y más.\n\n¿Sobre qué te gustaría saber? [link:contacto.html:Hablar con un asesor →]`;
 }
 
 app.post('/api/jarvis', async (req, res) => {
@@ -1279,11 +1415,11 @@ app.post('/api/jarvis', async (req, res) => {
   // Save conversation
   if (session_id) {
     try {
-      const conv = db.prepare('SELECT * FROM ai_conversations WHERE session_id=? AND tenant_id=1').get(session_id);
+      const conv = await db.prepare('SELECT * FROM ai_conversations WHERE session_id=? AND tenant_id=1').get(session_id);
       const msgs = conv ? j(conv.messages_json) : [];
       msgs.push({ role:'user', content: message, ts: now() });
-      if (conv) db.prepare("UPDATE ai_conversations SET messages_json=?, updated_at=datetime('now') WHERE session_id=?").run(JSON.stringify(msgs), session_id);
-      else db.prepare('INSERT INTO ai_conversations (tenant_id, session_id, messages_json) VALUES (1,?,?)').run(session_id, JSON.stringify(msgs));
+      if (conv) await db.prepare("UPDATE ai_conversations SET messages_json=?, updated_at=NOW() WHERE session_id=?").run(JSON.stringify(msgs), session_id);
+      else await db.prepare('INSERT INTO ai_conversations (tenant_id, session_id, messages_json) VALUES (1,?,?)').run(session_id, JSON.stringify(msgs));
     } catch(_) {}
   }
 
@@ -1295,8 +1431,8 @@ app.post('/api/jarvis', async (req, res) => {
       const reply = r.content[0].text;
       if (session_id) {
         try {
-          const conv = db.prepare('SELECT * FROM ai_conversations WHERE session_id=?').get(session_id);
-          if (conv) { const msgs = j(conv.messages_json); msgs.push({ role:'assistant', content: reply, ts: now() }); db.prepare("UPDATE ai_conversations SET messages_json=? WHERE session_id=?").run(JSON.stringify(msgs), session_id); }
+          const conv = await db.prepare('SELECT * FROM ai_conversations WHERE session_id=?').get(session_id);
+          if (conv) { const msgs = j(conv.messages_json); msgs.push({ role:'assistant', content: reply, ts: now() }); await db.prepare("UPDATE ai_conversations SET messages_json=? WHERE session_id=?").run(JSON.stringify(msgs), session_id); }
         } catch(_) {}
       }
       return res.json({ reply });
@@ -1314,7 +1450,7 @@ app.post('/api/jarvis', async (req, res) => {
 app.post('/api/ai/ticket-suggest', auth, requireAgent, async (req, res) => {
   if (!_ai) return res.status(503).json({ error: 'IA no configurada' });
   const { ticket_id, context } = req.body || {};
-  const t = ticket_id ? db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(Number(ticket_id)) : null;
+  const t = ticket_id ? await db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(Number(ticket_id)) : null;
   const ticketCtx = t ? `Ticket #${t.number}: "${t.title}"\nDescripción: ${t.description}\nPrioridad: ${t.priority}\nCategoría: ${t.category}` : context || '';
   try {
     const r = await _ai.messages.create({
@@ -1330,9 +1466,9 @@ app.post('/api/ai/ticket-suggest', auth, requireAgent, async (req, res) => {
 app.post('/api/ai/ticket-summarize', auth, requireAgent, async (req, res) => {
   if (!_ai) return res.status(503).json({ error: 'IA no configurada' });
   const { ticket_id } = req.body || {};
-  const t = db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(Number(ticket_id));
+  const t = await db.prepare('SELECT * FROM tickets WHERE id=? AND tenant_id=1').get(Number(ticket_id));
   if (!t) return res.status(404).json({ error: 'Ticket no encontrado' });
-  const comments = db.prepare('SELECT * FROM ticket_comments WHERE ticket_id=? ORDER BY created_at').all(t.id);
+  const comments = await db.prepare('SELECT * FROM ticket_comments WHERE ticket_id=? ORDER BY created_at').all(t.id);
   const fullText = `Ticket: ${t.title}\nDescripción: ${t.description}\n\nConversación:\n${comments.map(c=>`[${c.from_email}]: ${c.text}`).join('\n')}`;
   try {
     const r = await _ai.messages.create({
@@ -1340,7 +1476,7 @@ app.post('/api/ai/ticket-summarize', auth, requireAgent, async (req, res) => {
       system:'Resume conversaciones de soporte en 2-3 líneas. Incluye: problema, estado actual, y acción pendiente si aplica. Español.',
       messages:[{ role:'user', content:`Resume este ticket:\n${fullText}` }]
     });
-    db.prepare('UPDATE tickets SET ai_summary=? WHERE id=?').run(r.content[0].text, t.id);
+    await db.prepare('UPDATE tickets SET ai_summary=? WHERE id=?').run(r.content[0].text, t.id);
     res.json({ summary: r.content[0].text });
   } catch(e) { res.status(500).json({ error: 'IA no disponible' }); }
 });
@@ -1375,10 +1511,10 @@ app.post('/api/ai/generate-content', auth, async (req, res) => {
 app.post('/api/ai/contact-insights', auth, requireAgent, async (req, res) => {
   if (!_ai) return res.status(503).json({ error: 'IA no configurada' });
   const { contact_id } = req.body || {};
-  const c = db.prepare('SELECT * FROM contacts WHERE id=? AND tenant_id=1').get(Number(contact_id));
+  const c = await db.prepare('SELECT * FROM contacts WHERE id=? AND tenant_id=1').get(Number(contact_id));
   if (!c) return res.status(404).json({ error: 'Contacto no encontrado' });
-  const deals = db.prepare('SELECT * FROM deals WHERE contact_id=? AND tenant_id=1').all(c.id);
-  const notes = db.prepare('SELECT text FROM crm_notes WHERE contact_id=? ORDER BY created_at DESC LIMIT 5').all(c.id);
+  const deals = await db.prepare('SELECT * FROM deals WHERE contact_id=? AND tenant_id=1').all(c.id);
+  const notes = await db.prepare('SELECT text FROM crm_notes WHERE contact_id=? ORDER BY created_at DESC LIMIT 5').all(c.id);
   const ctx = `Contacto: ${c.name} (${c.company||'sin empresa'})\nStatus: ${c.status}, Stage: ${c.stage}\nDeals: ${deals.map(d=>`${d.title} - $${d.value} (${d.stage})`).join(', ')||'ninguno'}\nNotas recientes: ${notes.map(n=>n.text).join(' | ')||'ninguna'}`;
   try {
     const r = await _ai.messages.create({
@@ -1393,10 +1529,10 @@ app.post('/api/ai/contact-insights', auth, requireAgent, async (req, res) => {
 // AI: Business summary
 app.post('/api/ai/business-summary', auth, requireAdmin, async (req, res) => {
   if (!_ai) return res.status(503).json({ error: 'IA no configurada' });
-  const orders  = db.prepare('SELECT total, status, created_at FROM orders WHERE tenant_id=1').all();
-  const tickets = db.prepare('SELECT status, priority, csat_score FROM tickets WHERE tenant_id=1').all();
-  const contacts= db.prepare('SELECT stage, status FROM contacts WHERE tenant_id=1').all();
-  const deals   = db.prepare('SELECT stage, value FROM deals WHERE tenant_id=1').all();
+  const orders  = await db.prepare('SELECT total, status, created_at FROM orders WHERE tenant_id=1').all();
+  const tickets = await db.prepare('SELECT status, priority, csat_score FROM tickets WHERE tenant_id=1').all();
+  const contacts= await db.prepare('SELECT stage, status FROM contacts WHERE tenant_id=1').all();
+  const deals   = await db.prepare('SELECT stage, value FROM deals WHERE tenant_id=1').all();
   const ctx = `MÉTRICAS DEL NEGOCIO:
 Ingresos totales: $${orders.reduce((s,o)=>s+(o.total||0),0).toLocaleString()}
 Órdenes pendientes: ${orders.filter(o=>o.status==='pending').length}
@@ -1420,180 +1556,184 @@ Deals ganados: ${deals.filter(d=>d.stage==='won').length}`;
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: BLOG
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/blog', (req, res) => {
-  const { category, q, limit=20, offset=0 } = req.query;
-  let sql = 'SELECT * FROM blog_posts WHERE tenant_id=1 AND is_published=1';
-  const params = [];
-  if (category) { sql += ' AND category=?'; params.push(category); }
-  if (q) { sql += ' AND (title LIKE ? OR content LIKE ?)'; params.push(`%${q}%`,`%${q}%`); }
-  const total = db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c')).get(...params)?.c || 0;
-  sql += ' ORDER BY id DESC LIMIT ? OFFSET ?'; params.push(Number(limit), Number(offset));
-  res.json({ items: db.prepare(sql).all(...params), total });
+app.get('/api/blog', async (req, res) => {
+  try {
+    const { category, q, limit=20, offset=0 } = req.query;
+    let sql = 'SELECT * FROM blog_posts WHERE tenant_id=1 AND is_published=1';
+    const params = [];
+    if (category) { sql += ' AND category=?'; params.push(category); }
+    if (q) { sql += ' AND (title LIKE ? OR content LIKE ?)'; params.push(`%${q}%`,`%${q}%`); }
+    const total = (await db.prepare(sql.replace('SELECT *','SELECT COUNT(*) as c')).get(...params))?.c || 0;
+    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?'; params.push(Number(limit), Number(offset));
+    res.json({ items: await db.prepare(sql).all(...params), total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/blog', auth, requireAgent, (req, res) => {
-  const { title, content, excerpt, category='general', is_published=false, featured_image } = req.body || {};
-  if (!title || !content) return res.status(400).json({ error: 'Título y contenido requeridos' });
-  const s = slug(title);
-  const id = db.prepare('INSERT INTO blog_posts (tenant_id, title, slug, excerpt, content, category, is_published, featured_image, author_id) VALUES (1,?,?,?,?,?,?,?,?)').run(title, s, excerpt||null, content, category, is_published?1:0, featured_image||null, req.user.id).lastInsertRowid;
-  res.json({ ok: true, id });
+app.post('/api/blog', auth, requireAgent, async (req, res) => {
+  try {
+    const { title, content, excerpt, category='general', is_published=false, featured_image } = req.body || {};
+    if (!title || !content) return res.status(400).json({ error: 'Título y contenido requeridos' });
+    const s = slug(title);
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO blog_posts (tenant_id, title, slug, excerpt, content, category, is_published, featured_image, author_id) VALUES (1,?,?,?,?,?,?,?,?)').run(title, s, excerpt||null, content, category, is_published?1:0, featured_image||null, req.user.id);
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/blog/:id', auth, requireAgent, (req, res) => {
-  const id = Number(req.params.id);
-  const { title, content, excerpt, category, is_published, featured_image } = req.body || {};
-  db.prepare(`UPDATE blog_posts SET title=COALESCE(?,title), content=COALESCE(?,content), excerpt=COALESCE(?,excerpt), category=COALESCE(?,category), is_published=COALESCE(?,is_published), featured_image=COALESCE(?,featured_image), updated_at=datetime('now') WHERE id=? AND tenant_id=1`).run(title||null, content||null, excerpt||null, category||null, is_published!==undefined?(is_published?1:0):null, featured_image||null, id);
-  res.json({ ok: true });
+app.patch('/api/blog/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { title, content, excerpt, category, is_published, featured_image } = req.body || {};
+    await db.prepare(`UPDATE blog_posts SET title=COALESCE(?,title), content=COALESCE(?,content), excerpt=COALESCE(?,excerpt), category=COALESCE(?,category), is_published=COALESCE(?,is_published), featured_image=COALESCE(?,featured_image), updated_at=NOW() WHERE id=? AND tenant_id=1`).run(title||null, content||null, excerpt||null, category||null, is_published!==undefined?(is_published?1:0):null, featured_image||null, id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/blog/:id', auth, requireManager, (req, res) => {
-  db.prepare('DELETE FROM blog_posts WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/blog/:id', auth, requireManager, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM blog_posts WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: HEALTH + STATS
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
-  const dbSize = (() => { try { return fs.statSync(join(__dir,'data','nexus.db')).size; } catch { return 0; } })();
-  res.json({
-    ok: true, version: '2.0.0',
-    ai_ready: !!_ai,
-    db_size_kb: Math.round(dbSize/1024),
-    uptime_seconds: Math.round(process.uptime()),
-    node: process.version
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ ok: true, version: '2.0.0', ai_ready: !!_ai, db: 'PostgreSQL connected', uptime_seconds: Math.round(process.uptime()), node: process.version });
+  } catch(e) {
+    res.json({ ok: false, version: '2.0.0', db_error: e.message, uptime_seconds: Math.round(process.uptime()), node: process.version });
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: TASKS (Gestión de Tareas)
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/task-categories', auth, (req, res) => {
-  const cats = db.prepare('SELECT tc.*, COUNT(t.id) as task_count FROM task_categories tc LEFT JOIN tasks t ON t.category_id=tc.id WHERE tc.tenant_id=1 GROUP BY tc.id ORDER BY tc.name').all();
-  res.json({ items: cats });
+app.get('/api/task-categories', auth, async (req, res) => {
+  try {
+    const cats = await db.prepare('SELECT tc.*, COUNT(t.id) as task_count FROM task_categories tc LEFT JOIN tasks t ON t.category_id=tc.id WHERE tc.tenant_id=1 GROUP BY tc.id ORDER BY tc.name').all();
+    res.json({ items: cats });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/tasks', auth, (req, res) => {
-  const { status, priority, category_id, assigned_email, q, limit=50, offset=0 } = req.query;
-  let sql = 'SELECT t.*, tc.name as category_name, tc.color as category_color, tc.icon as category_icon FROM tasks t LEFT JOIN task_categories tc ON t.category_id=tc.id WHERE t.tenant_id=1';
-  const params = [];
-  if (status)         { sql += ' AND t.status=?'; params.push(status); }
-  if (priority)       { sql += ' AND t.priority=?'; params.push(priority); }
-  if (category_id)    { sql += ' AND t.category_id=?'; params.push(Number(category_id)); }
-  if (assigned_email) { sql += ' AND t.assigned_email LIKE ?'; params.push(`%${assigned_email}%`); }
-  if (q)              { sql += ' AND (t.title LIKE ? OR t.description LIKE ?)'; params.push(`%${q}%`,`%${q}%`); }
-  const total = db.prepare(sql.replace('SELECT t.*,tc.name as category_name,tc.color as category_color,tc.icon as category_icon','SELECT COUNT(*) as c')).get(...params)?.c || 0;
-  sql += ' ORDER BY t.created_at DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
-  res.json({ items: db.prepare(sql).all(...params), total });
+app.get('/api/tasks', auth, async (req, res) => {
+  try {
+    const { status, priority, category_id, assigned_email, q, limit=50, offset=0 } = req.query;
+    let sql = 'SELECT t.*, tc.name as category_name, tc.color as category_color, tc.icon as category_icon FROM tasks t LEFT JOIN task_categories tc ON t.category_id=tc.id WHERE t.tenant_id=1';
+    const params = [];
+    if (status)         { sql += ' AND t.status=?'; params.push(status); }
+    if (priority)       { sql += ' AND t.priority=?'; params.push(priority); }
+    if (category_id)    { sql += ' AND t.category_id=?'; params.push(Number(category_id)); }
+    if (assigned_email) { sql += ' AND t.assigned_email LIKE ?'; params.push(`%${assigned_email}%`); }
+    if (q)              { sql += ' AND (t.title LIKE ? OR t.description LIKE ?)'; params.push(`%${q}%`,`%${q}%`); }
+    const countSql = 'SELECT COUNT(*) as c FROM tasks t LEFT JOIN task_categories tc ON t.category_id=tc.id WHERE t.tenant_id=1' + sql.slice(sql.indexOf(' AND ') > -1 ? sql.indexOf(' AND ') : sql.length);
+    const total = (await db.prepare(countSql).get(...params))?.c || 0;
+    sql += ' ORDER BY t.created_at DESC LIMIT ? OFFSET ?';
+    params.push(Number(limit), Number(offset));
+    res.json({ items: await db.prepare(sql).all(...params), total });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/tasks/stats', auth, requireAgent, (req, res) => {
-  const total      = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1").get().c;
-  const pendiente  = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND status='pendiente'").get().c;
-  const en_progreso= db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND status='en_progreso'").get().c;
-  const completada = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND status='completada'").get().c;
-  const urgente    = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND priority='urgente'").get().c;
-  const vencidas   = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND due_date < date('now') AND status != 'completada'").get().c;
-  const byCategory = db.prepare("SELECT tc.name, tc.color, tc.icon, COUNT(t.id) as count FROM task_categories tc LEFT JOIN tasks t ON t.category_id=tc.id WHERE tc.tenant_id=1 GROUP BY tc.id").all();
-  const byPriority = db.prepare("SELECT priority, COUNT(*) as count FROM tasks WHERE tenant_id=1 GROUP BY priority").all();
-  res.json({ total, pendiente, en_progreso, completada, urgente, vencidas, by_category: byCategory, by_priority: byPriority });
+app.get('/api/tasks/stats', auth, requireAgent, async (req, res) => {
+  try {
+    const total      = (await db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1").get()).c;
+    const pendiente  = (await db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND status='pendiente'").get()).c;
+    const en_progreso= (await db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND status='en_progreso'").get()).c;
+    const completada = (await db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND status='completada'").get()).c;
+    const urgente    = (await db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND priority='urgente'").get()).c;
+    const vencidas   = (await db.prepare("SELECT COUNT(*) as c FROM tasks WHERE tenant_id=1 AND due_date < CURRENT_DATE AND status != 'completada'").get()).c;
+    const byCategory = await db.prepare("SELECT tc.name, tc.color, tc.icon, COUNT(t.id) as count FROM task_categories tc LEFT JOIN tasks t ON t.category_id=tc.id WHERE tc.tenant_id=1 GROUP BY tc.id").all();
+    const byPriority = await db.prepare("SELECT priority, COUNT(*) as count FROM tasks WHERE tenant_id=1 GROUP BY priority").all();
+    res.json({ total, pendiente, en_progreso, completada, urgente, vencidas, by_category: byCategory, by_priority: byPriority });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/tasks/:id', auth, (req, res) => {
-  const task = db.prepare('SELECT t.*, tc.name as category_name, tc.color as category_color FROM tasks t LEFT JOIN task_categories tc ON t.category_id=tc.id WHERE t.id=? AND t.tenant_id=1').get(Number(req.params.id));
-  if (!task) return res.status(404).json({ error: 'Tarea no encontrada' });
-  const comments = db.prepare('SELECT * FROM task_comments WHERE task_id=? ORDER BY created_at ASC').all(task.id);
-  res.json({ task: { ...task, tags: j(task.tags_json) }, comments });
+app.get('/api/tasks/:id', auth, async (req, res) => {
+  try {
+    const task = await db.prepare('SELECT t.*, tc.name as category_name, tc.color as category_color FROM tasks t LEFT JOIN task_categories tc ON t.category_id=tc.id WHERE t.id=? AND t.tenant_id=1').get(Number(req.params.id));
+    if (!task) return res.status(404).json({ error: 'Tarea no encontrada' });
+    const comments = await db.prepare('SELECT * FROM task_comments WHERE task_id=? ORDER BY created_at ASC').all(task.id);
+    res.json({ task: { ...task, tags: j(task.tags_json) }, comments });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/tasks', auth, requireAgent, (req, res) => {
-  const { title, description, status='pendiente', priority='normal', category_id, assigned_email, due_date, tags=[] } = req.body || {};
-  if (!title) return res.status(400).json({ error: 'El título es requerido' });
-  const id = db.prepare(`INSERT INTO tasks (tenant_id, category_id, title, description, status, priority, assigned_email, due_date, tags_json, created_by) VALUES (1,?,?,?,?,?,?,?,?,?)`).run(category_id||null, title, description||null, status, priority, assigned_email||null, due_date||null, JSON.stringify(tags), req.user.id).lastInsertRowid;
-  createAuditLog(1, req.user.id, req.user.email, 'task.created', 'task', id, { title, status, priority }, ip(req));
-  if (assigned_email) {
-    const assignedUser = db.prepare('SELECT id FROM users WHERE email=? AND tenant_id=1').get(assigned_email);
-    if (assignedUser) createNotification(1, assignedUser.id, assigned_email, 'info', 'Nueva tarea asignada', `Se te asignó: "${title}"`, '/tareas.html');
-  }
-  res.json({ ok: true, id });
+app.post('/api/tasks', auth, requireAgent, async (req, res) => {
+  try {
+    const { title, description, status='pendiente', priority='normal', category_id, assigned_email, due_date, tags=[] } = req.body || {};
+    if (!title) return res.status(400).json({ error: 'El título es requerido' });
+    const { lastInsertRowid: id } = await db.prepare(`INSERT INTO tasks (tenant_id, category_id, title, description, status, priority, assigned_email, due_date, tags_json, created_by) VALUES (1,?,?,?,?,?,?,?,?,?)`).run(category_id||null, title, description||null, status, priority, assigned_email||null, due_date||null, JSON.stringify(tags), req.user.id);
+    await createAuditLog(1, req.user.id, req.user.email, 'task.created', 'task', id, { title, status, priority }, ip(req));
+    if (assigned_email) {
+      const assignedUser = await db.prepare('SELECT id FROM users WHERE email=? AND tenant_id=1').get(assigned_email);
+      if (assignedUser) await createNotification(1, assignedUser.id, assigned_email, 'info', 'Nueva tarea asignada', `Se te asignó: "${title}"`, '/tareas.html');
+    }
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/tasks/:id', auth, requireAgent, (req, res) => {
-  const id = Number(req.params.id);
-  const task = db.prepare('SELECT * FROM tasks WHERE id=? AND tenant_id=1').get(id);
-  if (!task) return res.status(404).json({ error: 'Tarea no encontrada' });
-  const { title, description, status, priority, category_id, assigned_email, due_date, progress, tags } = req.body || {};
-  const updates = ["updated_at=datetime('now')"];
-  const params = [];
-  if (title!==undefined)         { updates.push('title=?');          params.push(title); }
-  if (description!==undefined)   { updates.push('description=?');    params.push(description||null); }
-  if (status!==undefined)        { updates.push('status=?');         params.push(status);
-    if (status==='completada')   { updates.push('completed_at=?');   params.push(now()); }
-  }
-  if (priority!==undefined)      { updates.push('priority=?');       params.push(priority); }
-  if (category_id!==undefined)   { updates.push('category_id=?');    params.push(category_id||null); }
-  if (assigned_email!==undefined){ updates.push('assigned_email=?'); params.push(assigned_email||null); }
-  if (due_date!==undefined)      { updates.push('due_date=?');       params.push(due_date||null); }
-  if (progress!==undefined)      { updates.push('progress=?');       params.push(Number(progress)); }
-  if (tags!==undefined)          { updates.push('tags_json=?');      params.push(JSON.stringify(tags)); }
-  db.prepare(`UPDATE tasks SET ${updates.join(',')} WHERE id=?`).run(...params, id);
-  createAuditLog(1, req.user.id, req.user.email, 'task.updated', 'task', id, req.body, ip(req));
-  res.json({ ok: true });
+app.patch('/api/tasks/:id', auth, requireAgent, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const task = await db.prepare('SELECT * FROM tasks WHERE id=? AND tenant_id=1').get(id);
+    if (!task) return res.status(404).json({ error: 'Tarea no encontrada' });
+    const { title, description, status, priority, category_id, assigned_email, due_date, progress, tags } = req.body || {};
+    const updates = ["updated_at=NOW()"];
+    const params = [];
+    if (title!==undefined)         { updates.push('title=?');          params.push(title); }
+    if (description!==undefined)   { updates.push('description=?');    params.push(description||null); }
+    if (status!==undefined)        { updates.push('status=?');         params.push(status);
+      if (status==='completada')   { updates.push('completed_at=?');   params.push(now()); }
+    }
+    if (priority!==undefined)      { updates.push('priority=?');       params.push(priority); }
+    if (category_id!==undefined)   { updates.push('category_id=?');    params.push(category_id||null); }
+    if (assigned_email!==undefined){ updates.push('assigned_email=?'); params.push(assigned_email||null); }
+    if (due_date!==undefined)      { updates.push('due_date=?');       params.push(due_date||null); }
+    if (progress!==undefined)      { updates.push('progress=?');       params.push(Number(progress)); }
+    if (tags!==undefined)          { updates.push('tags_json=?');      params.push(JSON.stringify(tags)); }
+    await db.prepare(`UPDATE tasks SET ${updates.join(',')} WHERE id=?`).run(...params, id);
+    await createAuditLog(1, req.user.id, req.user.email, 'task.updated', 'task', id, req.body, ip(req));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/tasks/:id', auth, requireManager, (req, res) => {
-  db.prepare('DELETE FROM tasks WHERE id=? AND tenant_id=1').run(Number(req.params.id));
-  res.json({ ok: true });
+app.delete('/api/tasks/:id', auth, requireManager, async (req, res) => {
+  try {
+    await db.prepare('DELETE FROM tasks WHERE id=? AND tenant_id=1').run(Number(req.params.id));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/tasks/:id/comments', auth, (req, res) => {
-  const taskId = Number(req.params.id);
-  const { text } = req.body || {};
-  if (!text) return res.status(400).json({ error: 'Comentario vacío' });
-  const user = db.prepare('SELECT name FROM users WHERE id=?').get(req.user.id);
-  const id = db.prepare('INSERT INTO task_comments (task_id, user_id, user_email, user_name, text) VALUES (?,?,?,?,?)').run(taskId, req.user.id, req.user.email, user?.name||req.user.email, text).lastInsertRowid;
-  res.json({ ok: true, id });
+app.post('/api/tasks/:id/comments', auth, async (req, res) => {
+  try {
+    const taskId = Number(req.params.id);
+    const { text } = req.body || {};
+    if (!text) return res.status(400).json({ error: 'Comentario vacío' });
+    const user = await db.prepare('SELECT name FROM users WHERE id=?').get(req.user.id);
+    const { lastInsertRowid: id } = await db.prepare('INSERT INTO task_comments (task_id, user_id, user_email, user_name, text) VALUES (?,?,?,?,?)').run(taskId, req.user.id, req.user.email, user?.name||req.user.email, text);
+    res.json({ ok: true, id });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: DATABASE BACKUP
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/backup/download', auth, requireAdmin, (req, res) => {
-  const dbPath = join(__dir, 'data', 'nexus.db');
-  if (!fs.existsSync(dbPath)) return res.status(404).json({ error: 'Base de datos no encontrada' });
-  const timestamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-  const backupName = `nexus-backup-${timestamp}.db`;
-  createAuditLog(1, req.user.id, req.user.email, 'backup.downloaded', 'database', 'nexus.db', { filename: backupName }, ip(req));
-  res.setHeader('Content-Type','application/octet-stream');
-  res.setHeader('Content-Disposition',`attachment; filename="${backupName}"`);
-  res.sendFile(dbPath);
+app.get('/api/backup/download', auth, requireAdmin, async (req, res) => {
+  try {
+    await createAuditLog(1, req.user.id, req.user.email, 'backup.attempted', 'database', 'postgresql', {}, ip(req));
+    res.json({ ok: false, message: 'Backup file download no disponible en PostgreSQL. Usa pg_dump o el panel de Render/Supabase.' });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/backup/create', auth, requireAdmin, (req, res) => {
-  const dbPath = join(__dir, 'data', 'nexus.db');
-  const backupDir = join(__dir, 'data', 'backups');
-  if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
-  const timestamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-  const backupPath = join(backupDir, `nexus-backup-${timestamp}.db`);
-  fs.copyFileSync(dbPath, backupPath);
-  const stat = fs.statSync(backupPath);
-  const backups = fs.readdirSync(backupDir).filter(f=>f.endsWith('.db')).map(f=>{
-    const s = fs.statSync(join(backupDir,f));
-    return { name: f, size_kb: Math.round(s.size/1024), created_at: s.mtime.toISOString() };
-  }).sort((a,b)=>b.created_at.localeCompare(a.created_at));
-  createAuditLog(1, req.user.id, req.user.email, 'backup.created', 'database', 'nexus.db', { filename: `nexus-backup-${timestamp}.db`, size_kb: Math.round(stat.size/1024) }, ip(req));
-  res.json({ ok: true, filename: `nexus-backup-${timestamp}.db`, size_kb: Math.round(stat.size/1024), backups });
+app.post('/api/backup/create', auth, requireAdmin, async (req, res) => {
+  try {
+    await createAuditLog(1, req.user.id, req.user.email, 'backup.attempted', 'database', 'postgresql', {}, ip(req));
+    res.json({ ok: false, message: 'Backup manual no disponible en PostgreSQL. Usa pg_dump o el panel de Render/Supabase para exportar la base de datos.' });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/backup/list', auth, requireAdmin, (req, res) => {
-  const backupDir = join(__dir, 'data', 'backups');
-  if (!fs.existsSync(backupDir)) return res.json({ backups: [] });
-  const backups = fs.readdirSync(backupDir).filter(f=>f.endsWith('.db')).map(f=>{
-    const s = fs.statSync(join(backupDir,f));
-    return { name: f, size_kb: Math.round(s.size/1024), created_at: s.mtime.toISOString() };
-  }).sort((a,b)=>b.created_at.localeCompare(a.created_at));
-  res.json({ backups });
+  res.json({ backups: [], message: 'Backups gestionados por el proveedor PostgreSQL (Render/Supabase).' });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1603,10 +1743,10 @@ app.get('/api/backup/list', auth, requireAdmin, (req, res) => {
 // Verifica tareas vencidas y SLA incumplidos → envía email de alerta
 app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
-  const now   = new Date().toISOString();
+  const nowStr = new Date().toISOString();
 
   // Tareas vencidas (fecha limite pasada, no completada)
-  const overdueTasks = db.prepare(`
+  const overdueTasks = await db.prepare(`
     SELECT id, title, assigned_email, due_date, status, priority
     FROM tasks
     WHERE tenant_id=1 AND status != 'completada'
@@ -1615,13 +1755,13 @@ app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
   `).all(today);
 
   // Tickets con SLA incumplido y aún abiertos
-  const breachedTickets = db.prepare(`
+  const breachedTickets = await db.prepare(`
     SELECT id, number, title, user_email, priority, sla_due_at, status
     FROM tickets
     WHERE tenant_id=1 AND status NOT IN ('closed','resolved')
       AND sla_due_at IS NOT NULL AND sla_due_at < ?
     ORDER BY priority DESC
-  `).all(now);
+  `).all(nowStr);
 
   const smtpActive = !!(process.env.SMTP_PASS && process.env.SMTP_PASS !== 'PEGAR_AQUI_TU_APP_PASSWORD_DE_16_LETRAS');
   const alerts = [];
@@ -1672,7 +1812,7 @@ app.post('/api/admin/check-overdue', auth, requireAdmin, async (req, res) => {
     alerts.push({ type: 'sla_breach', id: ticket.id, to: ticket.user_email, subject, sent: smtpActive });
   }
 
-  createAuditLog(1, req.user.id, req.user.email, 'alerts.checked', 'system', null,
+  await createAuditLog(1, req.user.id, req.user.email, 'alerts.checked', 'system', null,
     { overdue_tasks: overdueTasks.length, breached_tickets: breachedTickets.length, emails: alerts.length }, ip(req));
 
   res.json({
@@ -1720,14 +1860,14 @@ app.post('/api/admin/test-email', auth, requireAdmin, async (req, res) => {
   if (smtpActive) {
     try {
       await sendEmail(to, subject, html);
-      createAuditLog(1, req.user.id, req.user.email, 'email.test_sent', 'system', null, { to }, ip(req));
+      await createAuditLog(1, req.user.id, req.user.email, 'email.test_sent', 'system', null, { to }, ip(req));
       res.json({ ok: true, sent: true, to, message: `Email enviado correctamente a ${to}` });
     } catch(e) {
       res.json({ ok: false, sent: false, to, error: e.message, html });
     }
   } else {
     console.log(`\n[MOCK EMAIL → ${to}]\nSubject: ${subject}\n---`);
-    createAuditLog(1, req.user.id, req.user.email, 'email.test_mock', 'system', null, { to, mode: 'log' }, ip(req));
+    await createAuditLog(1, req.user.id, req.user.email, 'email.test_mock', 'system', null, { to, mode: 'log' }, ip(req));
     res.json({
       ok: true, sent: false, mock: true, to, subject, html,
       message: 'SMTP no configurado. Vista previa disponible. Configura SMTP en Branding → SMTP para enviar emails reales.'
@@ -1738,21 +1878,21 @@ app.post('/api/admin/test-email', auth, requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: SQL QUERIES (5 consultas para administración)
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/api/queries/run', auth, requireAdmin, (req, res) => {
+app.get('/api/queries/run', auth, requireAdmin, async (req, res) => {
   const { q } = req.query;
   const queries = {
     '1': { name: 'Usuarios con rol y último acceso', sql: "SELECT id, name, email, role, verified, last_login_at, login_count, created_at FROM users WHERE tenant_id=1 ORDER BY created_at DESC" },
     '2': { name: 'Tareas por estado y prioridad', sql: "SELECT t.title, t.status, t.priority, t.progress, t.assigned_email, t.due_date, tc.name as categoria FROM tasks t LEFT JOIN task_categories tc ON t.category_id=tc.id WHERE t.tenant_id=1 ORDER BY t.created_at DESC" },
-    '3': { name: 'Tickets abiertos con tiempo de respuesta', sql: "SELECT id, number, title, priority, status, category, user_email, sla_hours, sla_due_at, created_at, ROUND((julianday('now')-julianday(created_at))*24,1) as horas_abiertas FROM tickets WHERE tenant_id=1 ORDER BY created_at DESC" },
+    '3': { name: 'Tickets abiertos con tiempo de respuesta', sql: "SELECT id, number, title, priority, status, category, user_email, sla_hours, sla_due_at, created_at, ROUND((EXTRACT(EPOCH FROM (NOW() - created_at))::numeric/3600)::numeric, 1) as horas_abiertas FROM tickets WHERE tenant_id=1 ORDER BY created_at DESC" },
     '4': { name: 'Contactos por etapa del pipeline', sql: "SELECT stage, status, COUNT(*) as total, SUM(value) as valor_total, AVG(value) as valor_promedio FROM contacts WHERE tenant_id=1 GROUP BY stage, status ORDER BY total DESC" },
     '5': { name: 'Resumen de actividad del sistema (auditoría)', sql: "SELECT action, entity_type, COUNT(*) as veces, MAX(created_at) as ultima_vez FROM audit_logs WHERE tenant_id=1 GROUP BY action, entity_type ORDER BY veces DESC LIMIT 30" },
   };
   if (!q || !queries[q]) return res.status(400).json({ error: 'Consulta inválida. Use q=1..5' });
   const query = queries[q];
   try {
-    const rows = db.prepare(query.sql).all();
+    const rows = await db.prepare(query.sql).all();
     const cols = rows.length > 0 ? Object.keys(rows[0]) : [];
-    createAuditLog(1, req.user.id, req.user.email, 'query.executed', 'database', q, { query_name: query.name }, ip(req));
+    await createAuditLog(1, req.user.id, req.user.email, 'query.executed', 'database', q, { query_name: query.name }, ip(req));
     res.json({ name: query.name, sql: query.sql, columns: cols, rows, total: rows.length });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -1770,12 +1910,13 @@ app.get('/api/queries/list', auth, requireAgent, (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: ADMIN SEED — 20 registros por tabla (datos de demostración)
 // ─────────────────────────────────────────────────────────────────────────────
-app.post('/api/admin/seed', auth, requireAdmin, (req, res) => {
+app.post('/api/admin/seed', auth, requireAdmin, async (req, res) => {
+  try {
   const tid = 1;
   const results = {};
 
   // ── Contacts (20) ─────────────────────────────────────────────────────────
-  const existingContacts = db.prepare('SELECT COUNT(*) as c FROM contacts WHERE tenant_id=?').get(tid).c;
+  const existingContacts = (await db.prepare('SELECT COUNT(*) as c FROM contacts WHERE tenant_id=?').get(tid)).c;
   if (existingContacts < 20) {
     const contactsData = [
       { name:'Carlos Mendoza',   email:'carlos.mendoza@techdom.do',    phone:'809-555-0101', company:'TechDom Solutions',    position:'CEO',               status:'client',   stage:'won',         value:85000,  source:'referral'   },
@@ -1799,16 +1940,16 @@ app.post('/api/admin/seed', auth, requireAdmin, (req, res) => {
       { name:'Diego Espinal',    email:'d.espinal@distribuidora.do',    phone:'809-555-0119', company:'Distribuidora RD',     position:'Director',          status:'lead',     stage:'qualified',   value:60000,  source:'cold_email' },
       { name:'Mariana Polanco',  email:'m.polanco@mkt-digital.do',      phone:'849-555-0120', company:'Marketing Digital DO', position:'Directora',         status:'prospect', stage:'negotiation', value:95000,  source:'linkedin'   }
     ];
-    const iContact = db.prepare(`INSERT INTO contacts (tenant_id,name,email,phone,company,position,status,stage,value,source) VALUES (1,?,?,?,?,?,?,?,?,?)`);
+    const iContactSql = `INSERT INTO contacts (tenant_id,name,email,phone,company,position,status,stage,value,source) VALUES (1,?,?,?,?,?,?,?,?,?)`;
     let added = 0;
     for (const c of contactsData) {
-      try { iContact.run(c.name,c.email,c.phone,c.company,c.position,c.status,c.stage,c.value,c.source); added++; } catch(e) {}
+      try { await db.prepare(iContactSql).run(c.name,c.email,c.phone,c.company,c.position,c.status,c.stage,c.value,c.source); added++; } catch(e) {}
     }
     results.contacts = `+${added} contactos`;
   } else { results.contacts = `Ya tiene ${existingContacts} contactos`; }
 
   // ── Tickets (20) ───────────────────────────────────────────────────────────
-  const existingTickets = db.prepare('SELECT COUNT(*) as c FROM tickets WHERE tenant_id=?').get(tid).c;
+  const existingTickets = (await db.prepare('SELECT COUNT(*) as c FROM tickets WHERE tenant_id=?').get(tid)).c;
   if (existingTickets < 20) {
     const ticketsData = [
       { num:'TKT-001', title:'Error al iniciar sesión', desc:'El usuario no puede acceder a su cuenta. El sistema muestra error 401 aunque las credenciales son correctas.', pri:'urgent',  status:'open',        cat:'technical',       email:'carlos.mendoza@techdom.do',    name:'Carlos Mendoza',    sla:4,  csat:null },
@@ -1832,16 +1973,16 @@ app.post('/api/admin/seed', auth, requireAdmin, (req, res) => {
       { num:'TKT-019', title:'Error al subir archivos adjuntos', desc:'Al adjuntar un PDF de 3MB a un ticket el sistema muestra "Error al subir". Archivos pequeños sí funcionan.', pri:'normal',  status:'in_progress', cat:'technical',       email:'ana.m@innovatech.do',           name:'Ana Martínez',      sla:24, csat:null },
       { num:'TKT-020', title:'Integración con WhatsApp Business', desc:'¿La plataforma tiene integración con WhatsApp para gestionar conversaciones desde el sistema?', pri:'low',    status:'open',        cat:'feature_request', email:'luis.r@comercial-norte.do',     name:'Luis Rodríguez',    sla:72, csat:null }
     ];
-    const iTicket = db.prepare(`INSERT INTO tickets (tenant_id,number,title,description,priority,status,category,sla_hours,user_email,user_name,csat_score) VALUES (1,?,?,?,?,?,?,?,?,?,?)`);
+    const iTicketSql = `INSERT INTO tickets (tenant_id,number,title,description,priority,status,category,sla_hours,user_email,user_name,csat_score) VALUES (1,?,?,?,?,?,?,?,?,?,?)`;
     let added = 0;
     for (const t of ticketsData) {
-      try { iTicket.run(t.num,t.title,t.desc,t.pri,t.status,t.cat,t.sla,t.email,t.name,t.csat); added++; } catch(e) {}
+      try { await db.prepare(iTicketSql).run(t.num,t.title,t.desc,t.pri,t.status,t.cat,t.sla,t.email,t.name,t.csat); added++; } catch(e) {}
     }
     results.tickets = `+${added} tickets`;
   } else { results.tickets = `Ya tiene ${existingTickets} tickets`; }
 
   // ── Deals (20) ─────────────────────────────────────────────────────────────
-  const existingDeals = db.prepare('SELECT COUNT(*) as c FROM deals WHERE tenant_id=?').get(tid).c;
+  const existingDeals = (await db.prepare('SELECT COUNT(*) as c FROM deals WHERE tenant_id=?').get(tid)).c;
   if (existingDeals < 20) {
     const dealsData = [
       { title:'Sitio web corporativo TechDom',       value:85000,  stage:'won',          prob:100 },
@@ -1865,16 +2006,16 @@ app.post('/api/admin/seed', auth, requireAdmin, (req, res) => {
       { title:'Plataforma B2B Constructora RD',      value:420000, stage:'lost',         prob:0   },
       { title:'Dashboard Boutique Digital',          value:45000,  stage:'negotiation',  prob:80  }
     ];
-    const iDeal = db.prepare(`INSERT INTO deals (tenant_id,title,value,stage,probability,currency) VALUES (1,?,?,?,?,'DOP')`);
+    const iDealSql = `INSERT INTO deals (tenant_id,title,value,stage,probability,currency) VALUES (1,?,?,?,?,'DOP')`;
     let added = 0;
     for (const d of dealsData) {
-      try { iDeal.run(d.title,d.value,d.stage,d.prob); added++; } catch(e) {}
+      try { await db.prepare(iDealSql).run(d.title,d.value,d.stage,d.prob); added++; } catch(e) {}
     }
     results.deals = `+${added} deals`;
   } else { results.deals = `Ya tiene ${existingDeals} deals`; }
 
   // ── Orders (20) ────────────────────────────────────────────────────────────
-  const existingOrders = db.prepare('SELECT COUNT(*) as c FROM orders WHERE tenant_id=?').get(tid).c;
+  const existingOrders = (await db.prepare('SELECT COUNT(*) as c FROM orders WHERE tenant_id=?').get(tid)).c;
   if (existingOrders < 20) {
     const ordersData = [
       { cust:{name:'Carlos Mendoza',   email:'carlos.mendoza@techdom.do'},    items:[{name:'Plan Agency - Anual',         qty:1, price:4990}],           total:4990,   status:'completed'  },
@@ -1898,16 +2039,17 @@ app.post('/api/admin/seed', auth, requireAdmin, (req, res) => {
       { cust:{name:'Patricia Díaz',    email:'p.diaz@farmacia-vida.do'},      items:[{name:'Plan Starter - Anual',     qty:1, price:470}],             total:470,    status:'cancelled'  },
       { cust:{name:'Luis Rodríguez',   email:'luis.r@comercial-norte.do'},    items:[{name:'Consultoria Estrategia Digital',qty:1,price:8500}],        total:8500,   status:'pending'    }
     ];
-    const iOrder = db.prepare(`INSERT INTO orders (tenant_id,customer_json,items_json,total,status) VALUES (1,?,?,?,?)`);
+    const iOrderSql = `INSERT INTO orders (tenant_id,customer_json,items_json,total,status) VALUES (1,?,?,?,?)`;
     let added = 0;
     for (const o of ordersData) {
-      try { iOrder.run(JSON.stringify(o.cust),JSON.stringify(o.items),o.total,o.status); added++; } catch(e) {}
+      try { await db.prepare(iOrderSql).run(JSON.stringify(o.cust),JSON.stringify(o.items),o.total,o.status); added++; } catch(e) {}
     }
     results.orders = `+${added} ordenes`;
   } else { results.orders = `Ya tiene ${existingOrders} ordenes`; }
 
-  createAuditLog(tid, req.user.id, req.user.email, 'admin.seed', 'database', null, results, ip(req));
+  await createAuditLog(tid, req.user.id, req.user.email, 'admin.seed', 'database', null, results, ip(req));
   res.json({ ok:true, seeded:results, message:'Datos de demostración creados exitosamente' });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1923,7 +2065,7 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Nexuss X Sistems Server v2.0`);
   console.log(`   URL:    http://localhost:${PORT}`);
   console.log(`   AI:     ${_ai ? '✅ Anthropic connected' : '❌ No API key'}`);
-  console.log(`   DB:     SQLite @ server/data/nexus.db`);
+  console.log(`   DB:     PostgreSQL @ ${process.env.DATABASE_URL ? 'cloud' : 'localhost'}`);
   console.log(`   2FA:    ${otplib ? '✅ Available' : '⚠️  Install otplib'}`);
   console.log(`   Email:  ${process.env.SMTP_HOST ? '✅ SMTP configured' : '⚠️  No SMTP (logging only)'}\n`);
 });

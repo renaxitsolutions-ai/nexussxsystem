@@ -245,9 +245,9 @@
       </div>
     </section>
 
-    <!-- ══ PORTAFOLIO / TRABAJOS REALIZADOS ══ -->
+    <!-- PORTAFOLIO REMOVIDO — se añadirá página dedicada -->
     <div class="pulse-line"></div>
-    <section class="section" id="portafolio">
+    <section class="section" id="portafolio" style="display:none">
       <div class="section-head">
         <span class="tag" style="background:rgba(121,38,255,.1);color:#9b5bff;border-color:rgba(121,38,255,.3)">🎓 Trabajos Realizados</span>
         <h2 class="reveal" style="margin-top:12px">Evidencias como <span class="gradient-label">Programadores</span></h2>
@@ -568,15 +568,9 @@
 
   <script src="nexus.js"></script>
   <script>
-    // Si ya está autenticado ir directo al home
+    // Si ya está autenticado, redirigir al home sin mostrar intro
     if (localStorage.getItem('nxs_auth')) {
-      window.__nxsRedirectHome = true;
-    }
-
-    // Mostrar intro GD solo una vez por sesión (?preview salta la intro)
-    const _skipIntro = location.search.includes('preview') || location.hash === '#preview';
-    if (!_skipIntro && !sessionStorage.getItem('nxs_intro_done')) {
-      window.location.replace('intro.html');
+      window.location.replace('home.html');
     }
   </script>
 </body>
