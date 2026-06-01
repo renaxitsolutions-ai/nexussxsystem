@@ -1958,7 +1958,8 @@ header{isolation:auto}
   flex-direction: column; gap: 2px; pointer-events: all;
 }
 .nav-dropdown.open .nav-dropdown-panel,
-.nav-dropdown:focus-within .nav-dropdown-panel { display: flex; animation: langFadeDown .15s ease; }
+.nav-dropdown:focus-within .nav-dropdown-panel,
+.nav-dropdown:hover .nav-dropdown-panel { display: flex; animation: langFadeDown .15s ease; }
 .nav-dropdown-panel a {
   padding: 10px 14px; border-radius: 10px; display: flex;
   align-items: center; gap: 10px; font-size: .88rem;
