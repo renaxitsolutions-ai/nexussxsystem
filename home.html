@@ -94,10 +94,77 @@
         <!-- Resplandor de fondo pulsante -->
         <div style="position:absolute;width:290px;height:290px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,255,0.14) 0%,rgba(121,38,255,0.09) 50%,transparent 75%);filter:blur(22px);animation:jarvisPulse 3.5s ease-in-out infinite;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
 
-        <!-- Robot Jarvis flotando -->
+        <!-- Robot Jarvis SVG flotando -->
         <div style="position:relative;animation:jarvisFloat 4s ease-in-out infinite;z-index:2;text-align:center">
-          <img src="jarvis.jpg" alt="Jarvis AI"
-            style="display:block;margin:0 auto;width:290px;height:330px;object-fit:contain;mix-blend-mode:screen;filter:drop-shadow(0 0 18px rgba(0,212,255,0.85)) drop-shadow(0 0 42px rgba(121,38,255,0.55))">
+          <svg viewBox="0 0 220 310" width="260" height="310" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 22px rgba(0,212,255,0.9)) drop-shadow(0 0 50px rgba(121,38,255,0.6))">
+            <defs>
+              <radialGradient id="hbg" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a2a4a"/><stop offset="100%" stop-color="#0a0e20"/></radialGradient>
+              <radialGradient id="eye1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#0050aa"/></radialGradient>
+              <radialGradient id="chest" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#0d2a4a"/><stop offset="100%" stop-color="#060e1e"/></radialGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="softglow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#172040"/><stop offset="100%" stop-color="#0a1225"/></linearGradient>
+              <linearGradient id="panelGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#00d4ff" stop-opacity="0.25"/><stop offset="100%" stop-color="#7926ff" stop-opacity="0.15"/></linearGradient>
+            </defs>
+            <!-- Antena superior -->
+            <line x1="110" y1="8" x2="110" y2="42" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" filter="url(#glow)"/>
+            <circle cx="110" cy="6" r="7" fill="#7926ff" filter="url(#softglow)"/>
+            <circle cx="110" cy="6" r="3.5" fill="#cc88ff"/>
+            <!-- Orejas/lados cabeza -->
+            <rect x="22" y="65" width="18" height="28" rx="5" fill="#0d1628" stroke="#00d4ff" stroke-width="1" opacity="0.9"/>
+            <rect x="180" y="65" width="18" height="28" rx="5" fill="#0d1628" stroke="#00d4ff" stroke-width="1" opacity="0.9"/>
+            <rect x="26" y="72" width="10" height="14" rx="3" fill="url(#panelGrad)" stroke="rgba(0,212,255,0.5)" stroke-width="0.5"/>
+            <rect x="184" y="72" width="10" height="14" rx="3" fill="url(#panelGrad)" stroke="rgba(0,212,255,0.5)" stroke-width="0.5"/>
+            <!-- Cabeza -->
+            <rect x="40" y="42" width="140" height="110" rx="18" fill="url(#bodyGrad)" stroke="#00d4ff" stroke-width="1.5"/>
+            <rect x="42" y="44" width="136" height="106" rx="17" fill="none" stroke="rgba(0,212,255,0.12)" stroke-width="1"/>
+            <!-- Ojos -->
+            <ellipse cx="83" cy="88" rx="24" ry="18" fill="#05111f" stroke="#00d4ff" stroke-width="1.5" filter="url(#glow)"/>
+            <ellipse cx="137" cy="88" rx="24" ry="18" fill="#05111f" stroke="#00d4ff" stroke-width="1.5" filter="url(#glow)"/>
+            <circle cx="83" cy="88" r="14" fill="url(#eye1)"/>
+            <circle cx="137" cy="88" r="14" fill="url(#eye1)"/>
+            <circle cx="83" cy="86" r="7" fill="#001a30"/>
+            <circle cx="137" cy="86" r="7" fill="#001a30"/>
+            <circle cx="83" cy="86" r="5" fill="#00d4ff" opacity="0.9"/>
+            <circle cx="137" cy="86" r="5" fill="#00d4ff" opacity="0.9"/>
+            <circle cx="86" cy="83" r="2" fill="white" opacity="0.8"/>
+            <circle cx="140" cy="83" r="2" fill="white" opacity="0.8"/>
+            <!-- Línea de escaneo debajo de ojos -->
+            <rect x="55" y="112" width="110" height="2" rx="1" fill="rgba(0,212,255,0.3)"/>
+            <!-- Boca / speaker grill -->
+            <rect x="65" y="120" width="90" height="22" rx="7" fill="#060e1e" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+            <line x1="75" y1="126" x2="145" y2="126" stroke="#00d4ff" stroke-width="1" opacity="0.5"/>
+            <line x1="75" y1="130" x2="145" y2="130" stroke="#00d4ff" stroke-width="1" opacity="0.3"/>
+            <line x1="75" y1="134" x2="145" y2="134" stroke="#00d4ff" stroke-width="1" opacity="0.2"/>
+            <!-- Cuello -->
+            <rect x="85" y="152" width="50" height="18" rx="6" fill="#0a1020" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+            <rect x="92" y="155" width="36" height="10" rx="3" fill="url(#panelGrad)"/>
+            <!-- Hombros (trapecio) -->
+            <path d="M30 185 Q20 175 30 165 L60 162 Q85 160 110 160 Q135 160 160 162 L190 165 Q200 175 190 185 L30 185Z" fill="url(#bodyGrad)" stroke="#00d4ff" stroke-width="1.2"/>
+            <!-- Cuerpo torso -->
+            <rect x="38" y="183" width="144" height="100" rx="14" fill="url(#bodyGrad)" stroke="#00d4ff" stroke-width="1.5"/>
+            <rect x="40" y="185" width="140" height="96" rx="13" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="1"/>
+            <!-- Panel central pecho -->
+            <rect x="70" y="198" width="80" height="50" rx="9" fill="#060e1e" stroke="rgba(0,212,255,0.35)" stroke-width="1"/>
+            <!-- Reactor arc (círculo central) -->
+            <circle cx="110" cy="217" r="16" fill="#030810" stroke="#00d4ff" stroke-width="1.5" filter="url(#glow)"/>
+            <circle cx="110" cy="217" r="11" fill="none" stroke="#7926ff" stroke-width="1" opacity="0.8"/>
+            <circle cx="110" cy="217" r="7" fill="#00d4ff" opacity="0.25"/>
+            <circle cx="110" cy="217" r="4" fill="#00d4ff" opacity="0.9" filter="url(#glow)"/>
+            <!-- Botones indicadores -->
+            <circle cx="82" cy="236" r="4" fill="#7926ff" filter="url(#glow)"/>
+            <circle cx="95" cy="236" r="4" fill="#00d4ff" filter="url(#glow)"/>
+            <circle cx="125" cy="236" r="4" fill="#00ffaa" filter="url(#glow)" opacity="0.8"/>
+            <circle cx="138" cy="236" r="4" fill="#ff4466" filter="url(#glow)" opacity="0.8"/>
+            <!-- Líneas decorativas torso -->
+            <line x1="48" y1="200" x2="62" y2="200" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+            <line x1="48" y1="205" x2="62" y2="205" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
+            <line x1="158" y1="200" x2="172" y2="200" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+            <line x1="158" y1="205" x2="172" y2="205" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
+            <!-- Borde inferior torso (base) -->
+            <rect x="55" y="272" width="110" height="14" rx="7" fill="#0a1020" stroke="rgba(0,212,255,0.25)" stroke-width="1"/>
+            <rect x="70" y="275" width="80" height="8" rx="4" fill="url(#panelGrad)"/>
+          </svg>
         </div>
       </div>
     </section>
