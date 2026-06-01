@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J.A.R.V.I.S — Audio Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cyan: #00d4ff; --gold: #ffb800; --green: #00ff88;
+      --red: #ff4466;  --bg: #020c14;
+      --panel: rgba(0,212,255,.03); --border: rgba(0,212,255,.18);
+    }
+    html,body { background:var(--bg); color:var(--cyan);
+                font-family:'Rajdhani',sans-serif; min-height:100vh; overflow-x:hidden; }
+
+    /* Grid bg */
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(0,212,255,.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,212,255,.05) 1px,transparent 1px);
+      background-size:44px 44px;
+      animation:gridDrift 22s linear infinite; pointer-events:none; z-index:0;
+    }
+    @keyframes gridDrift { to { background-position:44px 44px; } }
+
+    /* Scanline */
+    #scanline { position:fixed;left:0;right:0;top:-6px;height:6px;z-index:1000;
+      pointer-events:none;
+      background:linear-gradient(transparent,rgba(0,212,255,.26),transparent);
+      animation:scanDown 5s linear infinite; }
+    @keyframes scanDown { 0%{top:-6px}100%{top:100vh} }
+
+    .wrap { position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:24px 18px 40px; }
+
+    /* HUD Panel */
+    .hud { border:1px solid var(--border);background:var(--panel);
+           padding:28px 24px;position:relative; }
+    .c { position:absolute;width:20px;height:20px; }
+    .c.tl{top:-1px;left:-1px;  border-top:2px solid var(--cyan);border-left:2px solid var(--cyan);}
+    .c.tr{top:-1px;right:-1px; border-top:2px solid var(--cyan);border-right:2px solid var(--cyan);}
+    .c.bl{bottom:-1px;left:-1px;  border-bottom:2px solid var(--cyan);border-left:2px solid var(--cyan);}
+    .c.br{bottom:-1px;right:-1px; border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan);}
+
+    /* Header */
+    .hud-head { text-align:center;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--border); }
+    .hud-title { font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,5vw,3.6rem);
+      font-weight:900;letter-spacing:.55em;color:var(--cyan);
+      text-shadow:0 0 14px var(--cyan),0 0 40px var(--cyan),0 0 80px rgba(0,212,255,.4);
+      animation:tp 3s ease-in-out infinite; }
+    @keyframes tp{0%,100%{text-shadow:0 0 14px var(--cyan),0 0 40px var(--cyan),0 0 80px rgba(0,212,255,.4)}
+                  50%{text-shadow:0 0 22px var(--cyan),0 0 60px var(--cyan),0 0 130px rgba(0,212,255,.75)}}
+    .hud-sub { font-family:'Rajdhani',sans-serif;font-size:.78rem;font-weight:600;
+      letter-spacing:.3em;color:var(--gold);text-shadow:0 0 12px rgba(255,184,0,.5);margin-top:8px; }
+
+    /* Upload zone */
+    .upload-zone {
+      border:2px dashed rgba(0,212,255,.35);
+      background:rgba(0,212,255,.03);
+      padding:32px 20px;text-align:center;cursor:pointer;
+      transition:all .25s;margin-bottom:22px;position:relative;
+    }
+    .upload-zone:hover,.upload-zone.drag {
+      border-color:var(--cyan);background:rgba(0,212,255,.08);
+      box-shadow:0 0 22px rgba(0,212,255,.18);
+    }
+    .upload-zone input { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+    .upload-icon { font-size:2.4rem;margin-bottom:10px; }
+    .upload-text { font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:.18em;color:var(--cyan); }
+    .upload-sub  { font-size:.8rem;color:rgba(0,212,255,.5);margin-top:6px; }
+    .file-name   { margin-top:10px;font-size:.8rem;color:var(--green);font-weight:600;min-height:18px; }
+
+    /* Main layout */
+    .grid2 { display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start; }
+    @media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+
+    /* Side panel */
+    .side { border:1px solid var(--border);background:var(--panel);padding:18px 16px;position:relative; }
+    .plabel { font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.2em;color:var(--gold);
+      margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,184,0,.2); }
+
+    /* Knob rows */
+    .knob-row { margin-bottom:14px; }
+    .knob-head { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+    .knob-label { font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.14em;color:rgba(0,212,255,.65); }
+    .knob-val   { font-family:'Orbitron',sans-serif;font-size:.68rem;color:var(--gold);min-width:44px;text-align:right; }
+
+    .slider {
+      -webkit-appearance:none;appearance:none;
+      width:100%;height:4px;background:rgba(0,212,255,.15);
+      border-radius:2px;outline:none;cursor:pointer;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance:none;appearance:none;
+      width:14px;height:14px;border-radius:50%;
+      background:var(--cyan);box-shadow:0 0 8px var(--cyan);cursor:pointer;
+    }
+    .slider.gold::-webkit-slider-thumb { background:var(--gold);box-shadow:0 0 8px var(--gold); }
+    .slider.green::-webkit-slider-thumb { background:var(--green);box-shadow:0 0 8px var(--green); }
+    .slider::-moz-range-thumb {
+      width:14px;height:14px;border-radius:50%;border:none;
+      background:var(--cyan);box-shadow:0 0 8px var(--cyan);cursor:pointer;
+    }
+
+    /* Waveform */
+    #wave { width:100%;height:90px;display:block;
+      border:1px solid var(--border);background:rgba(0,212,255,.02);margin-bottom:12px; }
+
+    /* Progress */
+    .prog-head { display:flex;justify-content:space-between;font-size:.68rem;
+      letter-spacing:.1em;color:rgba(0,212,255,.55);margin-bottom:5px; }
+    .prog-wrap { height:5px;background:rgba(0,212,255,.1);border:1px solid var(--border);
+      margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer; }
+    .prog-fill { height:100%;width:0%;
+      background:linear-gradient(90deg,var(--cyan),var(--gold));
+      transition:width .08s linear;position:relative; }
+    .prog-fill::after { content:'';position:absolute;right:-1px;top:-3px;
+      width:5px;height:11px;background:#fff;box-shadow:0 0 6px var(--cyan); }
+
+    /* Buttons */
+    .btn-row { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px; }
+    .btn {
+      font-family:'Orbitron',sans-serif;font-size:.59rem;font-weight:700;letter-spacing:.13em;
+      padding:10px 15px;border:none;cursor:pointer;
+      clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+      transition:all .2s;white-space:nowrap;
+    }
+    .btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+    .btn-cyan{background:var(--cyan);color:#020c14;}
+    .btn-cyan:hover{background:#8cf0ff;box-shadow:0 0 16px var(--cyan);}
+    .btn-gold{background:var(--gold);color:#020c14;}
+    .btn-gold:hover{background:#ffd055;box-shadow:0 0 16px var(--gold);}
+    .btn-out{background:transparent;color:var(--cyan);border:1px solid var(--cyan);}
+    .btn-out:hover{background:rgba(0,212,255,.1);}
+    .btn-red{background:transparent;color:var(--red);border:1px solid var(--red);}
+    .btn-red:hover{background:rgba(255,68,102,.08);}
+    .btn-green{background:var(--green);color:#020c14;}
+    .btn-green.active{box-shadow:0 0 16px var(--green);}
+
+    /* Status */
+    .statusbar { display:flex;align-items:center;gap:10px;border:1px solid var(--border);
+      background:var(--panel);padding:9px 14px;margin-bottom:14px; }
+    .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:all .3s;}
+    .dot.idle   {background:rgba(0,212,255,.4);}
+    .dot.ready  {background:var(--green);box-shadow:0 0 8px var(--green);}
+    .dot.playing{background:var(--green);box-shadow:0 0 8px var(--green);animation:blink .4s ease-in-out infinite;}
+    .dot.paused {background:var(--gold);box-shadow:0 0 8px var(--gold);}
+    .dot.error  {background:var(--red);box-shadow:0 0 8px var(--red);}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+    #statusTxt{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.12em;}
+
+    /* Time display */
+    .time-display { font-family:'Orbitron',sans-serif;font-size:.72rem;
+      color:var(--gold);text-align:center;margin-bottom:10px;letter-spacing:.1em; }
+
+    /* Freq bars */
+    #freqCanvas { width:100%;height:60px;display:block;
+      border:1px solid var(--border);background:rgba(0,212,255,.02);margin-bottom:12px; }
+
+    /* Tech row */
+    .techrow{display:flex;flex-wrap:wrap;gap:20px;margin-top:18px;padding-top:14px;
+      border-top:1px solid var(--border);}
+    .titem{display:flex;flex-direction:column;gap:3px;}
+    .tkey{font-family:'Orbitron',sans-serif;font-size:.57rem;letter-spacing:.14em;color:rgba(0,212,255,.45);}
+    .tval{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:.08em;color:var(--gold);}
+
+    /* Reset btn small */
+    .reset-btn { font-size:.55rem;font-family:'Orbitron',sans-serif;
+      background:transparent;border:none;color:rgba(0,212,255,.4);
+      cursor:pointer;letter-spacing:.12em;padding:2px 6px; }
+    .reset-btn:hover{color:var(--cyan);}
+
+    /* Loop indicator */
+    .loop-badge{
+      display:inline-block;font-family:'Orbitron',sans-serif;font-size:.58rem;
+      letter-spacing:.1em;padding:3px 8px;border:1px solid;margin-left:6px;
+      border-radius:2px;vertical-align:middle;
+    }
+    .loop-badge.on{border-color:var(--green);color:var(--green);}
+    .loop-badge.off{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.2);}
+  </style>
+</head>
+<body>
+
+<div id="scanline"></div>
+
+<div class="wrap">
+  <div class="hud">
+    <div class="c tl"></div><div class="c tr"></div>
+    <div class="c bl"></div><div class="c br"></div>
+
+    <!-- Header -->
+    <div class="hud-head">
+      <div class="hud-title">J.A.R.V.I.S</div>
+      <div class="hud-sub">AUDIO STUDIO — VOICE PROCESSOR &nbsp;·&nbsp; NEXUSS X SISTEMS</div>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="audio/*">
+      <div class="upload-icon">🎙️</div>
+      <div class="upload-text">▸ SUBIR AUDIO DE VOZ</div>
+      <div class="upload-sub">Arrastra aquí o haz click · MP3, WAV, OGG, M4A, FLAC, AAC</div>
+      <div class="file-name" id="fileName">Sin archivo cargado</div>
+    </div>
+
+    <!-- Status -->
+    <div class="statusbar">
+      <div class="dot idle" id="dot"></div>
+      <span id="statusTxt" style="font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.12em">
+        ESPERANDO AUDIO
+      </span>
+      <span class="loop-badge off" id="loopBadge">LOOP OFF</span>
+    </div>
+
+    <!-- Waveforms -->
+    <canvas id="wave" width="800" height="90"></canvas>
+    <canvas id="freqCanvas" width="800" height="60"></canvas>
+
+    <!-- Progress + time -->
+    <div class="prog-head">
+      <span>▸ POSICIÓN</span>
+      <span id="timeTxt">0:00 / 0:00</span>
+    </div>
+    <div class="prog-wrap" id="progWrap">
+      <div class="prog-fill" id="progFill"></div>
+    </div>
+
+    <!-- Main controls -->
+    <div class="btn-row">
+      <button class="btn btn-cyan"  id="playBtn"   disabled>▶ REPRODUCIR</button>
+      <button class="btn btn-gold"  id="pauseBtn"  disabled>⏸ PAUSA</button>
+      <button class="btn btn-red"   id="stopBtn"   disabled>■ DETENER</button>
+      <button class="btn btn-green" id="loopBtn"   disabled>↺ LOOP</button>
+      <button class="btn btn-out"   id="dlBtn"     disabled>↓ DESCARGAR</button>
+    </div>
+
+    <!-- Two-column controls -->
+    <div class="grid2" style="margin-top:16px">
+
+      <!-- LEFT: Speed + Pitch + Volume -->
+      <div class="side">
+        <div class="c tl"></div><div class="c tr"></div>
+        <div class="c bl"></div><div class="c br"></div>
+        <div class="plabel">▸ PARÁMETROS DE REPRODUCCIÓN</div>
+
+        <div class="knob-row">
+          <div class="knob-head">
+            <span class="knob-label">VELOCIDAD</span>
+            <span class="knob-val" id="speedVal">1.00×</span>
+            <button class="reset-btn" onclick="resetSlider('speed',1)">RESET</button>
+          </div>
+          <input type="range" class="slider" id="speed"
+            min="0.25" max="4" step="0.05" value="1">
+        </div>
+
+        <div class="knob-row">
+          <div class="knob-head">
+            <span class="knob-label">TONO (PITCH) <span style="font-size:.55rem;color:rgba(0,212,255,.45)">semitonos</span></span>
+            <span class="knob-val" id="pitchVal">0 st</span>
+            <button class="reset-btn" onclick="resetSlider('pitch',0)">RESET</button>
+          </div>
+          <input type="range" class="slider gold" id="pitch"
+            min="-12" max="12" step="0.5" value="0">
+        </div>
+
+        <div class="knob-row">
+          <div class="knob-head">
+            <span class="knob-label">VOLUMEN</span>
+            <span class="knob-val" id="volVal">100%</span>
+            <button class="reset-btn" onclick="resetSlider('volume',1)">RESET</button>
+          </div>
+          <input type="range" class="slider green" id="volume"
+            min="0" max="2" step="0.01" value="1">
+        </div>
+      </div>
+
+      <!-- RIGHT: EQ -->
+      <div class="side">
+        <div class="c tl"></div><div class="c tr"></div>
+        <div class="c bl"></div><div class="c br"></div>
+        <div class="plabel">▸ ECUALIZADOR (EQ)</div>
+
+        <div class="knob-row">
+          <div class="knob-head">
+            <span class="knob-label">GRAVES (BASS) — 200 Hz</span>
+            <span class="knob-val" id="bassVal">0 dB</span>
+            <button class="reset-btn" onclick="resetSlider('bass',0)">RESET</button>
+          </div>
+          <input type="range" class="slider" id="bass"
+            min="-16" max="16" step="0.5" value="0">
+        </div>
+
+        <div class="knob-row">
+          <div class="knob-head">
+            <span class="knob-label">MEDIOS (MID) — 1 kHz</span>
+            <span class="knob-val" id="midVal">0 dB</span>
+            <button class="reset-btn" onclick="resetSlider('mid',0)">RESET</button>
+          </div>
+          <input type="range" class="slider gold" id="mid"
+            min="-16" max="16" step="0.5" value="0">
+        </div>
+
+        <div class="knob-row">
+          <div class="knob-head">
+            <span class="knob-label">AGUDOS (TREBLE) — 4 kHz</span>
+            <span class="knob-val" id="trebleVal">0 dB</span>
+            <button class="reset-btn" onclick="resetSlider('treble',0)">RESET</button>
+          </div>
+          <input type="range" class="slider green" id="treble"
+            min="-16" max="16" step="0.5" value="0">
+        </div>
+      </div>
+
+    </div><!-- /grid2 -->
+
+    <!-- Tech data -->
+    <div class="techrow">
+      <div class="titem"><div class="tkey">ARCHIVO</div><div class="tval" id="tFile">—</div></div>
+      <div class="titem"><div class="tkey">DURACIÓN</div><div class="tval" id="tDur">—</div></div>
+      <div class="titem"><div class="tkey">SAMPLE RATE</div><div class="tval" id="tSr">—</div></div>
+      <div class="titem"><div class="tkey">CANALES</div><div class="tval" id="tCh">—</div></div>
+      <div class="titem"><div class="tkey">VELOCIDAD</div><div class="tval" id="tSpeed">1.00×</div></div>
+      <div class="titem"><div class="tkey">PITCH</div><div class="tval" id="tPitch">0 st</div></div>
+      <div class="titem"><div class="tkey">ESTADO</div><div class="tval" id="tState">IDLE</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   J.A.R.V.I.S Audio Studio — Web Audio API
+   Speed · Pitch · Bass · Mid · Treble · Volume
+   Real-time waveform + frequency spectrum
+═══════════════════════════════════════════════════════════════ */
+
+// ── DOM ──────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const uploadZone = $('uploadZone');
+const fileInput  = $('fileInput');
+const fileName   = $('fileName');
+const dot        = $('dot');
+const statusTxt  = $('statusTxt');
+const loopBadge  = $('loopBadge');
+const playBtn    = $('playBtn');
+const pauseBtn   = $('pauseBtn');
+const stopBtn    = $('stopBtn');
+const loopBtn    = $('loopBtn');
+const dlBtn      = $('dlBtn');
+const progWrap   = $('progWrap');
+const progFill   = $('progFill');
+const timeTxt    = $('timeTxt');
+const waveEl     = $('wave');
+const freqEl     = $('freqCanvas');
+const wctx       = waveEl.getContext('2d');
+const fctx       = freqEl.getContext('2d');
+
+// Sliders
+const speedSl   = $('speed'),  speedVal  = $('speedVal');
+const pitchSl   = $('pitch'),  pitchVal  = $('pitchVal');
+const volumeSl  = $('volume'), volVal    = $('volVal');
+const bassSl    = $('bass'),   bassVal   = $('bassVal');
+const midSl     = $('mid'),    midVal    = $('midVal');
+const trebleSl  = $('treble'), trebleVal = $('trebleVal');
+
+// Tech readouts
+const tFile  = $('tFile'),  tDur   = $('tDur');
+const tSr    = $('tSr'),    tCh    = $('tCh');
+const tSpeed = $('tSpeed'), tPitch = $('tPitch'), tState = $('tState');
+
+// ── Audio state ───────────────────────────────────────────────────
+let audioCtx    = null;
+let audioBuffer = null;
+let sourceNode  = null;
+let analyser    = null;
+let gainNode    = null;
+let bassFilter  = null;
+let midFilter   = null;
+let trebleFilter= null;
+let rawFileBlob = null;
+
+let state       = 'idle';  // idle | ready | playing | paused
+let startedAt   = 0;       // audioCtx.currentTime when play() was called
+let pauseOffset = 0;       // seconds into buffer when paused
+let loopEnabled = false;
+let rafId       = null;
+let progressRaf = null;
+
+// ── Init AudioContext + graph ────────────────────────────────────
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+
+  gainNode = audioCtx.createGain();
+  gainNode.gain.value = parseFloat(volumeSl.value);
+
+  bassFilter = audioCtx.createBiquadFilter();
+  bassFilter.type = 'lowshelf';
+  bassFilter.frequency.value = 200;
+  bassFilter.gain.value = parseFloat(bassSl.value);
+
+  midFilter = audioCtx.createBiquadFilter();
+  midFilter.type = 'peaking';
+  midFilter.frequency.value = 1000;
+  midFilter.Q.value = 1;
+  midFilter.gain.value = parseFloat(midSl.value);
+
+  trebleFilter = audioCtx.createBiquadFilter();
+  trebleFilter.type = 'highshelf';
+  trebleFilter.frequency.value = 4000;
+  trebleFilter.gain.value = parseFloat(trebleSl.value);
+
+  // Chain: source → bass → mid → treble → gain → analyser → out
+  bassFilter.connect(midFilter);
+  midFilter.connect(trebleFilter);
+  trebleFilter.connect(gainNode);
+  gainNode.connect(analyser);
+  analyser.connect(audioCtx.destination);
+}
+
+// ── File load ─────────────────────────────────────────────────────
+fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave',()  => uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('drag');
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+
+async function loadFile(file) {
+  if (!file || !file.type.startsWith('audio/')) {
+    setStatus('error','FORMATO NO SOPORTADO'); return;
+  }
+  stopAudio();
+  initAudio();
+  rawFileBlob = file;
+  fileName.textContent = '⟳ Cargando: ' + file.name;
+  setStatus('idle','PROCESANDO...');
+
+  try {
+    const ab = await file.arrayBuffer();
+    audioBuffer = await audioCtx.decodeAudioData(ab);
+
+    fileName.textContent = '✔ ' + file.name;
+    const dur = audioBuffer.duration;
+    tFile.textContent  = file.name.length > 22 ? file.name.slice(0,22)+'…' : file.name;
+    tDur.textContent   = fmt(dur);
+    tSr.textContent    = (audioBuffer.sampleRate / 1000).toFixed(1) + ' kHz';
+    tCh.textContent    = audioBuffer.numberOfChannels === 1 ? 'MONO' : 'STEREO';
+    timeTxt.textContent = '0:00 / ' + fmt(dur);
+
+    setState('ready');
+    [playBtn, pauseBtn, stopBtn, loopBtn, dlBtn].forEach(b => b.disabled = false);
+    pauseOffset = 0;
+
+  } catch(e) {
+    setStatus('error','ERROR AL DECODIFICAR');
+    fileName.textContent = '✘ Error: ' + e.message;
+  }
+}
+
+// ── Playback ──────────────────────────────────────────────────────
+function playAudio() {
+  if (!audioBuffer || !audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (sourceNode) { try { sourceNode.stop(); sourceNode.disconnect(); } catch(_){} sourceNode = null; }
+
+  sourceNode = audioCtx.createBufferSource();
+  sourceNode.buffer = audioBuffer;
+  sourceNode.loop   = loopEnabled;
+  sourceNode.playbackRate.value = parseFloat(speedSl.value);
+  sourceNode.detune.value = parseFloat(pitchSl.value) * 100; // semitones → cents
+
+  sourceNode.connect(bassFilter);
+  sourceNode.start(0, pauseOffset);
+  startedAt   = audioCtx.currentTime - pauseOffset / sourceNode.playbackRate.value;
+  pauseOffset = 0;
+
+  sourceNode.onended = () => {
+    if (state === 'playing' && !loopEnabled) {
+      setState('ready');
+      pauseOffset = 0;
+      progFill.style.width = '0%';
+      timeTxt.textContent = '0:00 / ' + fmt(audioBuffer.duration);
+    }
+  };
+
+  setState('playing');
+  startVisuals();
+  startProgress();
+}
+
+function pauseAudio() {
+  if (state !== 'playing' || !sourceNode) return;
+  // Save current position
+  pauseOffset = (audioCtx.currentTime - startedAt) * parseFloat(speedSl.value);
+  pauseOffset = Math.min(pauseOffset, audioBuffer.duration);
+  try { sourceNode.stop(); sourceNode.disconnect(); } catch(_){}
+  sourceNode = null;
+  setState('paused');
+  cancelAnimationFrame(rafId); rafId = null;
+  cancelAnimationFrame(progressRaf); progressRaf = null;
+}
+
+function stopAudio() {
+  if (sourceNode) { try { sourceNode.stop(); sourceNode.disconnect(); } catch(_){} sourceNode = null; }
+  pauseOffset = 0;
+  if (audioBuffer) { setState('ready'); timeTxt.textContent = '0:00 / ' + fmt(audioBuffer.duration); }
+  else setState('idle');
+  progFill.style.width = '0%';
+  cancelAnimationFrame(rafId); rafId = null;
+  cancelAnimationFrame(progressRaf); progressRaf = null;
+  drawIdleWave();
+}
+
+function toggleLoop() {
+  loopEnabled = !loopEnabled;
+  if (sourceNode) sourceNode.loop = loopEnabled;
+  loopBadge.textContent = loopEnabled ? 'LOOP ON' : 'LOOP OFF';
+  loopBadge.className   = 'loop-badge ' + (loopEnabled ? 'on' : 'off');
+  loopBtn.classList.toggle('active', loopEnabled);
+}
+
+// ── Download ──────────────────────────────────────────────────────
+function downloadAudio() {
+  if (!rawFileBlob) return;
+  const url = URL.createObjectURL(rawFileBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = rawFileBlob.name || 'jarvis-audio.mp3';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+// ── Seek ──────────────────────────────────────────────────────────
+progWrap.addEventListener('click', e => {
+  if (!audioBuffer) return;
+  const rect = progWrap.getBoundingClientRect();
+  const pct  = (e.clientX - rect.left) / rect.width;
+  pauseOffset = pct * audioBuffer.duration;
+  if (state === 'playing') { playAudio(); }
+  else {
+    progFill.style.width = (pct * 100) + '%';
+    timeTxt.textContent  = fmt(pauseOffset) + ' / ' + fmt(audioBuffer.duration);
+  }
+});
+
+// ── Realtime parameter update (no restart needed) ────────────────
+speedSl.addEventListener('input', () => {
+  const v = parseFloat(speedSl.value);
+  speedVal.textContent = v.toFixed(2) + '×';
+  tSpeed.textContent   = v.toFixed(2) + '×';
+  if (sourceNode) {
+    // Adjust startedAt to keep position consistent after rate change
+    const pos = (audioCtx.currentTime - startedAt) * sourceNode.playbackRate.value;
+    sourceNode.playbackRate.value = v;
+    startedAt = audioCtx.currentTime - pos / v;
+  }
+});
+
+pitchSl.addEventListener('input', () => {
+  const v = parseFloat(pitchSl.value);
+  pitchVal.textContent = (v > 0 ? '+' : '') + v.toFixed(1) + ' st';
+  tPitch.textContent   = (v > 0 ? '+' : '') + v.toFixed(1) + ' st';
+  if (sourceNode) sourceNode.detune.value = v * 100;
+});
+
+volumeSl.addEventListener('input', () => {
+  const v = parseFloat(volumeSl.value);
+  volVal.textContent = Math.round(v * 100) + '%';
+  if (gainNode) gainNode.gain.value = v;
+});
+
+bassSl.addEventListener('input', () => {
+  const v = parseFloat(bassSl.value);
+  bassVal.textContent = (v > 0 ? '+' : '') + v + ' dB';
+  if (bassFilter) bassFilter.gain.value = v;
+});
+
+midSl.addEventListener('input', () => {
+  const v = parseFloat(midSl.value);
+  midVal.textContent = (v > 0 ? '+' : '') + v + ' dB';
+  if (midFilter) midFilter.gain.value = v;
+});
+
+trebleSl.addEventListener('input', () => {
+  const v = parseFloat(trebleSl.value);
+  trebleVal.textContent = (v > 0 ? '+' : '') + v + ' dB';
+  if (trebleFilter) trebleFilter.gain.value = v;
+});
+
+// ── Reset slider ──────────────────────────────────────────────────
+function resetSlider(id, def) {
+  const sl = $(id);
+  sl.value = def;
+  sl.dispatchEvent(new Event('input'));
+}
+
+// ── Progress animation ────────────────────────────────────────────
+function startProgress() {
+  cancelAnimationFrame(progressRaf);
+  function tick() {
+    if (state !== 'playing' || !audioBuffer) return;
+    const pos = (audioCtx.currentTime - startedAt) * parseFloat(speedSl.value);
+    const dur = audioBuffer.duration;
+    const pct = Math.min(pos / dur, 1);
+    progFill.style.width = (pct * 100) + '%';
+    timeTxt.textContent  = fmt(Math.min(pos, dur)) + ' / ' + fmt(dur);
+    progressRaf = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── Waveform & Spectrum visuals ───────────────────────────────────
+let waveT = 0;
+const wBuf = new Uint8Array(analyser ? analyser.fftSize : 2048);
+const fBuf = new Uint8Array(analyser ? analyser.frequencyBinCount : 1024);
+
+function startVisuals() {
+  cancelAnimationFrame(rafId);
+  function draw() {
+    if (state !== 'playing') return;
+    rafId = requestAnimationFrame(draw);
+
+    analyser.fftSize = 2048;
+    const tw = new Uint8Array(analyser.fftSize);
+    const fw = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteTimeDomainData(tw);
+    analyser.getByteFrequencyData(fw);
+
+    // Waveform
+    const ww = waveEl.width, wh = waveEl.height;
+    wctx.clearRect(0,0,ww,wh);
+    wctx.beginPath();
+    const sliceW = ww / tw.length;
+    let x = 0;
+    for (let i=0; i<tw.length; i++) {
+      const v = tw[i]/128.0;
+      const y = v * wh/2;
+      i===0 ? wctx.moveTo(x,y) : wctx.lineTo(x,y);
+      x += sliceW;
+    }
+    wctx.strokeStyle = 'rgba(0,212,255,.9)';
+    wctx.lineWidth = 1.5;
+    wctx.stroke();
+
+    // Center line
+    wctx.beginPath(); wctx.moveTo(0,wh/2); wctx.lineTo(ww,wh/2);
+    wctx.strokeStyle='rgba(0,212,255,.1)'; wctx.lineWidth=1; wctx.stroke();
+
+    // Spectrum bars
+    const fw2 = freqEl.width, fh2 = freqEl.height;
+    fctx.clearRect(0,0,fw2,fh2);
+    const barW = fw2 / fw.length * 2;
+    let fx = 0;
+    for (let i=0; i<fw.length/2; i++) {
+      const barH = (fw[i]/255) * fh2;
+      const hue = i / (fw.length/2);
+      const r = Math.round(hue * 255);
+      const g = Math.round((1-hue) * 212);
+      fctx.fillStyle = `rgba(${r},${g},255,0.85)`;
+      fctx.fillRect(fx, fh2-barH, barW-1, barH);
+      fx += barW;
+    }
+  }
+  draw();
+}
+
+function drawIdleWave() {
+  const ww = waveEl.width, wh = waveEl.height;
+  wctx.clearRect(0,0,ww,wh);
+  // Flat line with subtle noise
+  wctx.beginPath(); wctx.moveTo(0,wh/2); wctx.lineTo(ww,wh/2);
+  wctx.strokeStyle='rgba(0,212,255,.2)'; wctx.lineWidth=1; wctx.stroke();
+  fctx.clearRect(0,0,freqEl.width,freqEl.height);
+}
+
+// Idle wave animation
+(function idleAnim() {
+  if (state !== 'playing') {
+    const ww=waveEl.width, wh=waveEl.height;
+    wctx.clearRect(0,0,ww,wh);
+    wctx.beginPath();
+    for(let x=0;x<=ww;x++){
+      const y = wh/2 + Math.sin(x*.022+waveT)*(state==='paused'?8:3) + Math.sin(x*.04+waveT*1.3)*2;
+      x===0?wctx.moveTo(x,y):wctx.lineTo(x,y);
+    }
+    wctx.strokeStyle='rgba(0,212,255,.3)';wctx.lineWidth=1.5;wctx.stroke();
+    waveT += .04;
+  }
+  requestAnimationFrame(idleAnim);
+})();
+
+// ── State machine ──────────────────────────────────────────────────
+function setState(s) {
+  state = s;
+  tState.textContent = s.toUpperCase();
+  dot.className = 'dot ' + (s==='playing'?'playing':s==='paused'?'paused':s==='ready'?'ready':s==='idle'?'idle':'error');
+
+  const labels = {
+    idle:'ESPERANDO AUDIO', ready:'AUDIO LISTO — PRESIONA REPRODUCIR',
+    playing:'REPRODUCIENDO...', paused:'EN PAUSA'
+  };
+  setStatus(s, labels[s]||s.toUpperCase());
+
+  playBtn.textContent  = state==='playing' ? '▶ REPRODUCIR' : (state==='paused' ? '▶ CONTINUAR' : '▶ REPRODUCIR');
+  pauseBtn.disabled    = state!=='playing';
+  stopBtn.disabled     = state==='idle' || state==='ready';
+}
+
+function setStatus(state, txt) {
+  statusTxt.textContent = txt;
+}
+
+// ── Button bindings ────────────────────────────────────────────────
+playBtn .addEventListener('click', () => { if(state==='playing'){pauseAudio();}else{playAudio();} });
+pauseBtn.addEventListener('click', pauseAudio);
+stopBtn .addEventListener('click', stopAudio);
+loopBtn .addEventListener('click', toggleLoop);
+dlBtn   .addEventListener('click', downloadAudio);
+
+// ── Helpers ────────────────────────────────────────────────────────
+function fmt(s) {
+  if(!s||isNaN(s)) return '0:00';
+  const m=Math.floor(s/60), sec=Math.floor(s%60);
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+// ── Canvas resize ──────────────────────────────────────────────────
+function resizeCanvases() {
+  waveEl.width  = waveEl.offsetWidth;
+  freqEl.width  = freqEl.offsetWidth;
+}
+resizeCanvases();
+window.addEventListener('resize', resizeCanvases);
+
+// ── Keyboard shortcuts ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){e.preventDefault(); playBtn.click();}
+  if(e.code==='KeyS') stopAudio();
+  if(e.code==='KeyL') toggleLoop();
+});
+</script>
+</body>
+</html>
