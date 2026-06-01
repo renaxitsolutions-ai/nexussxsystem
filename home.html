@@ -96,13 +96,40 @@
 
         <!-- Robot Jarvis flotando -->
         <div style="position:relative;animation:jarvisFloat 4s ease-in-out infinite;z-index:2;text-align:center">
-          <img src="jarvis.jpg" alt="Jarvis AI"
-            style="display:block;margin:0 auto;width:290px;height:330px;
-                   object-fit:contain;border-radius:0!important;box-shadow:none!important;
-                   -webkit-mask-image:radial-gradient(ellipse 52% 55% at 50% 50%, black 80%, rgba(0,0,0,0.5) 92%, transparent 100%);
-                   mask-image:radial-gradient(ellipse 52% 55% at 50% 50%, black 80%, rgba(0,0,0,0.5) 92%, transparent 100%)"
+          <img src="jarvis.jpg" alt="Jarvis AI" id="jarvis-hero-img"
+            style="display:block;margin:0 auto;width:290px;height:330px;object-fit:contain;border-radius:0!important;box-shadow:none!important;mix-blend-mode:normal!important;filter:none!important"
             class="jarvis-robot-img">
         </div>
+        <script>
+        (function(){
+          var img = document.getElementById('jarvis-hero-img');
+          if(!img) return;
+          function removeWhiteBg(){
+            var W=img.naturalWidth, H=img.naturalHeight;
+            if(!W||!H) return;
+            var c=document.createElement('canvas');
+            c.width=W; c.height=H;
+            c.style.cssText='display:block;margin:0 auto;width:290px;height:330px;border-radius:0;box-shadow:none';
+            var ctx=c.getContext('2d');
+            ctx.drawImage(img,0,0);
+            var id=ctx.getImageData(0,0,W,H), d=id.data;
+            for(var i=0;i<d.length;i+=4){
+              var r=d[i],g=d[i+1],b=d[i+2];
+              var mn=Math.min(r,g,b), mx=Math.max(r,g,b);
+              var sat=mx>0?(mx-mn)/mx:0;
+              if(mn>248&&sat<0.06){ d[i+3]=0; }          /* pure white bg → transparent */
+              else if(mn>228&&sat<0.10){                  /* near-white edge → fade */
+                d[i+3]=Math.round((mn-228)/20*255);
+                d[i+3]=255-d[i+3];
+              }
+            }
+            ctx.putImageData(id,0,0);
+            img.parentNode.replaceChild(c,img);
+          }
+          if(img.complete&&img.naturalWidth>0) removeWhiteBg();
+          else img.addEventListener('load',removeWhiteBg);
+        })();
+        </script>
       </div>
     </section>
 
