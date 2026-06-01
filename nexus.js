@@ -2556,6 +2556,38 @@ function bindPageJarvis() {
 function removeRobotWhiteBg() {
   const img = document.getElementById('jarvis-hero-img');
   if (!img) return;
+
+  /* ── Método 1: filtro SVG inline ──────────────────────────────────────
+     Funciona en CUALQUIER protocolo (file://, http://, https://).
+     La matrix hace α = clamp(-2R -2G -2B + 5, 0, 1):
+       • blanco puro  (1,1,1)   → α = -1  → 0  (invisible)    ✓
+       • gris claro   (0.85×3)  → α = 0.1 → casi transparente ✓
+       • gris medio   (0.7×3)   → α = 0.8 → mayormente opaco  ✓
+       • colores/dark (<0.6)    → α ≥ 1   → completamente opaco✓
+  ──────────────────────────────────────────────────────────────────── */
+  if (!document.getElementById('jarvis-svg-defs')) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'jarvis-svg-defs';
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+    svg.innerHTML = `<defs>
+      <filter id="jarvis-rm-white" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="
+          1  0  0  0  0
+          0  1  0  0  0
+          0  0  1  0  0
+         -2 -2 -2  0  5"/>
+      </filter>
+    </defs>`;
+    document.body.insertBefore(svg, document.body.firstChild);
+  }
+  img.style.filter = 'url(#jarvis-rm-white)';
+
+  /* ── Método 2: Canvas pixel-a-pixel ──────────────────────────────────
+     Más preciso (tiene en cuenta saturación).
+     Si funciona, reemplaza el <img> con un <canvas> limpio (sin filtro CSS).
+     Si falla (file://, SecurityError, etc.) el filtro SVG de arriba sigue activo.
+  ──────────────────────────────────────────────────────────────────── */
   function process() {
     try {
       const W = img.naturalWidth, H = img.naturalHeight;
@@ -2566,22 +2598,21 @@ function removeRobotWhiteBg() {
       const ctx = c.getContext('2d');
       if (!ctx) return;
       ctx.drawImage(img, 0, 0);
-      const id = ctx.getImageData(0, 0, W, H), d = id.data; /* puede lanzar SecurityError en file:// */
+      const id = ctx.getImageData(0, 0, W, H), d = id.data; /* SecurityError en file:// */
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i], g = d[i+1], b = d[i+2];
         const mn = Math.min(r, g, b), mx = Math.max(r, g, b);
         const sat = mx > 0 ? (mx - mn) / mx : 0;
         if (mn > 248 && sat < 0.06) {
-          d[i+3] = 0;                                      /* fondo blanco puro → transparente */
+          d[i+3] = 0;
         } else if (mn > 228 && sat < 0.10) {
-          d[i+3] = 255 - Math.round((mn - 228) / 20 * 255); /* borde → desvanece */
+          d[i+3] = 255 - Math.round((mn - 228) / 20 * 255);
         }
       }
       ctx.putImageData(id, 0, 0);
-      img.parentNode.replaceChild(c, img);
+      img.parentNode.replaceChild(c, img); /* reemplaza img → canvas limpio */
     } catch(e) {
-      /* SecurityError (file://, CORP header, etc.) — ignorar silenciosamente.
-         La intro y el resto de la página deben funcionar igual. */
+      /* SecurityError (file://, CORP) → el filtro SVG del Método 1 cubre esto */
     }
   }
   if (img.complete && img.naturalWidth > 0) process();
