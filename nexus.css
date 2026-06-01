@@ -1957,7 +1957,8 @@ header{isolation:auto}
   backdrop-filter: blur(20px); box-shadow: 0 16px 48px rgba(0,0,0,0.6);
   flex-direction: column; gap: 2px; pointer-events: all;
 }
-.nav-dropdown.open .nav-dropdown-panel { display: flex; animation: langFadeDown .15s ease; }
+.nav-dropdown.open .nav-dropdown-panel,
+.nav-dropdown:focus-within .nav-dropdown-panel { display: flex; animation: langFadeDown .15s ease; }
 .nav-dropdown-panel a {
   padding: 10px 14px; border-radius: 10px; display: flex;
   align-items: center; gap: 10px; font-size: .88rem;
