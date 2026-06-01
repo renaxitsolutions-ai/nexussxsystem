@@ -2310,6 +2310,14 @@ h4.jv-h { font-size: 0.82rem; }
   from { transform: translate(-50%,-50%) rotate(0deg); }
   to   { transform: translate(-50%,-50%) rotate(360deg); }
 }
+/* Robot hero image — override global .hero-art img styles */
+.jarvis-robot-img {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+}
+
 .jarvis-dot-orbit {
   position: absolute;
   width: 10px; height: 10px; border-radius: 50%;
