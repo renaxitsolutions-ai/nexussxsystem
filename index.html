@@ -16,6 +16,189 @@
   <link rel="stylesheet" href="nexus.css" />
 </head>
 <body>
+
+  <!-- ══ PRE-LOADER ══ -->
+  <div id="nxs-preloader">
+    <div class="pl-scanlines"></div>
+    <div class="pl-grid"></div>
+    <div class="pl-corner pl-tl"></div>
+    <div class="pl-corner pl-tr"></div>
+    <div class="pl-corner pl-bl"></div>
+    <div class="pl-corner pl-br"></div>
+    <div class="pl-content">
+      <div class="pl-logo-ring">
+        <div class="pl-logo-ring2"></div>
+        <img src="logo.jpeg" alt="" class="pl-logo-img" />
+      </div>
+      <div class="pl-brand">NEXUSS <em>X</em> SISTEMS</div>
+      <div class="pl-tagline">Soluciones Digitales · LATAM</div>
+      <div class="pl-status-wrap">
+        <span class="pl-dot"></span>
+        <span class="pl-status" id="plStatus">INITIALIZING SYSTEM</span>
+        <span class="pl-cursor">_</span>
+      </div>
+      <div class="pl-bar-track"><div class="pl-bar-fill"></div></div>
+      <div class="pl-metrics">
+        <span>SYS v4.2</span><span>AI: ACTIVE</span><span>NET: OK</span>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* ── Pre-loader overlay ─────────────────────────────────── */
+    #nxs-preloader {
+      position: fixed; inset: 0; z-index: 99999;
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      animation: plFadeOut 0.45s ease 1.95s forwards;
+      overflow: hidden;
+    }
+    @keyframes plFadeOut {
+      to { opacity: 0; pointer-events: none; }
+    }
+
+    /* scanlines */
+    .pl-scanlines {
+      position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0,212,255,0.03) 0px, rgba(0,212,255,0.03) 1px,
+        transparent 1px, transparent 3px
+      );
+      animation: plScanMove 8s linear infinite;
+    }
+    @keyframes plScanMove {
+      from { background-position: 0 0; }
+      to   { background-position: 0 60px; }
+    }
+
+    /* grid */
+    .pl-grid {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0.06;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.4) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* corner brackets */
+    .pl-corner {
+      position: absolute; width: 32px; height: 32px;
+      border-color: #00d4ff; border-style: solid; opacity: 0.7;
+    }
+    .pl-tl { top: 20px; left: 20px;  border-width: 2px 0 0 2px; }
+    .pl-tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
+    .pl-bl { bottom: 20px; left: 20px;  border-width: 0 0 2px 2px; }
+    .pl-br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
+
+    /* centre content */
+    .pl-content {
+      text-align: center; z-index: 1;
+      animation: plContentIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes plContentIn {
+      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* logo ring */
+    .pl-logo-ring {
+      position: relative; width: 110px; height: 110px;
+      margin: 0 auto 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,212,255,0.5);
+      box-shadow: 0 0 28px rgba(0,212,255,0.35), 0 0 60px rgba(121,38,255,0.18), inset 0 0 18px rgba(0,212,255,0.08);
+      animation: plRingPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes plRingPulse {
+      0%,100% { box-shadow: 0 0 28px rgba(0,212,255,0.35), 0 0 60px rgba(121,38,255,0.18); }
+      50%      { box-shadow: 0 0 46px rgba(0,212,255,0.65), 0 0 90px rgba(121,38,255,0.32); }
+    }
+    .pl-logo-ring2 {
+      position: absolute; inset: -10px; border-radius: 50%;
+      border: 1px dashed rgba(121,38,255,0.4);
+      animation: plRingSpin 4s linear infinite;
+    }
+    @keyframes plRingSpin {
+      to { transform: rotate(360deg); }
+    }
+    .pl-logo-img {
+      width: 84px; height: 84px; border-radius: 50%;
+      object-fit: cover;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+    }
+
+    /* brand name */
+    .pl-brand {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 700; letter-spacing: 0.18em;
+      color: #fff;
+      text-shadow: 0 0 18px rgba(0,212,255,0.7), 0 0 40px rgba(0,212,255,0.3);
+      animation: plBrandIn 0.8s ease 0.2s both;
+    }
+    .pl-brand em { color: #00d4ff; font-style: normal; }
+    @keyframes plBrandIn {
+      from { opacity: 0; letter-spacing: 0.4em; }
+      to   { opacity: 1; letter-spacing: 0.18em; }
+    }
+
+    .pl-tagline {
+      font-size: 0.7rem; letter-spacing: 0.22em;
+      color: rgba(0,212,255,0.5); margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* status line */
+    .pl-status-wrap {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      margin: 20px 0 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem; letter-spacing: 0.12em;
+      color: rgba(0,212,255,0.8);
+    }
+    .pl-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #00d4ff;
+      box-shadow: 0 0 8px #00d4ff;
+      animation: plDotBlink 0.7s step-end infinite;
+    }
+    @keyframes plDotBlink { 50% { opacity: 0; } }
+    .pl-cursor {
+      animation: plDotBlink 0.6s step-end infinite;
+      color: #00d4ff;
+    }
+
+    /* progress bar */
+    .pl-bar-track {
+      width: min(300px, 70vw); height: 3px;
+      background: rgba(0,212,255,0.12);
+      border-radius: 2px; margin: 0 auto;
+      overflow: hidden;
+    }
+    .pl-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00d4ff, #7926ff);
+      box-shadow: 0 0 10px rgba(0,212,255,0.8);
+      border-radius: 2px;
+      animation: plBarGrow 1.7s cubic-bezier(0.4,0,0.2,1) 0.2s both;
+    }
+    @keyframes plBarGrow {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+
+    /* metrics row */
+    .pl-metrics {
+      display: flex; gap: 20px; justify-content: center;
+      margin-top: 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.6rem; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.25);
+    }
+  </style>
+
   <!-- ══ GALAXY BACKGROUND ══ -->
   <canvas id="nxs-galaxy" style="position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:0.72"></canvas>
 
@@ -85,7 +268,7 @@
         <!-- Robot Jarvis flotando -->
         <div style="position:relative;animation:jarvisFloat 4s ease-in-out infinite;z-index:2;text-align:center">
           <img src="jarvis.jpg" alt="Jarvis AI" id="jarvis-hero-img"
-            style="display:block;margin:0 auto;width:290px;height:330px;object-fit:contain;border-radius:0!important;box-shadow:none!important;mix-blend-mode:normal!important;filter:none!important"
+            style="display:block;margin:0 auto;width:290px;height:330px;object-fit:contain;border-radius:0!important;box-shadow:none!important;mix-blend-mode:normal!important"
             class="jarvis-robot-img">
         </div>
 

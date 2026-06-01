@@ -34,10 +34,15 @@ const I18N = {
     index_trust_sub: 'Estrategia, diseño y desarrollo listos para crecimiento, ventas y automatización.',
 
     home_tag: 'Empresa de tecnología',
-    home_title: 'Nexuss X Sistems — soluciones digitales de alto impacto.',
-    home_sub: 'Desarrollamos aplicaciones, landing pages, paneles de gestión, páginas de ventas y chatbots con IA para empresas que buscan crecer.',
+    home_title: 'Impulsamos tu negocio con desarrollo web e inteligencia artificial.',
+    home_sub: 'Diseñamos sitios web, paneles de gestión, páginas de ventas, landing pages y chatbots con IA orientados a convertir visitantes en clientes.',
     home_cta_primary: 'Ver servicios',
     home_cta_secondary: 'Solicitar propuesta',
+    home_why_title: '¿Por qué <span class="gradient-label">Nexuss X Sistems</span>?',
+    home_why_sub: 'Tecnología de alto nivel. Resultados medibles. Entrega rápida.',
+    home_cta_band_title: '¿Listo para crecer al siguiente nivel?',
+    home_cta_band_sub: 'Disponible para crear procesos digitales que apoyen tu crecimiento y automaticen tu operación.',
+    home_cta_band_btn: 'Contáctame ahora',
     home_about_title: 'Nosotros',
     home_about_sub: 'Nexuss X Sistems es una marca enfocada en innovación, confianza y modernidad. Creamos productos digitales con calidad y una experiencia sencilla.',
     home_mission: 'Misión',
@@ -45,16 +50,21 @@ const I18N = {
     home_values: 'Valores',
     home_slogan_label: 'Lema',
     home_slogan: 'Nuestro trabajo supera los límites, va más allá de este planeta.',
-    home_services_title: 'Servicios principales',
-    home_services_sub: 'Soluciones a medida para negocios digitales y empresas tradicionales.',
+    home_services_title: 'Nuestros servicios',
+    home_services_sub: 'Paquetes completos para empresas que necesitan presencia digital profesional y ventas constantes.',
     home_industries_title: 'Industrias que atendemos',
     home_industries_sub: 'Experiencia adaptable a múltiples sectores y modelos de negocio.',
-    home_process_title: 'Diagrama / Proceso',
+    home_process_title: 'Nuestro proceso',
+    home_process_sub: 'Un flujo claro y probado para entregar rápido con calidad premium.',
+    home_tech_title: 'Tecnologías con las que <span class="gradient-label">trabajamos</span>',
+    home_tech_sub: 'Herramientas de clase mundial para construir soluciones rápidas, escalables y seguras.',
+    home_guarantee_title: 'Tu inversión está <span class="gradient-label">protegida</span>',
+    home_guarantee_sub: 'Trabajamos con garantías reales porque confiamos en lo que hacemos.',
     home_results_title: 'Resultados medibles',
     home_testimonials_title: 'Testimonios',
-    home_ready_title: '¿Listo para tu proyecto?',
-    home_ready_sub: 'Cuéntanos tu idea y te enviamos una propuesta clara.',
-    home_ready_cta1: 'Contactar',
+    home_ready_title: '¿Necesitas un presupuesto personalizado?',
+    home_ready_sub: 'Cuéntanos tu idea y diseñamos una solución a medida. Sin compromisos, sin letra pequeña.',
+    home_ready_cta1: 'Contáctame ahora',
     home_ready_cta2: 'Ver servicios',
 
     services_tag: 'Servicios',
@@ -165,10 +175,15 @@ const I18N = {
     index_trust_sub: 'Strategy, design and development built for growth, sales and automation.',
 
     home_tag: 'Technology company',
-    home_title: 'Nexuss X Sistems — high‑impact digital solutions.',
-    home_sub: 'We build applications, landing pages, management dashboards, sales pages and AI chatbots for growing businesses.',
+    home_title: 'We power your business with web development and artificial intelligence.',
+    home_sub: 'We design websites, dashboards, sales pages, landing pages and AI chatbots focused on converting visitors into clients.',
     home_cta_primary: 'View services',
     home_cta_secondary: 'Request proposal',
+    home_why_title: 'Why <span class="gradient-label">Nexuss X Sistems</span>?',
+    home_why_sub: 'Top-tier technology. Measurable results. Fast delivery.',
+    home_cta_band_title: 'Ready to grow to the next level?',
+    home_cta_band_sub: 'Available to build digital processes that support your growth and automate your operations.',
+    home_cta_band_btn: 'Contact me now',
     home_about_title: 'About us',
     home_about_sub: 'Nexuss X Sistems focuses on innovation, trust and modernity. We build digital products with quality and a simple experience.',
     home_mission: 'Mission',
@@ -176,16 +191,21 @@ const I18N = {
     home_values: 'Values',
     home_slogan_label: 'Slogan',
     home_slogan: 'Our work surpasses limits and goes beyond this planet.',
-    home_services_title: 'Core services',
-    home_services_sub: 'Tailored solutions for digital businesses and enterprises.',
+    home_services_title: 'Our services',
+    home_services_sub: 'Complete packages for businesses that need a professional digital presence and steady sales.',
     home_industries_title: 'Industries served',
-    home_industries_sub: 'Adaptable experience across sectors and business models.',
-    home_process_title: 'Diagram / Process',
+    home_industries_sub: 'Adaptable experience across multiple sectors and business models.',
+    home_process_title: 'Our process',
+    home_process_sub: 'A clear, proven workflow for fast delivery with premium quality.',
+    home_tech_title: 'Technologies we <span class="gradient-label">work with</span>',
+    home_tech_sub: 'World-class tools to build fast, scalable and secure solutions.',
+    home_guarantee_title: 'Your investment is <span class="gradient-label">protected</span>',
+    home_guarantee_sub: 'We work with real guarantees because we trust what we build.',
     home_results_title: 'Measurable results',
     home_testimonials_title: 'Testimonials',
-    home_ready_title: 'Ready for your project?',
-    home_ready_sub: 'Share your idea and we will send a clear proposal.',
-    home_ready_cta1: 'Contact',
+    home_ready_title: 'Need a custom quote?',
+    home_ready_sub: 'Tell us your idea and we will design a tailored solution. No commitments, no fine print.',
+    home_ready_cta1: 'Contact me now',
     home_ready_cta2: 'View services',
 
     services_tag: 'Services',
@@ -285,6 +305,28 @@ const I18N = {
     index_status: 'Servidor: Verificando...', index_login: 'Entrar', index_register: 'Criar conta',
     index_trust_title: 'Confiança e resultados',
     index_trust_sub: 'Estratégia, design e desenvolvimento para crescimento e automação.',
+    home_tag: 'Empresa de tecnologia',
+    home_title: 'Impulsionamos seu negócio com desenvolvimento web e inteligência artificial.',
+    home_sub: 'Criamos sites, painéis de gestão, páginas de vendas, landing pages e chatbots com IA para converter visitantes em clientes.',
+    home_cta_primary: 'Ver serviços', home_cta_secondary: 'Solicitar proposta',
+    home_why_title: 'Por que <span class="gradient-label">Nexuss X Sistems</span>?',
+    home_why_sub: 'Tecnologia de alto nível. Resultados mensuráveis. Entrega rápida.',
+    home_cta_band_title: 'Pronto para crescer ao próximo nível?',
+    home_cta_band_sub: 'Disponível para criar processos digitais que apoiem seu crescimento.',
+    home_cta_band_btn: 'Fale comigo agora',
+    home_services_title: 'Nossos serviços',
+    home_services_sub: 'Pacotes completos para empresas que precisam de presença digital profissional.',
+    home_industries_title: 'Setores atendidos',
+    home_industries_sub: 'Experiência adaptável a múltiplos setores e modelos de negócio.',
+    home_process_title: 'Nosso processo',
+    home_process_sub: 'Um fluxo claro e comprovado para entrega rápida com qualidade premium.',
+    home_tech_title: 'Tecnologias com as quais <span class="gradient-label">trabalhamos</span>',
+    home_tech_sub: 'Ferramentas de classe mundial para construir soluções rápidas e escaláveis.',
+    home_guarantee_title: 'Seu investimento está <span class="gradient-label">protegido</span>',
+    home_guarantee_sub: 'Trabalhamos com garantias reais porque confiamos no que fazemos.',
+    home_ready_title: 'Precisa de um orçamento personalizado?',
+    home_ready_sub: 'Conte-nos sua ideia e projetamos uma solução sob medida.',
+    home_ready_cta1: 'Fale comigo agora', home_ready_cta2: 'Ver serviços',
     contact_tag: 'Contato premium', contact_title: 'Fale sobre seu projeto',
     contact_send: 'Enviar mensagem', add_to_cart: 'Adicionar ao carrinho',
     buy_btn: 'Comprar agora', comments_send: 'Enviar avaliação',
@@ -301,11 +343,29 @@ const I18N = {
     index_status: 'Serveur : Vérification...', index_login: 'Se connecter', index_register: 'Créer un compte',
     index_trust_title: 'Confiance et résultats',
     index_trust_sub: 'Stratégie, design et développement pour croissance, ventes et automatisation.',
-    home_tag: 'Entreprise technologique', home_title: 'Nexuss X Sistems — solutions numériques à fort impact.',
+    home_tag: 'Entreprise technologique',
+    home_title: 'Nous boostons votre activité avec le développement web et l\'intelligence artificielle.',
+    home_sub: 'Nous créons des sites web, panneaux de gestion, pages de vente et chatbots IA pour convertir vos visiteurs en clients.',
     home_cta_primary: 'Voir les services', home_cta_secondary: 'Demander un devis',
+    home_why_title: 'Pourquoi <span class="gradient-label">Nexuss X Sistems</span> ?',
+    home_why_sub: 'Technologie de haut niveau. Résultats mesurables. Livraison rapide.',
+    home_cta_band_title: 'Prêt à passer au niveau supérieur ?',
+    home_cta_band_sub: 'Disponible pour créer des processus digitaux qui soutiennent votre croissance.',
+    home_cta_band_btn: 'Contactez-moi maintenant',
     home_slogan: 'Notre travail dépasse les limites et va au-delà de cette planète.',
-    home_services_title: 'Services principaux', home_industries_title: 'Industries servies',
-    home_ready_title: 'Prêt pour votre projet ?', home_ready_cta1: 'Contacter', home_ready_cta2: 'Voir les services',
+    home_services_title: 'Nos services',
+    home_services_sub: 'Packages complets pour les entreprises qui ont besoin d\'une présence digitale professionnelle.',
+    home_industries_title: 'Secteurs desservis',
+    home_industries_sub: 'Expérience adaptable à de multiples secteurs et modèles d\'affaires.',
+    home_process_title: 'Notre processus',
+    home_process_sub: 'Un flux de travail clair et éprouvé pour livrer rapidement avec une qualité premium.',
+    home_tech_title: 'Technologies avec lesquelles nous <span class="gradient-label">travaillons</span>',
+    home_tech_sub: 'Des outils de classe mondiale pour créer des solutions rapides et évolutives.',
+    home_guarantee_title: 'Votre investissement est <span class="gradient-label">protégé</span>',
+    home_guarantee_sub: 'Nous travaillons avec de vraies garanties car nous faisons confiance à notre travail.',
+    home_ready_title: 'Besoin d\'un devis personnalisé ?',
+    home_ready_sub: 'Partagez votre idée et nous concevons une solution sur mesure.',
+    home_ready_cta1: 'Contactez-moi maintenant', home_ready_cta2: 'Voir les services',
     services_tag: 'Services', services_title: 'Développement intégral pour vendre et évoluer.',
     solutions_tag: 'Solutions', solutions_title: 'Produits numériques prêts à vendre.',
     cart_title: 'Panier d\'achat', cart_total: 'Total (DOP)', cart_empty: 'Aucun produit.',
@@ -335,11 +395,29 @@ const I18N = {
     index_status: 'Server: Verifica...', index_login: 'Accedi', index_register: 'Crea account',
     index_trust_title: 'Fiducia e risultati',
     index_trust_sub: 'Strategia, design e sviluppo per crescita, vendite e automazione.',
-    home_tag: 'Azienda tecnologica', home_title: 'Nexuss X Sistems — soluzioni digitali ad alto impatto.',
+    home_tag: 'Azienda tecnologica',
+    home_title: 'Potenziamo il tuo business con sviluppo web e intelligenza artificiale.',
+    home_sub: 'Creiamo siti web, pannelli di gestione, pagine di vendita e chatbot IA per convertire visitatori in clienti.',
     home_cta_primary: 'Vedi servizi', home_cta_secondary: 'Richiedi proposta',
+    home_why_title: 'Perché <span class="gradient-label">Nexuss X Sistems</span>?',
+    home_why_sub: 'Tecnologia di alto livello. Risultati misurabili. Consegna rapida.',
+    home_cta_band_title: 'Pronto a crescere al livello successivo?',
+    home_cta_band_sub: 'Disponibile per creare processi digitali che supportino la tua crescita.',
+    home_cta_band_btn: 'Contattami ora',
     home_slogan: 'Il nostro lavoro supera i limiti e va oltre questo pianeta.',
-    home_services_title: 'Servizi principali', home_industries_title: 'Settori serviti',
-    home_ready_title: 'Pronto per il tuo progetto?', home_ready_cta1: 'Contattaci', home_ready_cta2: 'Vedi servizi',
+    home_services_title: 'I nostri servizi',
+    home_services_sub: 'Pacchetti completi per aziende che hanno bisogno di presenza digitale professionale.',
+    home_industries_title: 'Settori serviti',
+    home_industries_sub: 'Esperienza adattabile a molteplici settori e modelli di business.',
+    home_process_title: 'Il nostro processo',
+    home_process_sub: 'Un flusso di lavoro chiaro e collaudato per consegne rapide con qualità premium.',
+    home_tech_title: 'Tecnologie con cui <span class="gradient-label">lavoriamo</span>',
+    home_tech_sub: 'Strumenti di classe mondiale per costruire soluzioni veloci e scalabili.',
+    home_guarantee_title: 'Il tuo investimento è <span class="gradient-label">protetto</span>',
+    home_guarantee_sub: 'Lavoriamo con garanzie reali perché ci fidiamo di ciò che facciamo.',
+    home_ready_title: 'Hai bisogno di un preventivo personalizzato?',
+    home_ready_sub: 'Condividi la tua idea e progettiamo una soluzione su misura.',
+    home_ready_cta1: 'Contattami ora', home_ready_cta2: 'Vedi servizi',
     services_tag: 'Servizi', services_title: 'Sviluppo integrale per vendere e crescere.',
     solutions_tag: 'Soluzioni', solutions_title: 'Prodotti digitali pronti per vendere.',
     cart_title: 'Carrello acquisti', cart_total: 'Totale (DOP)', cart_empty: 'Nessun prodotto.',
@@ -372,6 +450,11 @@ function applyI18n(lang){
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if(dict[key]){ el.textContent = dict[key]; }
+  });
+  /* data-i18n-html: permite traducciones con HTML interno (ej: spans con gradient-label) */
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if(dict[key]){ el.innerHTML = dict[key]; }
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
@@ -1374,6 +1457,15 @@ function bindCinematicIntro() {
   const path = window.location.pathname;
   const isIndex = path === '/' || path.endsWith('/index.html') || path.endsWith('\\index.html') || path === '';
   if (!isIndex) return;
+
+  /* Pre-loader handoff: wait for it to finish fading before launching the intro */
+  const plEl = document.getElementById('nxs-preloader');
+  const preDelay = plEl ? 2350 : 0;
+  setTimeout(_launchIntro, preDelay);
+
+  function _launchIntro() {
+    if (plEl) { plEl.style.display = 'none'; }
+
   // Siempre mostrar la intro al abrir index.html (no bloquear por sessionStorage)
 
   const W = window.innerWidth, H = window.innerHeight;
@@ -1596,6 +1688,7 @@ function bindCinematicIntro() {
   const skipBtn = intro.querySelector('#introSkip');
   if (skipBtn) skipBtn.addEventListener('click', exitIntro);
   setTimeout(exitIntro, 12000);
+  } /* end _launchIntro */
 }
 
 /* ══════════════════════════════════════════
@@ -2429,10 +2522,63 @@ function initJarvisAgent() {
 }
 
 /* ══════════════════════════════════════════
-   SPEAK CUSTOM TEXT — redirige a jarvisAgentSpeak para voz unificada
+   SPEAK — voz para el asistente de página y el chatbot
+   • speakPageAssistant()  → reproduce jarvis-page.mp3 (voz enviada por el usuario)
+   • speakChatbotVoice(t)  → Web Speech robótico para respuestas dinámicas del chat
+   La intro del índice sigue usando jarvina-voz.mp3 (no cambia).
    ══════════════════════════════════════════ */
+
+/* Reproduce el clip de voz Jarvis para el asistente de página */
+function speakPageAssistant() {
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_) {}
+  try {
+    const a = new Audio('./audio/jarvis-page.mp3');
+    a.volume = 0.92;
+    window._pageVoiceAudio = a;
+    a.onended = () => { window._pageVoiceAudio = null; };
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {}); /* silencia bloqueo de autoplay */
+  } catch(e) {}
+}
+
+/* Web Speech con voz robótica para respuestas dinámicas del chatbot */
+function speakChatbotVoice(text) {
+  if (!window.speechSynthesis) return;
+  const clean = text.replace(/\[link:[^\]]+\]/g, '').replace(/\n+/g, '. ').trim();
+  const ph = clean
+    .replace(/Nexuss X Sistems/gi, 'Nexuss eks Systems')
+    .replace(/\bX\b/g, 'eks');
+  const sentence = ph.split(/[.!?]/)[0].trim() || ph.substring(0, 140);
+  if (!sentence) return;
+
+  function doSpeak(vs) {
+    const voice = vs.find(v => v.name === 'Microsoft Raúl Online (Natural) - Spanish (Mexico)')
+      || vs.find(v => v.name === 'Microsoft Rodrigo Online (Natural) - Spanish (Mexico)')
+      || vs.find(v => v.name === 'Microsoft Alvaro Online (Natural) - Spanish (Spain)')
+      || vs.find(v => /natural/i.test(v.name) && v.lang.startsWith('es'))
+      || vs.find(v => v.lang === 'es-MX')
+      || vs.find(v => v.lang.startsWith('es'))
+      || null;
+    const u = new SpeechSynthesisUtterance(sentence);
+    u.lang = voice ? voice.lang : 'es-MX';
+    u.rate = 0.90; u.pitch = 0.70; u.volume = 1.0;
+    if (voice) u.voice = voice;
+    u.onerror = () => {};
+    try { speechSynthesis.speak(u); } catch(_) {}
+  }
+
+  try { speechSynthesis.cancel(); } catch(_) {}
+  const vs = speechSynthesis.getVoices();
+  if (vs.length > 0) doSpeak(vs);
+  else {
+    speechSynthesis.addEventListener('voiceschanged',
+      () => doSpeak(speechSynthesis.getVoices()), { once: true });
+    setTimeout(() => { if (!speechSynthesis.speaking) doSpeak(speechSynthesis.getVoices()); }, 1000);
+  }
+}
+
 function speakCustomText(text) {
-  jarvisAgentSpeak(text);
+  speakChatbotVoice(text);
 }
 
 /* ══════════════════════════════════════════
@@ -2440,6 +2586,7 @@ function speakCustomText(text) {
    ══════════════════════════════════════════ */
 const PAGE_DESCRIPTIONS = {
   'index':       'Bienvenido a Nexuss X Sistems. Soy Jarvis, tu asistente. Aquí encontrarás información sobre nuestros servicios de desarrollo web e inteligencia artificial.',
+  'home':        'Bienvenido a Nexuss X Sistems. Soy Jarvis, tu asistente de inteligencia artificial. Explora nuestros servicios, el portafolio y todo lo que podemos hacer por tu negocio.',
   'servicios':   'Estás en la página de servicios. Aquí puedes explorar todo lo que Nexuss X Sistems ofrece: desde sitios web corporativos hasta chatbots con inteligencia artificial.',
   'contacto':    'Estás en la página de contacto. Envíanos un mensaje y nuestro equipo te responderá en menos de 24 horas.',
   'blog':        'Bienvenido al blog de Nexuss X Sistems. Aquí compartimos artículos, tutoriales y novedades de tecnología e inteligencia artificial.',
@@ -2510,8 +2657,8 @@ function showPageJarvis(text) {
     else { clearInterval(ti); }
   }, 26);
 
-  // Auto-speak using consistent Jarvis voice
-  speakCustomText(text);
+  // Reproduce el clip de voz Jarvis (jarvis-page.mp3)
+  speakPageAssistant();
 
   // Close logic
   const close = () => {
@@ -2519,6 +2666,7 @@ function showPageJarvis(text) {
     el.classList.add('pj-exit');
     setTimeout(() => { if (el.parentNode) el.remove(); }, 380);
     try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_){}
+    try { if (window._pageVoiceAudio) { window._pageVoiceAudio.pause(); window._pageVoiceAudio = null; } } catch(_){}
   };
   document.getElementById('pjClose').addEventListener('click', close);
   setTimeout(close, 7500);
@@ -2566,22 +2714,17 @@ function removeRobotWhiteBg() {
        • colores/dark (<0.6)    → α ≥ 1   → completamente opaco✓
   ──────────────────────────────────────────────────────────────────── */
   if (!document.getElementById('jarvis-svg-defs')) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.id = 'jarvis-svg-defs';
-    svg.setAttribute('aria-hidden', 'true');
-    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
-    svg.innerHTML = `<defs>
-      <filter id="jarvis-rm-white" color-interpolation-filters="sRGB">
-        <feColorMatrix type="matrix" values="
-          1  0  0  0  0
-          0  1  0  0  0
-          0  0  1  0  0
-         -2 -2 -2  0  5"/>
-      </filter>
-    </defs>`;
-    document.body.insertBefore(svg, document.body.firstChild);
+    /* insertAdjacentHTML parsea el SVG en contexto HTML5 — más fiable que createElementNS */
+    document.body.insertAdjacentHTML('afterbegin',
+      '<svg id="jarvis-svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"' +
+      ' style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none">' +
+      '<defs><filter id="jarvis-rm-white" color-interpolation-filters="sRGB">' +
+      '<feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -2 -2 -2 0 5"/>' +
+      '</filter></defs></svg>'
+    );
   }
-  img.style.filter = 'url(#jarvis-rm-white)';
+  /* setProperty con 'important' sobrescribe filter:none!important del CSS */
+  img.style.setProperty('filter', 'url(#jarvis-rm-white)', 'important');
 
   /* ── Método 2: Canvas pixel-a-pixel ──────────────────────────────────
      Más preciso (tiene en cuenta saturación).
@@ -2619,7 +2762,28 @@ function removeRobotWhiteBg() {
   else img.addEventListener('load', process);
 }
 
+/* ══════════════════════════════════════════
+   PRE-LOADER — cicla mensajes de estado
+   ══════════════════════════════════════════ */
+function bindPreloader() {
+  const el = document.getElementById('plStatus');
+  if (!el) return;
+  const msgs = [
+    'INITIALIZING SYSTEM',
+    'LOADING AI MODULES',
+    'CONNECTING SECURE CHANNEL',
+    'SYSTEM READY'
+  ];
+  let i = 0;
+  const iv = setInterval(() => {
+    i++;
+    if (i >= msgs.length) { clearInterval(iv); return; }
+    el.textContent = msgs[i];
+  }, 460);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  bindPreloader();
   const lang = getLang();
   applyI18n(lang);
   bindLangToggle();

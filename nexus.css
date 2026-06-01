@@ -1090,10 +1090,10 @@ header{isolation:auto}
   animation: introFadeUp 0.7s 1.0s both, introGlitch 5s 3s infinite !important;
 }
 
-/* ── LOGO: remove white background via blend mode ── */
+/* ── LOGO: glow effect ── */
 .brand-logo {
-  mix-blend-mode: screen !important;
-  filter: drop-shadow(0 0 10px rgba(121,38,255,0.6)) drop-shadow(0 0 20px rgba(0,212,255,0.3)) !important;
+  mix-blend-mode: normal !important;
+  filter: drop-shadow(0 0 8px rgba(0,212,255,0.5)) drop-shadow(0 0 18px rgba(121,38,255,0.3)) !important;
   background: transparent !important;
 }
 .logo-blend {

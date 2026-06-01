@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title id="pageTitle">Blog — Nexuss X Sistems</title>
+  <meta name="description" id="pageDesc" content="Artículo del blog de Nexuss X Sistems sobre desarrollo web, IA y marketing digital." />
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    /* ── Blog post layout ─────────────────────────────── */
+    .post-hero {
+      position: relative; overflow: hidden; border-radius: 20px;
+      margin: 32px 0; max-height: 420px;
+    }
+    .post-hero img {
+      width: 100%; height: 420px; object-fit: cover;
+      display: block;
+      filter: brightness(0.75);
+    }
+    .post-hero-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 24px 28px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    }
+    .post-hero-cat {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      background: rgba(0,212,255,0.18); border: 1px solid rgba(0,212,255,0.35);
+      color: #00d4ff; font-size: .75rem; letter-spacing: .08em;
+      margin-bottom: 8px;
+    }
+    .post-title {
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 800; line-height: 1.2;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      margin: 0;
+    }
+
+    /* article body */
+    .post-layout {
+      display: grid;
+      grid-template-columns: 1fr min(260px, 28%);
+      gap: 40px;
+      margin-top: 36px;
+    }
+    @media (max-width:768px) {
+      .post-layout { grid-template-columns: 1fr; }
+      .post-sidebar { order: -1; }
+    }
+
+    .post-meta-bar {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      align-items: center; margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-size: .85rem; color: var(--muted);
+    }
+    .post-meta-bar strong { color: rgba(255,255,255,0.8); }
+
+    .post-body { line-height: 1.8; color: rgba(255,255,255,0.88); }
+    .post-body h2 {
+      font-size: 1.35rem; margin: 36px 0 12px;
+      color: #fff;
+    }
+    .post-body h3 {
+      font-size: 1.1rem; margin: 28px 0 10px;
+      color: rgba(0,212,255,0.9);
+    }
+    .post-body p { margin: 0 0 18px; }
+    .post-body ul, .post-body ol {
+      margin: 0 0 18px; padding-left: 22px;
+    }
+    .post-body li { margin-bottom: 8px; }
+    .post-body strong { color: #00d4ff; }
+    .post-body blockquote {
+      margin: 24px 0; padding: 14px 18px;
+      border-left: 3px solid rgba(0,212,255,0.5);
+      background: rgba(0,212,255,0.04);
+      border-radius: 0 10px 10px 0;
+      color: rgba(0,212,255,0.85);
+      font-style: italic;
+    }
+    .post-body .highlight-box {
+      background: rgba(0,212,255,0.06);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 12px;
+      padding: 18px 20px; margin: 24px 0;
+    }
+    .post-body .highlight-box .hb-title {
+      font-weight: 700; color: #00d4ff;
+      margin-bottom: 8px; font-size: .9rem;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+
+    /* sidebar */
+    .post-sidebar { position: sticky; top: 90px; align-self: start; }
+    .sidebar-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding: 20px;
+      margin-bottom: 20px;
+    }
+    .sidebar-card h4 {
+      font-size: .85rem; text-transform: uppercase;
+      letter-spacing: .08em; color: rgba(0,212,255,0.7);
+      margin: 0 0 14px;
+    }
+    .related-post {
+      display: flex; gap: 10px; align-items: flex-start;
+      margin-bottom: 12px; text-decoration: none;
+      transition: opacity .2s;
+    }
+    .related-post:hover { opacity: 0.75; }
+    .related-post img {
+      width: 52px; height: 52px; border-radius: 8px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .related-post .rp-title {
+      font-size: .8rem; color: rgba(255,255,255,0.8);
+      line-height: 1.4;
+    }
+    .related-post .rp-date {
+      font-size: .7rem; color: var(--muted); margin-top: 3px;
+    }
+
+    /* share */
+    .share-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 28px; padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .post-nav {
+      display: flex; justify-content: space-between; gap: 16px;
+      margin-top: 40px; padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .post-nav a { font-size: .85rem; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .post-nav a:hover { color: #00d4ff; }
+
+    /* 404 state */
+    #postNotFound { display: none; text-align: center; padding: 60px 0; }
+  </style>
+</head>
+<body data-requires-auth="true">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Sistems logo" />
+          Nexuss X Sistems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html" data-i18n="nav_home">Home</a>
+          <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+          <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+          <div class="nav-dropdown" id="ddRecursos">
+            <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="blog.html">Blog</a>
+              <a href="calculadora.html">Calculadora</a>
+              <a href="faq.html">FAQ</a>
+              <a href="sobre.html">Sobre nosotros</a>
+              <a href="trabajos.html">🗂 Portafolio</a>
+            </div>
+          </div>
+          <div class="nav-dropdown" id="ddPanel">
+            <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+            <div class="nav-dropdown-panel">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="timeline.html">Mi proyecto</a>
+              <a href="tickets.html">Soporte</a>
+              <a href="crm.html">CRM</a>
+              <a href="referidos.html">Referidos</a>
+            </div>
+          </div>
+          <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+          <a href="admin.html" data-i18n="nav_admin">Admin</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+          <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- breadcrumb -->
+    <div style="padding:18px 0 0;font-size:.82rem;color:var(--muted)">
+      <a href="home.html" style="color:var(--muted);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#00d4ff'" onmouseout="this.style.color=''">Home</a>
+      <span style="margin:0 8px;opacity:.4">›</span>
+      <a href="blog.html" style="color:var(--muted);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#00d4ff'" onmouseout="this.style.color=''">Blog</a>
+      <span style="margin:0 8px;opacity:.4">›</span>
+      <span id="breadcrumbTitle" style="color:rgba(255,255,255,0.6)">Artículo</span>
+    </div>
+
+    <!-- Hero image -->
+    <div class="post-hero" id="postHero">
+      <img id="heroImg" src="" alt="" />
+      <div class="post-hero-overlay">
+        <div class="post-hero-cat" id="heroCat">Blog</div>
+        <h1 class="post-title" id="heroTitle">Cargando artículo...</h1>
+      </div>
+    </div>
+
+    <!-- Not found -->
+    <div id="postNotFound">
+      <div style="font-size:3rem;margin-bottom:16px">📭</div>
+      <h2>Artículo no encontrado</h2>
+      <p class="muted">El artículo que buscas no existe o fue removido.</p>
+      <a href="blog.html" class="btn primary" style="margin-top:18px">Ver todos los artículos →</a>
+    </div>
+
+    <!-- Content layout -->
+    <div class="post-layout" id="postLayout">
+      <!-- Main content -->
+      <div>
+        <div class="post-meta-bar">
+          <span>📅 <strong id="metaDate">—</strong></span>
+          <span>✍️ <strong>Nexuss X Sistems</strong></span>
+          <span>⏱ <strong id="metaRead">5 min</strong> lectura</span>
+          <span id="metaCat" style="background:rgba(0,212,255,0.1);color:#00d4ff;padding:3px 10px;border-radius:20px;font-size:.76rem">—</span>
+        </div>
+        <div class="post-body" id="postBody">
+          <!-- content injected by JS -->
+        </div>
+        <div class="share-row">
+          <span style="color:var(--muted);font-size:.85rem;align-self:center">Compartir:</span>
+          <a id="shareWA" href="#" target="_blank" rel="noopener" class="btn" style="font-size:.8rem;padding:8px 14px">💬 WhatsApp</a>
+          <button id="copyLink" class="btn ghost" style="font-size:.8rem;padding:8px 14px">🔗 Copiar enlace</button>
+        </div>
+        <div class="post-nav">
+          <a href="blog.html">← Volver al Blog</a>
+          <a href="contacto.html">¿Necesitas ayuda? Contáctanos →</a>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="post-sidebar">
+        <div class="sidebar-card">
+          <h4>Artículos relacionados</h4>
+          <div id="relatedPosts"><!-- injected --></div>
+        </div>
+        <div class="sidebar-card" style="background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(121,38,255,0.06));border-color:rgba(0,212,255,0.2)">
+          <h4>¿Necesitas una solución?</h4>
+          <p style="font-size:.82rem;color:var(--muted);margin:0 0 14px;line-height:1.6">
+            Desarrollamos lo que necesitas: desde una landing page hasta un sistema completo con IA.
+          </p>
+          <a href="contacto.html" class="btn primary" style="width:100%;text-align:center;font-size:.82rem">Solicitar propuesta →</a>
+        </div>
+      </aside>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-band reveal" style="margin-top:48px;padding:36px 28px;text-align:center">
+      <span class="tag" style="margin-bottom:10px;display:inline-block;background:rgba(245,158,11,0.1);color:var(--gold);border-color:rgba(245,158,11,0.3)">✦ Aplica lo que aprendiste</span>
+      <h2>¿Listo para implementar esta estrategia en tu negocio?</h2>
+      <p class="muted" style="max-width:520px;margin:8px auto 0">Cuéntanos tu proyecto y diseñamos una solución a medida. Sin compromisos.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+        <a href="contacto.html" class="btn primary">Contáctame ahora</a>
+        <a href="servicios.html" class="btn">Ver servicios →</a>
+      </div>
+    </div>
+
+    <footer style="padding:40px 0 24px;margin-top:40px">
+      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+        <div class="muted" style="font-size:.78rem">© 2026 Nexuss X Sistems — Todos los derechos reservados</div>
+        <div style="display:flex;gap:16px">
+          <a href="blog.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">Blog</a>
+          <a href="faq.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">FAQ</a>
+          <a href="contacto.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">Contacto</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="nexus.js"></script>
+  <script>
+  /* ═══════════════════════════════════════════════════════
+     BLOG POST DATA — all 12 articles
+  ═══════════════════════════════════════════════════════ */
+  const POSTS = {
+    'landing-page-2026': {
+      title: '5 elementos que toda landing page necesita para convertir en 2026',
+      cat: '💻 Desarrollo Web', date: '10 abr, 2026', read: '6',
+      img: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>En 2026, los usuarios deciden en menos de <strong>3 segundos</strong> si quedan o abandonan una página. Si tu landing page no cumple los criterios básicos de conversión, estás perdiendo dinero en cada visita.</p>
+        <h2>1. Propuesta de valor clara en el primer scroll</h2>
+        <p>El visitante debe entender qué ofreces, para quién es y qué resultado obtendrá antes de mover el dedo. Esto se logra con un titular directo, un subtítulo que amplía el beneficio y un CTA visible sin hacer scroll.</p>
+        <blockquote>"No vendas el producto. Vende el resultado que el cliente ya desea."</blockquote>
+        <h2>2. Prueba social poderosa</h2>
+        <p>Los testimonios, logos de clientes, reseñas con foto y números reales (clientes atendidos, proyectos entregados, % de mejora) construyen confianza en segundos. En 2026, los videos testimonios de 30 segundos son el formato más efectivo.</p>
+        <h2>3. CTA único y repetido estratégicamente</h2>
+        <p>Una landing page con un solo objetivo convierte más que una con múltiples. Repite el mismo CTA en tres puntos: al inicio, al centro (después de la propuesta de valor) y al final. El botón debe tener un verbo de acción y especificar el beneficio: <em>"Quiero mi propuesta gratis"</em> funciona mejor que <em>"Enviar"</em>.</p>
+        <div class="highlight-box">
+          <div class="hb-title">Checklist de CTA efectivo</div>
+          <ul>
+            <li>Verbo de acción en primera persona</li>
+            <li>Menciona el beneficio, no la acción</li>
+            <li>Color que contraste con el fondo</li>
+            <li>Tamaño mínimo de 44px (accesibilidad táctil)</li>
+          </ul>
+        </div>
+        <h2>4. Velocidad de carga bajo 2 segundos</h2>
+        <p>Google prioriza páginas rápidas y los usuarios las abandonan si tardan más de 3s. Optimiza imágenes en WebP, usa CDN, reduce scripts y aplica lazy loading. Un Google PageSpeed Score mayor a 90 debe ser el objetivo mínimo.</p>
+        <h2>5. Diseño mobile-first real</h2>
+        <p>Más del 70% del tráfico llega desde smartphones en LATAM. No basta con hacer que "se vea bien" en móvil — el diseño debe pensarse para el dedo: botones grandes, texto legible sin zoom, formularios simples y sin fricciones de navegación.</p>
+        <p>Cuando todos estos elementos funcionan juntos, los resultados son significativos. En Nexuss X Sistems hemos construido landing pages que han logrado tasas de conversión de entre 8% y 22%, muy por encima del promedio del sector (2-4%).</p>
+      `
+    },
+    'chatbots-ia': {
+      title: 'Chatbots con IA: cómo entrenarlo con la información de tu negocio',
+      cat: '🤖 IA', date: '5 abr, 2026', read: '7',
+      img: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>Un chatbot genérico responde preguntas generales. Un chatbot entrenado con la información de tu empresa responde como el mejor vendedor que puedas contratar, disponible las 24 horas y sin descansos.</p>
+        <h2>¿Qué significa "entrenar" un chatbot con IA?</h2>
+        <p>A diferencia de los chatbots de reglas de hace una década, los modelos actuales como GPT-4 y Claude pueden procesar tu documentación, preguntas frecuentes, catálogo de productos y políticas de empresa para responder con precisión sobre cualquier tema relacionado con tu negocio.</p>
+        <h2>El método más efectivo: RAG (Retrieval-Augmented Generation)</h2>
+        <p>RAG es la técnica que permite a un modelo de IA buscar en tu base de conocimiento antes de responder. Funciona así:</p>
+        <ol>
+          <li>El cliente hace una pregunta al chatbot</li>
+          <li>El sistema busca en los documentos de tu empresa la información relevante</li>
+          <li>El modelo IA genera una respuesta usando esa información como contexto</li>
+          <li>El cliente recibe una respuesta precisa y personalizada</li>
+        </ol>
+        <h2>¿Qué información puede incluirse?</h2>
+        <ul>
+          <li>Catálogo completo de productos y servicios con precios</li>
+          <li>Políticas de devolución, garantías y envíos</li>
+          <li>Preguntas frecuentes del área de soporte</li>
+          <li>Scripts de ventas y argumentarios</li>
+          <li>Información de la empresa, historia y valores</li>
+        </ul>
+        <blockquote>"El chatbot más poderoso no es el más sofisticado, sino el que tiene el conocimiento correcto en el momento correcto."</blockquote>
+        <h2>Integración con WhatsApp y tu sitio web</h2>
+        <p>En Nexuss X Sistems conectamos el chatbot con la API de WhatsApp Business y como widget en el sitio web, para que el asistente esté disponible donde ya están tus clientes. También podemos integrarlo con tu CRM para registrar conversaciones y calificar leads automáticamente.</p>
+        <div class="highlight-box">
+          <div class="hb-title">Resultado típico de nuestros clientes</div>
+          <p>Reducción del 65% en tiempo de respuesta a clientes, aumento del 40% en leads calificados y disponibilidad 24/7 sin costo adicional por horario.</p>
+        </div>
+      `
+    },
+    'instagram-2026': {
+      title: 'El algoritmo de Instagram en 2026: qué funciona y qué ya no',
+      cat: '📱 Marketing Digital', date: '28 mar, 2026', read: '5',
+      img: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>Instagram ha cambiado radicalmente su algoritmo en los últimos 12 meses. Lo que funcionaba en 2024 puede estar destruyendo tu alcance hoy. Aquí el análisis actualizado.</p>
+        <h2>Lo que el algoritmo prioriza en 2026</h2>
+        <ul>
+          <li><strong>Tiempo de retención del video</strong>: El porcentaje de personas que ven tu reel completo es la señal más importante. Objetivo mínimo: 50%.</li>
+          <li><strong>Interacciones tempranas</strong>: Los primeros 30 minutos determinan si el contenido se distribuye más ampliamente. Responde comentarios en ese período.</li>
+          <li><strong>Uso de todas las funciones</strong>: Cuentas que usan Stories, Reels, Posts y Colabs de forma regular tienen mayor alcance orgánico.</li>
+          <li><strong>Frecuencia consistente</strong>: 4-5 veces por semana supera a publicar esporádicamente, aunque la calidad siempre gana sobre la cantidad.</li>
+        </ul>
+        <h2>Lo que ya no funciona</h2>
+        <ul>
+          <li>Pedir "dale me gusta y comenta" explícitamente (Instagram lo penaliza como engagement bait)</li>
+          <li>Hashtags en exceso: 5-8 relevantes rinden mejor que 30</li>
+          <li>Repostear contenido de otros sin valor añadido</li>
+          <li>Copiar audios virales sin adaptarlos a tu nicho</li>
+        </ul>
+        <blockquote>"Instagram no quiere que seas popular. Quiere que sus usuarios pasen más tiempo en la plataforma. Crea contenido que logre eso."</blockquote>
+        <h2>Formato ganador en 2026: el Reel educativo-entretenido</h2>
+        <p>El contenido que mezcla información valiosa con un gancho visual en los primeros 2 segundos domina el feed. El formato más efectivo: problema en el gancho, solución en el desarrollo, CTA suave al final.</p>
+        <div class="highlight-box">
+          <div class="hb-title">Estructura de reel que funciona</div>
+          <ol>
+            <li>0-2s: Gancho visual o afirmación que genera curiosidad</li>
+            <li>2-15s: Desarrollo con valor real (tip, dato, demostración)</li>
+            <li>15-25s: Cierre con lección o llamada a la acción</li>
+          </ol>
+        </div>
+      `
+    },
+    'automatizacion-zapier': {
+      title: 'Automatización con Zapier y Make: 7 flujos que te ahorran 20 horas a la semana',
+      cat: '🏢 Negocios', date: '20 mar, 2026', read: '8',
+      img: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>El tiempo es el único recurso no renovable de tu negocio. Estos 7 flujos de automatización eliminan las tareas repetitivas que consumen tus horas más productivas.</p>
+        <h2>Herramientas: Zapier vs Make (antes Integromat)</h2>
+        <p><strong>Zapier</strong> es ideal para integraciones simples entre apps populares, con una curva de aprendizaje baja. <strong>Make</strong> permite flujos más complejos con lógica condicional, iteraciones y procesamiento de datos, siendo más potente para negocios con procesos avanzados.</p>
+        <h2>7 flujos de automatización esenciales</h2>
+        <ol>
+          <li><strong>Formulario web → CRM + Email de bienvenida</strong>: Cuando alguien llena tu formulario, se crea el contacto en tu CRM y recibe un email automático de bienvenida en segundos. <em>Ahorro: 2h/semana</em></li>
+          <li><strong>Nueva venta → Notificación al equipo + Actualización de inventario</strong>: Cada venta dispara un mensaje a Slack/WhatsApp del equipo y descuenta el producto del inventario. <em>Ahorro: 3h/semana</em></li>
+          <li><strong>Google Sheets → Factura automática</strong>: Al agregar un cliente en la hoja, se genera y envía la factura por email. <em>Ahorro: 4h/semana</em></li>
+          <li><strong>Soporte por email → Ticket en Notion/Trello</strong>: Los emails de soporte crean tareas asignadas automáticamente. <em>Ahorro: 2h/semana</em></li>
+          <li><strong>Publicaciones en redes → Reportes semanales</strong>: Recopila métricas de Instagram, Facebook y TikTok en un Google Sheet cada semana. <em>Ahorro: 3h/semana</em></li>
+          <li><strong>Calendario → Recordatorios WhatsApp</strong>: 24h antes de cada reunión, el cliente recibe un mensaje de confirmación por WhatsApp. <em>Ahorro: 2h/semana</em></li>
+          <li><strong>Pagos → Onboarding automático</strong>: Al confirmar el pago, el cliente recibe acceso a su portal, el contrato digital y el primer email de onboarding. <em>Ahorro: 4h/semana</em></li>
+        </ol>
+        <blockquote>"Automatizar no es para las grandes empresas. Es para cualquier negocio que quiera crecer sin multiplicar su carga de trabajo."</blockquote>
+        <div class="highlight-box">
+          <div class="hb-title">Total estimado de ahorro</div>
+          <p>Implementando estos 7 flujos: <strong>20 horas semanales</strong> — el equivalente a medio empleado a tiempo completo, sin su costo.</p>
+        </div>
+      `
+    },
+    'panel-gestion-dashboard': {
+      title: 'Panel de gestión vs spreadsheets: por qué tu empresa necesita un dashboard propio',
+      cat: '💻 Desarrollo Web', date: '15 mar, 2026', read: '6',
+      img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>Si tu equipo todavía trabaja con 15 pestañas de Google Sheets abiertas para gestionar el negocio, es probable que estés perdiendo tiempo, cometiendo errores y tomando decisiones con información desactualizada.</p>
+        <h2>El límite de las hojas de cálculo</h2>
+        <ul>
+          <li>No escalan: al crecer el volumen de datos, se vuelven lentas e imposibles de mantener</li>
+          <li>No tienen control de acceso granular: todos ven todo, o nadie ve nada</li>
+          <li>No ofrecen notificaciones en tiempo real</li>
+          <li>Los errores de formato o fórmulas pueden costar caro</li>
+          <li>Dificultan la colaboración simultánea de múltiples usuarios</li>
+        </ul>
+        <h2>Lo que un panel de gestión personalizado resuelve</h2>
+        <p>Un dashboard construido a medida para tu negocio puede mostrar exactamente los KPIs que importan, en tiempo real, con acceso diferenciado por roles y notificaciones automáticas ante eventos críticos.</p>
+        <div class="highlight-box">
+          <div class="hb-title">Funcionalidades típicas de un panel de gestión</div>
+          <ul>
+            <li>Vista de ventas, leads y conversión en tiempo real</li>
+            <li>Gestión de inventario con alertas de stock bajo</li>
+            <li>Reportes automáticos exportables a PDF o CSV</li>
+            <li>Control de proyectos y tareas por equipo</li>
+            <li>Historial de clientes y seguimiento de interacciones</li>
+          </ul>
+        </div>
+        <h2>¿Cuándo es el momento de dar el salto?</h2>
+        <p>Si tu equipo tiene más de 3 personas, si manejas más de 50 clientes activos o si tus procesos requieren coordinación entre áreas, ya es tiempo de invertir en un sistema propio. El ROI generalmente se recupera en los primeros 3 meses.</p>
+        <blockquote>"Una empresa que toma decisiones con datos en tiempo real actúa más rápido que su competencia. La velocidad es la ventaja competitiva del siglo XXI."</blockquote>
+      `
+    },
+    'seo-ia-2026': {
+      title: 'SEO en 2026: cómo posicionar tu sitio en Google con inteligencia artificial',
+      cat: '📱 Marketing', date: '8 mar, 2026', read: '7',
+      img: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>El SEO en 2026 es fundamentalmente diferente al de hace tres años. La llegada de las respuestas generadas por IA en Google ha cambiado las reglas del juego, pero también ha abierto nuevas oportunidades para quienes entienden cómo adaptarse.</p>
+        <h2>El impacto de AI Overviews en el tráfico orgánico</h2>
+        <p>Las respuestas generativas de Google (AI Overviews) han reducido el CTR para búsquedas informativas simples. Sin embargo, las búsquedas con intención transaccional y las queries de cola larga siguen generando alto tráfico a sitios especializados.</p>
+        <h2>Las 5 estrategias SEO que dominan en 2026</h2>
+        <ol>
+          <li><strong>E-E-A-T amplificado</strong>: Google prioriza contenido de autores con experiencia demostrable en el tema. Crea perfiles de autor con credenciales reales y menciones externas.</li>
+          <li><strong>Contenido profundo vs contenido amplio</strong>: Un artículo de 2,500 palabras que responde una pregunta específica en profundidad supera a 10 artículos superficiales.</li>
+          <li><strong>Optimización para búsquedas conversacionales</strong>: La gente busca en lenguaje natural. Incluye preguntas completas y sus respuestas en el contenido.</li>
+          <li><strong>Core Web Vitals perfectos</strong>: LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1. No es opcional.</li>
+          <li><strong>SEO semántico y autoridad temática</strong>: Crea clusters de contenido alrededor de un tema central, enlazando artículos relacionados entre sí.</li>
+        </ol>
+        <div class="highlight-box">
+          <div class="hb-title">Herramientas IA para SEO que recomendamos</div>
+          <ul>
+            <li>Semrush AI: análisis de competencia y gaps de contenido</li>
+            <li>Clearscope: optimización semántica del contenido</li>
+            <li>RankMath AI: sugerencias de optimización on-page en tiempo real</li>
+          </ul>
+        </div>
+        <blockquote>"El SEO ya no es sobre engañar al algoritmo. Es sobre ser genuinamente el mejor resultado para la intención del usuario."</blockquote>
+      `
+    },
+    'presencia-digital-perdidas': {
+      title: '¿Cuánto pierde tu negocio por no tener presencia digital profesional?',
+      cat: '🏢 Negocios', date: '1 mar, 2026', read: '5',
+      img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>El 81% de los consumidores investiga en internet antes de realizar una compra. Si tu negocio no aparece — o aparece con una presencia poco profesional — estás cediendo clientes a tu competencia todos los días.</p>
+        <h2>El costo real de no tener un sitio web profesional</h2>
+        <p>Para un negocio que genera DOP 300,000 mensuales, si pierde el 20% de clientes potenciales por no tener presencia digital confiable, eso equivale a <strong>DOP 60,000 mensuales perdidos</strong>, o más de <strong>DOP 720,000 al año</strong>.</p>
+        <h2>Señales de que tu presencia digital está dañando tu negocio</h2>
+        <ul>
+          <li>Clientes piden referencias pero "no encuentran nada en Google"</li>
+          <li>Sitio web que no abre correctamente en móvil</li>
+          <li>Sin reseñas en Google Maps o perfil incompleto</li>
+          <li>Redes sociales sin publicar hace más de 2 semanas</li>
+          <li>Formulario de contacto que no funciona</li>
+          <li>Información de contacto desactualizada</li>
+        </ul>
+        <h2>La solución no siempre es cara</h2>
+        <p>Una landing page profesional optimizada puede construirse entre DOP 12,000 y DOP 25,000 y generar retorno de inversión en el primer mes si está bien estructurada. El costo de no tenerla es siempre mayor que el costo de construirla.</p>
+        <div class="highlight-box">
+          <div class="hb-title">Inversión mínima vs ROI estimado (6 meses)</div>
+          <ul>
+            <li>Landing page básica (DOP 12,000) → conversión estimada: +8 clientes/mes</li>
+            <li>Sitio empresarial completo (DOP 28,000) → autoridad de marca + SEO local</li>
+            <li>Chatbot IA (DOP 18,000) → atención 24/7 sin costo adicional de personal</li>
+          </ul>
+        </div>
+        <blockquote>"No tener presencia digital profesional no es un ahorro — es una inversión en perder clientes."</blockquote>
+      `
+    },
+    'ia-contenido-marketing': {
+      title: 'Cómo usar Claude y ChatGPT para crear contenido de marketing que vende',
+      cat: '🤖 IA', date: '22 feb, 2026', read: '6',
+      img: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>La IA no reemplaza al marketer creativo, pero multiplica por 10 su capacidad de producción. El problema es que la mayoría usa estas herramientas de forma básica y obtiene resultados genéricos. Aquí cómo hacerlo correctamente.</p>
+        <h2>El error más común: prompts vagos</h2>
+        <p>"Escríbeme un post para Instagram sobre mi negocio" produce contenido sin personalidad. La calidad del output depende directamente de la calidad del input.</p>
+        <h2>Estructura de un prompt efectivo para marketing</h2>
+        <div class="highlight-box">
+          <div class="hb-title">Fórmula CARE para prompts de marketing</div>
+          <ul>
+            <li><strong>C</strong>ontexto: "Soy una empresa de desarrollo web en República Dominicana, especializada en PYMES..."</li>
+            <li><strong>A</strong>udiencia: "Mi cliente ideal es dueño de negocio entre 35-55 años que quiere digitalizar su empresa..."</li>
+            <li><strong>R</strong>esultado: "Necesito un post de Instagram que genere consultas sobre landing pages..."</li>
+            <li><strong>E</strong>structura: "Formato: gancho + problema + solución + CTA. Tono: profesional pero cercano. 150 palabras."</li>
+          </ul>
+        </div>
+        <h2>5 usos de IA para marketing que generan resultados reales</h2>
+        <ol>
+          <li><strong>Email sequences</strong>: Genera 5-7 emails de nurturing para leads fríos con un solo prompt bien estructurado</li>
+          <li><strong>Variaciones de CTA</strong>: Pide 10 versiones del botón de compra y prueba cuál convierte mejor</li>
+          <li><strong>Scripts de video</strong>: Reels y YouTube Shorts con estructura probada en segundos</li>
+          <li><strong>Análisis de competidores</strong>: Describe a tu competidor y pide identificar ángulos de diferenciación</li>
+          <li><strong>Respuestas a reseñas</strong>: Templates personalizados para responder positivas y negativas</li>
+        </ol>
+        <blockquote>"ChatGPT y Claude son los mejores asistentes de marketing que existen, pero necesitan instrucciones de un experto para brillar."</blockquote>
+        <h2>Claude vs ChatGPT para marketing en 2026</h2>
+        <p>Claude es superior para textos largos, persuasión emocional y análisis de copy. ChatGPT destaca en brainstorming, estructuras de contenido y variaciones rápidas. Lo ideal es usar ambos para diferentes etapas del proceso creativo.</p>
+      `
+    },
+    'wordpress-vs-custom': {
+      title: '¿WordPress o desarrollo a medida? La guía definitiva para 2026',
+      cat: '💻 Desarrollo Web', date: '15 feb, 2026', read: '7',
+      img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>Esta es probablemente la pregunta más frecuente que recibimos de dueños de negocio que quieren construir su presencia digital. La respuesta correcta depende de factores específicos de tu empresa.</p>
+        <h2>WordPress en 2026: lo bueno y lo malo</h2>
+        <p><strong>Ventajas:</strong></p>
+        <ul>
+          <li>Bajo costo inicial (desde DOP 8,000)</li>
+          <li>Gran ecosistema de plugins y temas</li>
+          <li>Fácil de editar por no-técnicos</li>
+          <li>CMS robusto para blogs y contenido</li>
+        </ul>
+        <p><strong>Desventajas:</strong></p>
+        <ul>
+          <li>Velocidad limitada sin optimización agresiva</li>
+          <li>Actualizaciones y mantenimiento constante</li>
+          <li>Vulnerabilidades de seguridad frecuentes</li>
+          <li>Personalización limitada sin desarrollo custom</li>
+          <li>Costos de plugins premium pueden acumularse</li>
+        </ul>
+        <h2>Desarrollo a medida: cuándo vale la inversión</h2>
+        <p>Un sitio construido desde cero ofrece performance superior, seguridad controlada, integraciones personalizadas y escalabilidad sin límites. La inversión es mayor (desde DOP 25,000) pero el costo total de propiedad a 2-3 años suele ser comparable o inferior.</p>
+        <div class="highlight-box">
+          <div class="hb-title">Regla de decisión rápida</div>
+          <ul>
+            <li>Blog/contenido/portafolio → WordPress</li>
+            <li>Landing page de ventas → Desarrollo custom o constructores especializados</li>
+            <li>Sistema/panel/automatizaciones → Desarrollo a medida</li>
+            <li>E-commerce básico → WordPress + WooCommerce</li>
+            <li>E-commerce con lógica compleja → Desarrollo custom</li>
+          </ul>
+        </div>
+        <blockquote>"La pregunta no es qué tecnología usar. Es qué tecnología te permite lograr tus objetivos de negocio al menor costo total."</blockquote>
+      `
+    },
+    'rag-chatbot': {
+      title: 'RAG: La técnica que hace que tu chatbot responda como un experto real',
+      cat: '🤖 IA', date: '8 feb, 2026', read: '8',
+      img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>Retrieval-Augmented Generation (RAG) es la arquitectura que está detrás de los chatbots empresariales más avanzados del mundo. Y ahora está al alcance de cualquier negocio de LATAM.</p>
+        <h2>¿Qué es RAG y por qué importa?</h2>
+        <p>Los modelos de IA como GPT-4 o Claude tienen un conocimiento de corte: todo lo que aprendieron hasta cierta fecha, pero nada sobre tu empresa específica. RAG resuelve esto conectando el modelo con una base de conocimiento actualizable que puede consultarse en tiempo real antes de generar cada respuesta.</p>
+        <h2>Cómo funciona RAG en 4 pasos</h2>
+        <ol>
+          <li><strong>Indexación</strong>: Tus documentos (PDFs, páginas web, Google Docs, bases de datos) se procesan y convierten en embeddings vectoriales</li>
+          <li><strong>Almacenamiento</strong>: Los vectores se guardan en una base de datos especializada (Pinecone, Qdrant, Weaviate)</li>
+          <li><strong>Recuperación</strong>: Cuando llega una pregunta, el sistema busca los fragmentos más relevantes de tu documentación</li>
+          <li><strong>Generación</strong>: El modelo IA genera una respuesta usando esos fragmentos como contexto, citando fuentes cuando corresponde</li>
+        </ol>
+        <h2>Casos de uso reales en empresas LATAM</h2>
+        <ul>
+          <li><strong>Clínica médica</strong>: Chatbot que responde sobre tratamientos, precios y disponibilidad de médicos usando el catálogo interno</li>
+          <li><strong>Inmobiliaria</strong>: Asistente que describe propiedades, calcula cuotas y agenda visitas basándose en el inventario actualizado</li>
+          <li><strong>E-commerce</strong>: Bot que recomienda productos según el historial del cliente y responde sobre stock y envíos</li>
+          <li><strong>Empresa de servicios</strong>: Soporte técnico automatizado que responde usando los manuales y guías internas</li>
+        </ul>
+        <div class="highlight-box">
+          <div class="hb-title">Stack tecnológico que usamos en Nexuss X Sistems</div>
+          <ul>
+            <li>Modelo: Claude (Anthropic) o GPT-4o (OpenAI)</li>
+            <li>Vector DB: Pinecone o Supabase pgvector</li>
+            <li>Framework: LangChain / LlamaIndex</li>
+            <li>Interfaz: WhatsApp API + widget web personalizado</li>
+          </ul>
+        </div>
+        <blockquote>"RAG convierte un modelo genérico de IA en el experto más informado de tu industria — sin reentrenamiento, sin costos millonarios."</blockquote>
+      `
+    },
+    'email-marketing-secuencias': {
+      title: 'Email marketing en 2026: las 6 secuencias automáticas que generan más ventas',
+      cat: '📱 Marketing Digital', date: '1 feb, 2026', read: '6',
+      img: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>El email marketing tiene un ROI promedio de $36 por cada $1 invertido según estudios recientes, superando a cualquier otro canal digital. Pero solo si se hace con secuencias estratégicas, no con envíos masivos y aleatorios.</p>
+        <h2>Por qué las secuencias automáticas ganan a los newsletters</h2>
+        <p>Un newsletter se envía a todos por igual. Una secuencia de email responde al comportamiento individual: si alguien descargó tu guía, abrió tu precio o abandonó el carrito, recibe una secuencia específica para esa acción. La personalización multiplica las conversiones.</p>
+        <h2>Las 6 secuencias esenciales</h2>
+        <ol>
+          <li><strong>Secuencia de bienvenida (5 emails, 7 días)</strong>: Presenta tu marca, ofrece valor inmediato, construye confianza antes de vender.</li>
+          <li><strong>Secuencia de nurturing de leads fríos (8 emails, 30 días)</strong>: Educa, resuelve objeciones y construye urgencia gradualmente.</li>
+          <li><strong>Secuencia post-cotización (4 emails, 5 días)</strong>: Cuando alguien pide precio, esta secuencia cierra ventas con casos de éxito y garantías.</li>
+          <li><strong>Secuencia de reactivación (3 emails)</strong>: Para suscriptores inactivos hace +90 días. Reactivar el 5% puede generar ventas significativas.</li>
+          <li><strong>Secuencia de onboarding de clientes (6 emails, 14 días)</strong>: Reduce el churn y aumenta la satisfacción desde el primer día.</li>
+          <li><strong>Secuencia de upsell y referidos (4 emails)</strong>: Clientes satisfechos son el mejor canal de venta. Esta secuencia los activa.</li>
+        </ol>
+        <div class="highlight-box">
+          <div class="hb-title">Métricas objetivo en email marketing 2026</div>
+          <ul>
+            <li>Tasa de apertura promedio: 35-45% (industria: 21%)</li>
+            <li>Tasa de clics: 4-8% (industria: 2.3%)</li>
+            <li>Tasa de baja: &lt;0.3% (señal de lista saludable)</li>
+          </ul>
+        </div>
+        <blockquote>"El dinero está en la lista, pero las ventas están en las secuencias."</blockquote>
+      `
+    },
+    'negocio-digital-escalamiento': {
+      title: 'De 0 a 6 cifras: cómo estructurar tu negocio digital para escalar sin caos',
+      cat: '🏢 Negocios', date: '25 ene, 2026', read: '9',
+      img: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=1200&q=80',
+      body: `
+        <p>La diferencia entre un emprendimiento que llega a 6 cifras y uno que se estanca no es el talento ni la dedicación. Es la <strong>estructura de sistemas</strong> que permite operar y crecer sin que el dueño esté presente en cada tarea.</p>
+        <h2>Fase 1 (0 – DOP 50,000/mes): Validación y primeros sistemas</h2>
+        <p>En esta fase el objetivo es validar que la propuesta de valor tiene demanda y construir los sistemas mínimos: CRM básico, proceso de ventas documentado, método de entrega definido.</p>
+        <ul>
+          <li>Herramienta: Notion o Trello para gestión de proyectos</li>
+          <li>CRM: HubSpot Free o Pipedrive</li>
+          <li>Pagos: PayPal, Stripe o pago por transferencia</li>
+          <li>Comunicación: WhatsApp Business con respuestas rápidas configuradas</li>
+        </ul>
+        <h2>Fase 2 (DOP 50,000 – 200,000/mes): Automatización y delegación</h2>
+        <p>Aquí el crecimiento se detiene si el dueño es el cuello de botella. Los sistemas clave:</p>
+        <ul>
+          <li>Automatización de onboarding de clientes (Zapier + email marketing)</li>
+          <li>Chatbot para soporte de primer nivel</li>
+          <li>Panel de gestión con KPIs visibles en tiempo real</li>
+          <li>Procesos documentados (SOPs) para delegar tareas repetitivas</li>
+        </ul>
+        <h2>Fase 3 (DOP 200,000+/mes): Escala con infraestructura digital</h2>
+        <p>A este nivel, la tecnología es la ventaja competitiva. Inversiones clave:</p>
+        <ul>
+          <li>Sistema de CRM enterprise con pipeline automatizado</li>
+          <li>Dashboard ejecutivo para tomar decisiones basadas en datos</li>
+          <li>Integraciones entre todas las herramientas (single source of truth)</li>
+          <li>IA para análisis predictivo de clientes y ventas</li>
+        </ul>
+        <div class="highlight-box">
+          <div class="hb-title">La regla del 80/20 para escalar</div>
+          <p>Identifica el 20% de tus actividades que generan el 80% de tus ingresos. Sistematiza esas actividades primero. El resto puede delegarse, automatizarse o eliminarse.</p>
+        </div>
+        <blockquote>"Un negocio exitoso no depende del dueño. Depende de los sistemas que el dueño construyó."</blockquote>
+        <p>En Nexuss X Sistems ayudamos a negocios en todas las fases a construir la infraestructura digital que necesitan para pasar al siguiente nivel. Desde una landing page que convierte hasta un sistema completo con IA y automatizaciones.</p>
+      `
+    }
+  };
+
+  /* ── Render post ─────────────────────────────────── */
+  function renderPost() {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+    const post = slug ? POSTS[slug] : null;
+
+    if (!post) {
+      document.getElementById('postHero').style.display = 'none';
+      document.getElementById('postLayout').style.display = 'none';
+      document.getElementById('postNotFound').style.display = 'block';
+      return;
+    }
+
+    // <title> and meta
+    document.getElementById('pageTitle').textContent = post.title + ' — Blog Nexuss X Sistems';
+    document.getElementById('pageDesc').setAttribute('content', post.body.replace(/<[^>]+>/g,'').slice(0,160));
+
+    // hero
+    document.getElementById('heroImg').src = post.img;
+    document.getElementById('heroImg').alt = post.title;
+    document.getElementById('heroCat').textContent = post.cat;
+    document.getElementById('heroTitle').textContent = post.title;
+
+    // breadcrumb
+    document.getElementById('breadcrumbTitle').textContent = post.title.slice(0,50) + '...';
+
+    // meta bar
+    document.getElementById('metaDate').textContent = post.date;
+    document.getElementById('metaRead').textContent = post.read + ' min';
+    document.getElementById('metaCat').textContent = post.cat;
+
+    // body
+    document.getElementById('postBody').innerHTML = post.body;
+
+    // share links
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(post.title);
+    document.getElementById('shareWA').href = 'https://wa.me/?text=' + title + '%20' + url;
+    document.getElementById('copyLink').addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        document.getElementById('copyLink').textContent = '✓ Copiado!';
+        setTimeout(() => { document.getElementById('copyLink').textContent = '🔗 Copiar enlace'; }, 2000);
+      });
+    });
+
+    // related posts (3 random excluding current)
+    const others = Object.entries(POSTS).filter(([s]) => s !== slug).sort(() => Math.random() - 0.5).slice(0,3);
+    document.getElementById('relatedPosts').innerHTML = others.map(([s, p]) => `
+      <a href="blog-post.html?slug=${s}" class="related-post">
+        <img src="${p.img}" alt="${p.title}" />
+        <div><div class="rp-title">${p.title}</div><div class="rp-date">${p.date}</div></div>
+      </a>
+    `).join('');
+  }
+
+  renderPost();
+  </script>
+</body>
+</html>
