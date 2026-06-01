@@ -1525,36 +1525,7 @@ function bindCinematicIntro() {
 
   function _launchIntro() {
     if (plEl) { plEl.style.display = 'none'; }
-
-    // ── TAP-TO-ENTER gate (unlocks audio autoplay) ──────────────────
-    const gate = document.createElement('div');
-    gate.id = 'nxs-gate';
-    gate.style.cssText = 'position:fixed;inset:0;z-index:99998;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;';
-    gate.innerHTML = `
-      <style>
-        @keyframes gatePulse{0%,100%{box-shadow:0 0 30px #00d4ff,0 0 80px rgba(0,212,255,.3)}50%{box-shadow:0 0 60px #00d4ff,0 0 140px rgba(0,212,255,.5)}}
-        @keyframes gateRing{to{transform:rotate(360deg)}}
-        #nxs-gate-btn{background:transparent;border:2px solid #00d4ff;color:#00d4ff;font-family:'Arial Black',Arial;font-size:1rem;letter-spacing:4px;padding:18px 48px;border-radius:10px;cursor:pointer;text-transform:uppercase;animation:gatePulse 2s ease-in-out infinite;transition:background .2s,color .2s;}
-        #nxs-gate-btn:hover{background:#00d4ff;color:#000;}
-      </style>
-      <div style="position:relative;width:110px;height:110px;margin-bottom:32px">
-        <div style="position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(0,212,255,.5);animation:gateRing 4s linear infinite"></div>
-        <img src="logo.jpeg" alt="" style="width:80px;height:80px;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);object-fit:cover"/>
-      </div>
-      <div style="font-family:'Arial Black',Arial;font-size:clamp(1.4rem,4vw,2.2rem);letter-spacing:6px;color:#fff;text-shadow:0 0 20px rgba(0,212,255,.7);margin-bottom:8px">NEXUSS <em style="color:#00d4ff;font-style:normal">X</em> SISTEMS</div>
-      <div style="font-size:.7rem;letter-spacing:3px;color:rgba(0,212,255,.6);margin-bottom:40px">SOLUCIONES DIGITALES · LATAM</div>
-      <button id="nxs-gate-btn">▶ &nbsp; ENTRAR AL SISTEMA</button>
-      <div style="margin-top:20px;font-size:.65rem;color:rgba(255,255,255,.25);letter-spacing:2px">TAP ANYWHERE TO CONTINUE</div>`;
-    document.body.prepend(gate);
-
-    const doEnter = () => {
-      if (gate._entered) return; gate._entered = true;
-      gate.style.transition = 'opacity .5s'; gate.style.opacity = '0';
-      setTimeout(() => gate.remove(), 500);
-      _startIntro();
-    };
-    gate.addEventListener('click', doEnter);
-    document.addEventListener('keydown', doEnter, { once: true });
+    _startIntro();
   }
 
   function _startIntro() {

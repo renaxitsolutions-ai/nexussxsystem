@@ -49,6 +49,52 @@
 </head>
 <body>
 
+  <!-- ══ GATE — aparece al instante, desbloquea audio autoplay ══ -->
+  <div id="nxs-gate" style="position:fixed;inset:0;z-index:100000;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;">
+    <style>
+      @keyframes gateRing{to{transform:rotate(360deg)}}
+      @keyframes gatePulse{0%,100%{box-shadow:0 0 32px #00d4ff,0 0 90px rgba(0,212,255,.3)}50%{box-shadow:0 0 64px #00d4ff,0 0 160px rgba(0,212,255,.55)}}
+      @keyframes gateScan{0%{top:-40%}100%{top:110%}}
+      #nxs-gate-btn{background:transparent;border:2px solid #00d4ff;color:#00d4ff;font-family:'Arial Black',Arial;font-size:1.05rem;letter-spacing:5px;padding:20px 54px;border-radius:12px;cursor:pointer;text-transform:uppercase;animation:gatePulse 2.2s ease-in-out infinite;transition:background .2s,color .2s,transform .15s;margin-top:36px;}
+      #nxs-gate-btn:hover,#nxs-gate-btn:active{background:#00d4ff;color:#000;transform:scale(1.04);}
+    </style>
+    <!-- scanline effect -->
+    <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+      <div style="position:absolute;left:0;right:0;height:40%;background:linear-gradient(transparent,rgba(0,212,255,.04),transparent);animation:gateScan 4s linear infinite"></div>
+    </div>
+    <!-- logo ring -->
+    <div style="position:relative;width:120px;height:120px;margin-bottom:28px">
+      <div style="position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(0,212,255,.5);animation:gateRing 5s linear infinite"></div>
+      <div style="position:absolute;inset:-14px;border-radius:50%;border:1px solid rgba(121,38,255,.3);animation:gateRing 8s linear infinite reverse"></div>
+      <img src="logo.jpeg" alt="Nexuss X Sistems" style="width:86px;height:86px;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);object-fit:cover;border:2px solid rgba(0,212,255,.4)"/>
+    </div>
+    <div style="font-family:'Arial Black',Arial;font-size:clamp(1.5rem,5vw,2.4rem);letter-spacing:7px;color:#fff;text-shadow:0 0 24px rgba(0,212,255,.8)">NEXUSS <em style="color:#00d4ff;font-style:normal">X</em> SISTEMS</div>
+    <div style="font-size:.68rem;letter-spacing:4px;color:rgba(0,212,255,.55);margin-top:6px">SOLUCIONES DIGITALES · LATAM</div>
+    <button id="nxs-gate-btn">&#9654;&nbsp;&nbsp;ENTRAR AL SISTEMA</button>
+    <div style="margin-top:18px;font-size:.6rem;letter-spacing:3px;color:rgba(255,255,255,.2)">TAP ANYWHERE · CLICK TO CONTINUE</div>
+  </div>
+  <script>
+    (function(){
+      var gate = document.getElementById('nxs-gate');
+      function enter(){
+        if(gate._done)return; gate._done=true;
+        // Unlock Web Audio API with silent buffer (primes audio for Jarvis)
+        try {
+          var ac = new (window.AudioContext||window.webkitAudioContext)();
+          var buf = ac.createBuffer(1,1,22050);
+          var src = ac.createBufferSource(); src.buffer=buf;
+          src.connect(ac.destination); src.start(0);
+          window._nxsAudioCtxPrimed = ac;
+        } catch(e){}
+        window._nxsGateClicked = true;
+        gate.style.transition='opacity .6s'; gate.style.opacity='0';
+        setTimeout(function(){gate.style.display='none';},600);
+      }
+      gate.addEventListener('click',enter);
+      document.addEventListener('keydown',enter,{once:true});
+    })();
+  </script>
+
   <!-- ══ PRE-LOADER ══ -->
   <div id="nxs-preloader">
     <div class="pl-scanlines"></div>
