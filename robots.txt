@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nexussxsistems.onrender.com/sitemap.xml
+
+# Disallow admin, internal app, and private areas
+Disallow: /admin.html
+Disallow: /auth.html
+Disallow: /login.html
+Disallow: /registro.html
+Disallow: /dashboard.html
+Disallow: /crm.html
+Disallow: /tickets.html
+Disallow: /reports.html
+Disallow: /kb-admin.html
+Disallow: /pipeline.html
+Disallow: /tareas.html
+Disallow: /notifications.html
+Disallow: /settings.html
+Disallow: /audit.html
+Disallow: /fol.html
+Disallow: /ai-tools.html
+Disallow: /plans.html
+Disallow: /forgot-password.html
+Disallow: /reset-password.html
+Disallow: /verify-email.html
+Disallow: /intro.html
+Disallow: /timeline.html
+Disallow: /server/
+Disallow: /data/
+Disallow: /_v1_backup/

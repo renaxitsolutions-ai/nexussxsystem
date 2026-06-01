@@ -2,9 +2,24 @@
 <html lang="es">
 <head>
   <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+  <link rel="apple-touch-icon" href="logo.jpeg" />
   <meta charset="utf-8" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Trabajos Anteriores — Nexuss X Sistems</title>
+  <title>Portafolio — Nexuss X Sistems | Proyectos de Desarrollo Web e IA</title>
+  <meta name="description" content="Portafolio de proyectos: sitios web, paneles de gestión, chatbots con IA y sistemas digitales desarrollados por Nexuss X Sistems para empresas LATAM." />
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_LA" />
+  <meta property="og:url" content="https://nexussxsistems.onrender.com/trabajos.html" />
+  <meta property="og:title" content="Portafolio — Nexuss X Sistems | Proyectos Reales" />
+  <meta property="og:description" content="Explora nuestros proyectos: sitios web, paneles de gestión, chatbots con IA y automatización para empresas LATAM." />
+  <meta property="og:image" content="https://nexussxsistems.onrender.com/logo.jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://nexussxsistems.onrender.com/trabajos.html" />
   <link rel="stylesheet" href="nexus.css" />
   <style>
     /* ── Hero banner ─────────────────────────────────────────────────────── */
@@ -184,31 +199,88 @@
     .tl-title  { font-weight: 700; margin-bottom: 4px; }
     .tl-text   { font-size: .82rem; color: var(--muted); line-height: 1.6; }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Portafolio de Proyectos — Nexuss X Sistems",
+    "url": "https://nexussxsistems.onrender.com/trabajos.html",
+    "description": "Portafolio de proyectos de desarrollo web, chatbots con IA, paneles de gestión y automatización para empresas LATAM.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Nexuss X Sistems",
+      "url": "https://nexussxsistems.onrender.com",
+      "logo": "https://nexussxsistems.onrender.com/logo.jpeg"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Proyectos desarrollados",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "item": { "@type": "CreativeWork", "name": "Sistema NexussX — Plataforma empresarial completa", "description": "Plataforma full-stack con autenticación, CRM, dashboard de KPIs, chatbot IA, tickets y gestión de clientes.", "creator": { "@type": "Organization", "name": "Nexuss X Sistems" } } },
+        { "@type": "ListItem", "position": 2, "item": { "@type": "CreativeWork", "name": "Tienda Online — E-commerce con panel de admin", "description": "Tienda en línea con carrito de compras, pasarela de pago y panel de administración para gestión de inventario.", "creator": { "@type": "Organization", "name": "Nexuss X Sistems" } } },
+        { "@type": "ListItem", "position": 3, "item": { "@type": "CreativeWork", "name": "Dashboard de Analítica Empresarial", "description": "Panel de control con métricas en tiempo real, KPIs personalizados y reportes automáticos.", "creator": { "@type": "Organization", "name": "Nexuss X Sistems" } } },
+        { "@type": "ListItem", "position": 4, "item": { "@type": "CreativeWork", "name": "Landing Page de Alta Conversión", "description": "Página de aterrizaje optimizada para ventas con copy persuasivo y CTA estratégicos.", "creator": { "@type": "Organization", "name": "Nexuss X Sistems" } } }
+      ]
+    }
+  }
+  </script>
 </head>
-<body>
+<body data-requires-auth="true">
+<a class="skip-link" href="#mainContent">Saltar al contenido principal</a>
+<noscript><div style="background:#ff6b91;color:#fff;text-align:center;padding:10px;font-size:.9rem">⚠️ JavaScript está desactivado. Algunas funciones pueden no estar disponibles.</div></noscript>
 <header>
-  <div class="container"><nav>
-    <div class="brand"><img class="brand-logo" src="logo.jpeg" alt="logo" />Nexuss X Sistems</div>
-    <button class="nav-toggle" id="navToggle">Menú</button>
-    <div class="nav-links" id="navLinks">
-      <a href="home.html">Home</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="trabajos.html" style="color:#00d4ff">Trabajos</a>
-      <a href="contacto.html" class="btn">Contactar</a>
-    </div>
-  </nav></div>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Sistems logo" />
+        Nexuss X Sistems
+      </div>
+      <button class="nav-toggle" id="navToggle">Menú</button>
+      <div class="nav-links" id="navLinks">
+        <a href="home.html" data-i18n="nav_home">Home</a>
+        <a href="servicios.html" data-i18n="nav_services">Servicios</a>
+        <a href="productos.html" data-i18n="nav_solutions">Soluciones</a>
+        <div class="nav-dropdown" id="ddRecursos">
+          <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
+          <div class="nav-dropdown-panel">
+            <a href="blog.html">Blog</a>
+            <a href="calculadora.html">Calculadora</a>
+            <a href="faq.html">FAQ</a>
+            <a href="sobre.html">Sobre nosotros</a>
+            <a href="trabajos.html" style="color:#00d4ff">🗂 Portafolio</a>
+            <a href="games.html">🕹 Arcade</a>
+          </div>
+        </div>
+        <div class="nav-dropdown" id="ddPanel">
+          <button class="nav-dropdown-btn" type="button">Mi panel ▾</button>
+          <div class="nav-dropdown-panel">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="timeline.html">Mi proyecto</a>
+            <a href="tickets.html">Soporte</a>
+            <a href="crm.html">CRM</a>
+            <a href="referidos.html">Referidos</a>
+          </div>
+        </div>
+        <a href="contacto.html" data-i18n="nav_contact">Contacto</a>
+        <a href="admin.html" data-i18n="nav_admin">Admin</a>
+        <button class="btn ghost" id="langToggle" type="button">ES</button>
+        <a href="#" class="btn" id="logoutBtn" data-i18n="nav_logout">Salir</a>
+        <a href="productos.html" class="btn" style="position:relative">Carrito <span class="cart-nav-badge" style="display:none">0</span></a>
+      </div>
+    </nav>
+  </div>
 </header>
 
 <div class="trabajos-hero">
   <div class="school-badge">
     🏫 &nbsp;Politécnico Jesús María &nbsp;·&nbsp; 5to Año Informática
   </div>
-  <h1>Galería de <span class="gradient-label">Trabajos Anteriores</span></h1>
+  <h1>Galería de <span class="gradient-label">Portafolio</span></h1>
   <p>Proyectos y prácticas realizados durante el año escolar 2025–2026, documentando el aprendizaje progresivo en desarrollo web y programación.</p>
   <span class="year-badge">Año Escolar 2025 – 2026</span>
 </div>
 
-<div class="container">
+<div class="container" id="mainContent">
 
   <!-- Estadísticas -->
   <div class="stats-row">
@@ -718,8 +790,15 @@
 
 </div>
 
-<footer style="text-align:center;padding:24px;border-top:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:.8rem">
-  Nexuss X Sistems &copy; 2026 — Trabajo Final 5to Año Informática · Politécnico Jesús María
+<footer style="padding:32px 0 20px;margin-top:20px">
+  <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+    <div class="muted" style="font-size:.78rem">© 2026 Nexuss X Sistems — Todos los derechos reservados · Politécnico Jesús María 5to Año</div>
+    <div style="display:flex;gap:16px">
+      <a href="blog.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">Blog</a>
+      <a href="faq.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">FAQ</a>
+      <a href="contacto.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">Contacto</a>
+    </div>
+  </div>
 </footer>
 
 <div class="toast" id="toast"></div>

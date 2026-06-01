@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+  <link rel="apple-touch-icon" href="logo.jpeg" />
+  <meta charset="utf-8" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>404 — Página no encontrada | Nexuss X Sistems</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="La página que buscas no existe. Redirigiendo al inicio de Nexuss X Sistems." />
+  <link rel="stylesheet" href="nexus.css" />
+  <style>
+    .error-page {
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .error-code {
+      font-size: clamp(6rem, 18vw, 12rem);
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, #00d4ff, #7926ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      animation: errorPulse 3s ease-in-out infinite;
+    }
+    @keyframes errorPulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.75; }
+    }
+    .error-title {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .error-sub {
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .error-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      max-width: 560px;
+      width: 100%;
+      margin-bottom: 32px;
+    }
+    .error-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.8);
+      font-size: .88rem;
+      transition: all .2s;
+    }
+    .error-link:hover {
+      background: rgba(0,212,255,0.07);
+      border-color: rgba(0,212,255,0.3);
+      color: #00d4ff;
+      transform: translateY(-2px);
+    }
+    .error-scan {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00d4ff, #7926ff, transparent);
+      animation: scanLine 4s ease-in-out infinite;
+    }
+    @keyframes scanLine {
+      0%   { top: 0; opacity: 1; }
+      100% { top: 100vh; opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-scan"></div>
+
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img class="brand-logo" src="logo.jpeg" alt="Nexuss X Sistems logo" />
+          Nexuss X Sistems
+        </div>
+        <button class="nav-toggle" id="navToggle">Menú</button>
+        <div class="nav-links" id="navLinks">
+          <a href="home.html">Home</a>
+          <a href="servicios.html">Servicios</a>
+          <a href="blog.html">Blog</a>
+          <a href="contacto.html">Contacto</a>
+          <button class="btn ghost" id="langToggle" type="button">ES</button>
+          <a href="index.html" class="btn primary">Ir al inicio</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="error-page">
+      <div class="error-code">404</div>
+      <h1 class="error-title">Sistema: Página no encontrada</h1>
+      <p class="error-sub">
+        La ruta que buscas no existe en nuestro sistema.<br />
+        Puede haber sido eliminada, movida o ingresada incorrectamente.
+      </p>
+
+      <div class="error-grid">
+        <a href="home.html" class="error-link">🏠 Home</a>
+        <a href="servicios.html" class="error-link">⚡ Servicios</a>
+        <a href="blog.html" class="error-link">📝 Blog</a>
+        <a href="productos.html" class="error-link">💼 Soluciones</a>
+        <a href="contacto.html" class="error-link">📩 Contacto</a>
+        <a href="faq.html" class="error-link">❓ FAQ</a>
+      </div>
+
+      <a href="home.html" class="btn primary" style="font-size:1rem;padding:14px 28px">
+        ← Volver al inicio
+      </a>
+
+      <p style="margin-top:24px;color:var(--muted);font-size:.82rem">
+        Redirigiendo automáticamente en <span id="countdown" style="color:#00d4ff;font-weight:700">10</span> segundos…
+      </p>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="nexus.js"></script>
+  <script>
+    (function() {
+      var n = 10;
+      var el = document.getElementById('countdown');
+      var iv = setInterval(function() {
+        n--;
+        if (el) el.textContent = n;
+        if (n <= 0) { clearInterval(iv); window.location.href = 'home.html'; }
+      }, 1000);
+    })();
+  </script>
+</body>
+</html>

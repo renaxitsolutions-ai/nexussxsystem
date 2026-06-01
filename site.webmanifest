@@ -1,0 +1,44 @@
+{
+  "name": "Nexuss X Sistems",
+  "short_name": "NexussX",
+  "description": "Desarrollo web, chatbots con IA y automatización digital para empresas LATAM.",
+  "start_url": "/home.html",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#00d4ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "utilities", "productivity"],
+  "lang": "es",
+  "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "Servicios",
+      "url": "/servicios.html",
+      "description": "Ver todos los servicios disponibles"
+    },
+    {
+      "name": "Cotizar",
+      "url": "/calculadora.html",
+      "description": "Calculadora de precios"
+    },
+    {
+      "name": "Contacto",
+      "url": "/contacto.html",
+      "description": "Hablar con el equipo"
+    }
+  ]
+}

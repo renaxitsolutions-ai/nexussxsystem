@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
   <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+  <link rel="apple-touch-icon" href="logo.jpeg" />
   <meta charset="utf-8" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title id="pageTitle">Blog — Nexuss X Sistems</title>
   <meta name="description" id="pageDesc" content="Artículo del blog de Nexuss X Sistems sobre desarrollo web, IA y marketing digital." />
@@ -141,9 +146,21 @@
 
     /* 404 state */
     #postNotFound { display: none; text-align: center; padding: 60px 0; }
+
+    /* Reading progress bar */
+    #readingProgress {
+      position: fixed; top: 0; left: 0; z-index: 9999;
+      height: 3px; width: 0;
+      background: linear-gradient(90deg, #00d4ff, #7926ff);
+      transition: width .1s linear;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body data-requires-auth="true">
+  <div id="readingProgress"></div>
+  <a class="skip-link" href="#mainContent">Saltar al contenido principal</a>
+  <noscript><div style="background:#ff6b91;color:#fff;text-align:center;padding:10px;font-size:.9rem">⚠️ JavaScript está desactivado. El contenido del artículo requiere JavaScript para cargarse.</div></noscript>
   <header>
     <div class="container">
       <nav>
@@ -164,6 +181,7 @@
               <a href="faq.html">FAQ</a>
               <a href="sobre.html">Sobre nosotros</a>
               <a href="trabajos.html">🗂 Portafolio</a>
+              <a href="games.html">🕹 Arcade</a>
             </div>
           </div>
           <div class="nav-dropdown" id="ddPanel">
@@ -186,7 +204,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="mainContent">
     <!-- breadcrumb -->
     <div style="padding:18px 0 0;font-size:.82rem;color:var(--muted)">
       <a href="home.html" style="color:var(--muted);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#00d4ff'" onmouseout="this.style.color=''">Home</a>
@@ -228,7 +246,9 @@
         </div>
         <div class="share-row">
           <span style="color:var(--muted);font-size:.85rem;align-self:center">Compartir:</span>
-          <a id="shareWA" href="#" target="_blank" rel="noopener" class="btn" style="font-size:.8rem;padding:8px 14px">💬 WhatsApp</a>
+          <a id="shareWA" href="#" target="_blank" rel="noopener" class="btn" style="font-size:.8rem;padding:8px 14px;background:#25d366;border-color:transparent;color:#000">💬 WhatsApp</a>
+          <a id="shareTW" href="#" target="_blank" rel="noopener" class="btn" style="font-size:.8rem;padding:8px 14px;background:#1d9bf0;border-color:transparent;color:#fff">𝕏 Twitter</a>
+          <a id="shareLI" href="#" target="_blank" rel="noopener" class="btn" style="font-size:.8rem;padding:8px 14px;background:#0a66c2;border-color:transparent;color:#fff">in LinkedIn</a>
           <button id="copyLink" class="btn ghost" style="font-size:.8rem;padding:8px 14px">🔗 Copiar enlace</button>
         </div>
         <div class="post-nav">
@@ -265,12 +285,43 @@
     </div>
 
     <footer style="padding:40px 0 24px;margin-top:40px">
-      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
-        <div class="muted" style="font-size:.78rem">© 2026 Nexuss X Sistems — Todos los derechos reservados</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:24px;margin-bottom:28px">
+        <div>
+          <div style="font-weight:700;font-size:1rem;margin-bottom:10px"><span class="gradient-label">Nexuss X Sistems</span></div>
+          <p class="muted" style="font-size:.82rem;line-height:1.6;margin:0 0 10px">Soluciones digitales de alto impacto para negocios LATAM.</p>
+          <a href="https://wa.me/18293689630" target="_blank" style="color:#25d366;font-size:.82rem;text-decoration:none">💬 WhatsApp</a>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Servicios</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px">
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Desarrollo web</a></li>
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Chatbots con IA</a></li>
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Automatización</a></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Blog</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px">
+            <li><a href="blog.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Todos los artículos</a></li>
+            <li><a href="blog-post.html?slug=chatbots-ia" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">IA & Chatbots</a></li>
+            <li><a href="blog-post.html?slug=seo-ia-2026" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">SEO 2026</a></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Contacto</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:8px;margin-bottom:12px">
+            <li style="color:var(--muted);font-size:.82rem">📧 ventas@nexusx.system</li>
+            <li style="color:var(--muted);font-size:.82rem">📞 +1 (829) 368-9630</li>
+          </ul>
+          <a href="contacto.html" class="btn primary" style="font-size:.78rem;padding:8px 14px">Solicitar propuesta →</a>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+        <div class="muted" style="font-size:.76rem">© 2026 Nexuss X Sistems — Todos los derechos reservados</div>
         <div style="display:flex;gap:16px">
-          <a href="blog.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">Blog</a>
-          <a href="faq.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">FAQ</a>
-          <a href="contacto.html" style="color:var(--muted);font-size:.78rem;text-decoration:none">Contacto</a>
+          <a href="blog.html" style="color:var(--muted);font-size:.76rem;text-decoration:none">Blog</a>
+          <a href="faq.html" style="color:var(--muted);font-size:.76rem;text-decoration:none">FAQ</a>
+          <a href="contacto.html" style="color:var(--muted);font-size:.76rem;text-decoration:none">Contacto</a>
         </div>
       </div>
     </footer>
@@ -676,7 +727,18 @@
 
     // <title> and meta
     document.getElementById('pageTitle').textContent = post.title + ' — Blog Nexuss X Sistems';
-    document.getElementById('pageDesc').setAttribute('content', post.body.replace(/<[^>]+>/g,'').slice(0,160));
+    const excerpt = post.body.replace(/<[^>]+>/g,'').slice(0,160);
+    document.getElementById('pageDesc').setAttribute('content', excerpt);
+    // Update OG tags for social sharing
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) { ogTitle = document.createElement('meta'); ogTitle.setAttribute('property','og:title'); document.head.appendChild(ogTitle); }
+    ogTitle.setAttribute('content', post.title + ' — Nexuss X Sistems');
+    let ogDesc = document.querySelector('meta[property="og:description"]');
+    if (!ogDesc) { ogDesc = document.createElement('meta'); ogDesc.setAttribute('property','og:description'); document.head.appendChild(ogDesc); }
+    ogDesc.setAttribute('content', excerpt);
+    let ogImg = document.querySelector('meta[property="og:image"]');
+    if (!ogImg) { ogImg = document.createElement('meta'); ogImg.setAttribute('property','og:image'); document.head.appendChild(ogImg); }
+    ogImg.setAttribute('content', post.img);
 
     // hero
     document.getElementById('heroImg').src = post.img;
@@ -699,6 +761,8 @@
     const url = encodeURIComponent(window.location.href);
     const title = encodeURIComponent(post.title);
     document.getElementById('shareWA').href = 'https://wa.me/?text=' + title + '%20' + url;
+    document.getElementById('shareTW').href = 'https://twitter.com/intent/tweet?text=' + title + '&url=' + url + '&via=NexussXSistems';
+    document.getElementById('shareLI').href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + url;
     document.getElementById('copyLink').addEventListener('click', () => {
       navigator.clipboard.writeText(window.location.href).then(() => {
         document.getElementById('copyLink').textContent = '✓ Copiado!';
@@ -717,6 +781,17 @@
   }
 
   renderPost();
+
+  // Reading progress bar
+  (function() {
+    const bar = document.getElementById('readingProgress');
+    if (!bar) return;
+    window.addEventListener('scroll', () => {
+      const docH = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const pct = docH > 0 ? (window.scrollY / docH) * 100 : 0;
+      bar.style.width = Math.min(pct, 100) + '%';
+    }, { passive: true });
+  })();
   </script>
 </body>
 </html>

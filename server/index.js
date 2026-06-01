@@ -2080,9 +2080,14 @@ app.post('/api/admin/seed', auth, requireAdmin, async (req, res) => {
 // CATCH-ALL → serve frontend
 // ─────────────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  const htmlFile = join(__dir, '..', 'index.html');
-  if (fs.existsSync(htmlFile)) res.sendFile(htmlFile);
-  else res.status(404).json({ error: 'Not found' });
+  /* serve 404 page for browser navigation; JSON for API calls */
+  if (req.accepts('html')) {
+    const notFound = join(__dir, '..', '404.html');
+    if (fs.existsSync(notFound)) return res.status(404).sendFile(notFound);
+    const fallback = join(__dir, '..', 'index.html');
+    if (fs.existsSync(fallback)) return res.status(404).sendFile(fallback);
+  }
+  res.status(404).json({ error: 'Not found' });
 });
 
 app.listen(PORT, () => {

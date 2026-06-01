@@ -2,9 +2,24 @@
 <html lang="es">
 <head>
   <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+  <link rel="apple-touch-icon" href="logo.jpeg" />
   <meta charset="utf-8" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Nexuss X Sistems — Arcade</title>
+  <title>Nexuss X Sistems — Arcade 🕹</title>
+  <meta name="description" content="¡Zona de juegos de Nexuss X Sistems! Juega clásicos como Geometry Dash, Snake, Tetris y más directamente en tu navegador. Totalmente gratis." />
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_LA" />
+  <meta property="og:url" content="https://nexussxsistems.onrender.com/games.html" />
+  <meta property="og:title" content="Nexuss X Sistems — Arcade 🕹" />
+  <meta property="og:description" content="¡Zona de juegos! Juega clásicos de arcade directamente en el navegador. Gratis, sin instalación." />
+  <meta property="og:image" content="https://nexussxsistems.onrender.com/logo.jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://nexussxsistems.onrender.com/games.html" />
   <link rel="stylesheet" href="nexus.css" />
   <style>
     /* ── GD Intro ─────────────────────────────────── */
@@ -97,6 +112,8 @@
   </style>
 </head>
 <body data-requires-auth="true">
+<a class="skip-link" href="#mainContent">Saltar al contenido principal</a>
+<noscript><div style="background:#ff6b91;color:#fff;text-align:center;padding:10px;font-size:.9rem">⚠️ JavaScript está desactivado. El Arcade requiere JavaScript para funcionar.</div></noscript>
 
 <!-- ══ GD INTRO ══ -->
 <div id="gdIntro"><canvas id="gdCanvas"></canvas></div>
@@ -120,12 +137,10 @@
           <button class="nav-dropdown-btn" type="button">Recursos ▾</button>
           <div class="nav-dropdown-panel">
             <a href="blog.html">Blog</a>
-            <a href="casos.html">Casos de exito</a>
             <a href="calculadora.html">Calculadora</a>
             <a href="faq.html">FAQ</a>
             <a href="sobre.html">Sobre nosotros</a>
-            <a href="trabajos.html">🗂 Trabajos anteriores</a>
-            <a href="tarjeta.html">🪪 Tarjeta de presentación</a>
+            <a href="trabajos.html">🗂 Portafolio</a>
             <a href="games.html">🕹 Arcade</a>
           </div>
         </div>
@@ -149,7 +164,7 @@
   </div>
 </header>
 
-<main class="container">
+<main class="container" id="mainContent">
 
   <!-- Hero -->
   <section class="arcade-hero">

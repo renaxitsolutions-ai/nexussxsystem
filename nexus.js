@@ -613,17 +613,29 @@ function bindNav(){
 
   if(toggle && links){
     toggle.innerHTML = '☰ Menú';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', 'navLinks');
+    links.setAttribute('id', 'navLinks');
+
+    function setNavOpen(open) {
+      links.classList.toggle('open', open);
+      toggle.innerHTML = open ? '✕ Cerrar' : '☰ Menú';
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
     toggle.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = links.classList.toggle('open');
-      toggle.innerHTML = isOpen ? '✕ Cerrar' : '☰ Menú';
+      setNavOpen(!links.classList.contains('open'));
     });
     // Close mobile nav when a link is clicked
     links.addEventListener('click', (e) => {
       if(window.innerWidth <= 820 && e.target.tagName === 'A'){
-        links.classList.remove('open');
-        toggle.innerHTML = '☰ Menú';
+        setNavOpen(false);
       }
+    });
+    // Close on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && links.classList.contains('open')) setNavOpen(false);
     });
   }
 
@@ -698,10 +710,42 @@ function bindReveal(){
 }
 
 function bindAccordions(){
-  document.querySelectorAll('.acc-btn').forEach(btn => {
+  document.querySelectorAll('.acc-btn').forEach((btn, idx) => {
+    const item  = btn.parentElement;
+    const panel = item.querySelector('.acc-panel');
+
+    // Accessibility attributes
+    const panelId = 'acc-panel-' + idx;
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', panelId);
+    if (panel) { panel.id = panelId; panel.setAttribute('role', 'region'); panel.setAttribute('aria-labelledby', 'acc-btn-' + idx); }
+    btn.id = 'acc-btn-' + idx;
+
     btn.addEventListener('click', () => {
-      const item = btn.parentElement;
-      item.classList.toggle('open');
+      const isOpen = item.classList.contains('open');
+      // Close all siblings in same accordion group
+      const accordion = item.closest('.accordion');
+      if (accordion) {
+        accordion.querySelectorAll('.acc-item.open').forEach(other => {
+          other.classList.remove('open');
+          other.querySelector('.acc-btn')?.setAttribute('aria-expanded', 'false');
+        });
+      }
+      // Toggle this one
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    // Keyboard: Enter/Space already handled by browser for buttons
+    // Allow Escape to close
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && item.classList.contains('open')) {
+        item.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.focus();
+      }
     });
   });
 }
@@ -1136,6 +1180,12 @@ function bindContact(){
     
     const fullMessage = extra ? `${message.value.trim()}\n\n${extra}` : message.value.trim();
 
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    const _origText = submitBtn.textContent;
+    submitBtn.textContent = 'Enviando…';
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
@@ -1152,21 +1202,31 @@ function bindContact(){
     .then(res => {
       clearTimeout(timeoutId);
       if(!res.ok){ throw new Error('Error'); }
-      showToast('Mensaje enviado. Gracias.');
+      showToast('✅ Mensaje enviado. Te contactaremos pronto.');
       form.reset();
       form.querySelectorAll('input, textarea').forEach(f => f.classList.remove('err'));
+      // Show inline success banner
+      const existing = form.querySelector('.contact-success-msg');
+      if(!existing) {
+        const msg = document.createElement('div');
+        msg.className = 'alert alert-success contact-success-msg';
+        msg.innerHTML = '<span class="alert-icon">✅</span> ¡Recibimos tu mensaje! Te responderemos en menos de 24 horas.';
+        form.appendChild(msg);
+        setTimeout(() => msg.remove(), 6000);
+      }
     })
     .catch(err => {
       clearTimeout(timeoutId);
       if(err.name === 'AbortError'){
-        showToast('Tiempo agotado. Intenta de nuevo.');
+        showToast('⚠️ Tiempo agotado. Intenta de nuevo.');
       } else {
-        showToast('No se pudo enviar. Intenta de nuevo.');
+        showToast('❌ No se pudo enviar. Intenta de nuevo o usa WhatsApp.');
       }
     })
     .finally(() => {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar mensaje';
+      submitBtn.classList.remove('loading');
+      submitBtn.textContent = _origText;
     });
   });
 }
@@ -2281,6 +2341,43 @@ function renderJarvisMarkdown(raw) {
   return s;
 }
 
+/* Respuestas locales de emergencia — activan cuando el backend no responde */
+function jarvisLocalFallback(message) {
+  const m = message.toLowerCase();
+  if (/precio|costo|cuánto|cuanto|cobr|tarifa|presupuest/.test(m)) {
+    return { text: 'Nuestros proyectos parten desde **$150 USD** para landing pages hasta **$1,200+ USD** para sistemas web completos. Para un presupuesto exacto, cuéntame los detalles de tu proyecto.', link: { href: 'calculadora.html', label: '🧮 Calcular precio →' } };
+  }
+  if (/servicios|ofrecen|qué hacen|que hacen|trabajan/.test(m)) {
+    return { text: 'Ofrecemos:\n• Sitios web y landing pages\n• Paneles de gestión (CRM, reportes)\n• Chatbots con IA\n• Automatización de procesos\n• Tiendas online\n\n¿Cuál te interesa más?', link: { href: 'servicios.html', label: 'Ver servicios →' } };
+  }
+  if (/tiempo|demora|cuánto tarda|cuando termina|plazo/.test(m)) {
+    return { text: 'Los tiempos dependen del proyecto:\n• Landing page → **3–5 días**\n• Sitio web completo → **1–2 semanas**\n• Sistema/CRM → **2–4 semanas**\n\nSiempre cumplimos los plazos acordados.' };
+  }
+  if (/contac|whatsapp|llamar|escribir|email|correo/.test(m)) {
+    return { text: '📞 Puedes contactarnos por:\n• **WhatsApp:** +1 (829) 368-9630\n• **Email:** ventas@nexusx.system\n• O llena el formulario de contacto.', link: { href: 'contacto.html', label: 'Formulario de contacto →' } };
+  }
+  if (/portafolio|trabajos|proyectos|ejemplos|muestra/.test(m)) {
+    return { text: 'Tenemos proyectos de desarrollo web, landing pages y sistemas para clientes en LATAM.', link: { href: 'trabajos.html', label: '🗂 Ver portafolio →' } };
+  }
+  if (/garantia|garantía|no me gusta|cambios|revisiones/.test(m)) {
+    return { text: 'Ofrecemos **revisiones ilimitadas** durante el desarrollo y **30 días de soporte** post-entrega. Si el resultado no te convence, lo trabajamos hasta que estés satisfecho.' };
+  }
+  if (/hola|buenos|buenas|hi|hey|saludos/.test(m)) {
+    return { text: '¡Hola! Soy **JARVIS**, el asistente de Nexuss X Sistems. Puedo ayudarte con información sobre servicios, precios y proyectos. ¿Qué necesitas?' };
+  }
+  if (/pago|forma de pago|transferencia|tarjeta|dólares/.test(m)) {
+    return { text: 'Aceptamos:\n• Transferencia bancaria (RD y USA)\n• Binance / USDT\n• PayPal\n\nGeneralmente trabajamos con **50% al inicio** y 50% al finalizar.' };
+  }
+  if (/latam|república dominicana|dominicana|país|zona|donde/.test(m)) {
+    return { text: 'Trabajamos con clientes en toda **LATAM**: República Dominicana, México, Colombia, Venezuela, Chile y más. Todo es 100% remoto y en español.' };
+  }
+  // Fallback genérico mejorado
+  return {
+    text: 'En este momento no puedo conectarme al servidor de IA. Pero puedo responderte directamente: **¿cuál es tu pregunta?** — precios, servicios, tiempos de entrega, contacto...',
+    link: { href: 'contacto.html', label: 'Contactar ahora →' }
+  };
+}
+
 /* Llama al backend IA; si falla usa respuesta de emergencia local */
 async function jarvisAskAI(message, history) {
   try {
@@ -2289,14 +2386,12 @@ async function jarvisAskAI(message, history) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, history: history.slice(-20) })
     });
+    if (!res.ok) throw new Error('http-error');
     const data = await res.json();
     if (data.reply) return parseJarvisReply(data.reply);
     throw new Error('no-reply');
   } catch(e) {
-    return {
-      text: 'No pude conectarme al servidor. Contáctanos directamente para ayudarte.',
-      link: { href: 'contacto.html', label: 'Ir a contacto →' }
-    };
+    return jarvisLocalFallback(message);
   }
 }
 
@@ -2604,6 +2699,10 @@ const PAGE_DESCRIPTIONS = {
   'casos':       'Estás viendo los casos de éxito de Nexuss X Sistems. Conoce los proyectos que hemos realizado para nuestros clientes.',
   'knowledge':   'Esta es la base de conocimiento. Encuentra artículos y guías para resolver tus preguntas técnicas.',
   'pipeline':    'Estás en el pipeline de ventas. Visualiza y gestiona todas las oportunidades en tu proceso comercial.',
+  'trabajos':    'Bienvenido al portafolio de Nexuss X Sistems. Aquí puedes ver proyectos reales de desarrollo web, paneles de gestión, chatbots e IA que hemos construido para clientes en LATAM.',
+  'referidos':   'Este es el programa de referidos de Nexuss X Sistems. Recomienda a un cliente y gana una comisión por cada proyecto cerrado.',
+  'timeline':    'Esta es la línea de tiempo de tu proyecto. Aquí puedes ver el progreso y cada hito del desarrollo de tu solución.',
+  'tarjeta':     'Esta es la tarjeta de presentación digital de Nexuss X Sistems. Compártela fácilmente con tus contactos.',
 };
 
 function showPageJarvis(text) {
@@ -2782,6 +2881,68 @@ function bindPreloader() {
   }, 460);
 }
 
+/* ══════════════════════════════════════════
+   COOKIE CONSENT BANNER
+   ══════════════════════════════════════════ */
+function bindCookieConsent() {
+  if (localStorage.getItem('nxs_cookies_accepted')) return;
+  const banner = document.createElement('div');
+  banner.id = 'nxsCookieBanner';
+  banner.innerHTML = `
+    <p>🍪 Usamos cookies para mejorar tu experiencia y analizar el tráfico. Al continuar navegando, aceptas nuestra
+      <a href="faq.html">política de privacidad</a>.
+    </p>
+    <button class="cookie-decline" id="cookieDecline">Rechazar</button>
+    <button class="cookie-accept" id="cookieAccept">Aceptar</button>
+  `;
+  document.body.appendChild(banner);
+  // Show after slight delay
+  requestAnimationFrame(() => { setTimeout(() => banner.classList.add('visible'), 600); });
+  function dismiss() {
+    banner.classList.remove('visible');
+    setTimeout(() => banner.remove(), 450);
+  }
+  document.getElementById('cookieAccept').addEventListener('click', () => {
+    localStorage.setItem('nxs_cookies_accepted', '1');
+    dismiss();
+  });
+  document.getElementById('cookieDecline').addEventListener('click', dismiss);
+}
+
+/* ══════════════════════════════════════════
+   FLOATING WHATSAPP BUTTON — siempre visible
+   ══════════════════════════════════════════ */
+function bindFloatingWhatsApp() {
+  // No duplicar si ya existe
+  if (document.getElementById('wa-float')) return;
+  const a = document.createElement('a');
+  a.id = 'wa-float';
+  a.href = 'https://wa.me/18293689630?text=' + encodeURIComponent('Hola, me interesa conocer más sobre sus servicios.');
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.setAttribute('aria-label', 'Contactar por WhatsApp');
+  a.innerHTML = '💬<span class="wa-tooltip">¡Escríbenos ahora!</span>';
+  document.body.appendChild(a);
+}
+
+/* ══════════════════════════════════════════
+   SCROLL TO TOP — aparece al bajar 400px
+   ══════════════════════════════════════════ */
+function bindScrollToTop() {
+  const btn = document.createElement('button');
+  btn.id = 'scrollToTop';
+  btn.title = 'Volver arriba';
+  btn.innerHTML = '↑';
+  btn.setAttribute('aria-label', 'Volver al inicio de la página');
+  document.body.appendChild(btn);
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 400);
+  }, { passive: true });
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   bindPreloader();
   const lang = getLang();
@@ -2812,6 +2973,15 @@ document.addEventListener('DOMContentLoaded', () => {
   bindLeadPopup();
   bindRipple();
   bindScrollProgress();
+  bindScrollToTop();
+  bindFloatingWhatsApp();
+  bindCookieConsent();
+  // Lazy-load images that aren't in the first viewport
+  document.querySelectorAll('img[src]').forEach(img => {
+    if (!img.loading && !img.closest('header') && !img.closest('.hero-art') && img.getBoundingClientRect().top > window.innerHeight) {
+      img.loading = 'lazy';
+    }
+  });
   bindInteractiveCards();
   bindMoreDropdown();
   // Brand logo → home
@@ -2820,6 +2990,12 @@ document.addEventListener('DOMContentLoaded', () => {
     b.addEventListener('click', () => { location.href = 'home.html'; });
   });
   html.classList.add('js');
+
+  /* ── Service Worker registration (PWA) ── */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .catch(err => console.warn('[NXS] SW registration failed:', err));
+  }
 });
 
 /* ══════════════════════════════════════════

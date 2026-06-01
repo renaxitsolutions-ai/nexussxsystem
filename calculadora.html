@@ -2,13 +2,53 @@
 <html lang="es">
 <head>
   <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+  <link rel="apple-touch-icon" href="logo.jpeg" />
   <meta charset="utf-8" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Calculadora de Precios — Nexuss X Sistems</title>
   <meta name="description" content="Calcula el precio de tu proyecto web con nuestra calculadora interactiva. Obtén una cotización instantánea sin compromiso." />
+  <meta property="og:title" content="Calculadora de Precios — Nexuss X Sistems" />
+  <meta property="og:description" content="Obtén una cotización instantánea para tu proyecto digital. Sin compromiso." />
+  <meta property="og:image" content="https://nexussxsistems.onrender.com/logo.jpeg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_LA" />
+  <meta property="og:url" content="https://nexussxsistems.onrender.com/calculadora.html" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Calculadora — Nexuss X Sistems" />
+  <meta name="twitter:description" content="Cotización instantánea para tu proyecto web." />
+  <link rel="canonical" href="https://nexussxsistems.onrender.com/calculadora.html" />
   <link rel="stylesheet" href="nexus.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Calculadora de Precios — Nexuss X Sistems",
+    "url": "https://nexussxsistems.onrender.com/calculadora.html",
+    "description": "Calculadora interactiva para obtener una cotización instantánea de servicios de desarrollo web, chatbots IA, landing pages y automatización.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web Browser",
+    "inLanguage": "es",
+    "offers": {
+      "@type": "Offer",
+      "description": "Cotización gratuita e instantánea para proyectos digitales",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "Nexuss X Sistems",
+      "url": "https://nexussxsistems.onrender.com"
+    }
+  }
+  </script>
 </head>
 <body data-requires-auth="true">
+  <a class="skip-link" href="#mainContent">Saltar al contenido principal</a>
+  <noscript><div style="background:#ff6b91;color:#fff;text-align:center;padding:10px;font-size:.9rem">⚠️ JavaScript está desactivado. Actívalo para usar la calculadora interactiva.</div></noscript>
   <header>
     <div class="container">
       <nav>
@@ -29,6 +69,7 @@
               <a href="faq.html">FAQ</a>
               <a href="sobre.html">Sobre nosotros</a>
               <a href="trabajos.html">🗂 Portafolio</a>
+              <a href="games.html">🕹 Arcade</a>
             </div>
           </div>
           <div class="nav-dropdown" id="ddPanel">
@@ -51,7 +92,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="mainContent">
     <section class="section">
       <div class="section-head">
         <div>
@@ -182,7 +223,7 @@
             <a href="contacto.html" class="btn primary" style="width:100%;justify-content:center;margin-bottom:10px">
               📩 Solicitar propuesta formal
             </a>
-            <a href="https://wa.me/18293689630?text=Hola,%20me%20interesa%20solicitar%20una%20propuesta" target="_blank" class="btn whatsapp" style="width:100%;justify-content:center">
+            <a id="waBtn" href="https://wa.me/18293689630?text=Hola,%20me%20interesa%20solicitar%20una%20propuesta" target="_blank" class="btn whatsapp" style="width:100%;justify-content:center">
               💬 Hablar por WhatsApp
             </a>
             <button id="downloadPdf" class="btn" style="width:100%;justify-content:center;margin-top:10px">
@@ -331,10 +372,46 @@
       </div>
     </section>
 
-    <footer>
-      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Sistems</span></div>
-      <div class="muted" style="font-size:.82rem">Soluciones digitales de alto impacto · LATAM</div>
-      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Sistems</div>
+    <footer style="padding:40px 0 24px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:24px;margin-bottom:28px">
+        <div>
+          <div style="font-weight:700;font-size:1rem;margin-bottom:10px"><span class="gradient-label">Nexuss X Sistems</span></div>
+          <p class="muted" style="font-size:.82rem;line-height:1.6;margin:0 0 10px">Soluciones digitales de alto impacto para negocios LATAM.</p>
+          <a href="https://wa.me/18293689630" target="_blank" style="color:#25d366;font-size:.82rem;text-decoration:none">💬 WhatsApp</a>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Servicios</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px">
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Desarrollo web</a></li>
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Chatbots con IA</a></li>
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Automatización</a></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Empresa</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px">
+            <li><a href="sobre.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Sobre nosotros</a></li>
+            <li><a href="trabajos.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Portafolio</a></li>
+            <li><a href="blog.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Contacto</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:8px;margin-bottom:12px">
+            <li style="color:var(--muted);font-size:.82rem">📧 ventas@nexusx.system</li>
+            <li style="color:var(--muted);font-size:.82rem">📞 +1 (829) 368-9630</li>
+          </ul>
+          <a href="contacto.html" class="btn primary" style="font-size:.78rem;padding:8px 14px">Solicitar propuesta →</a>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+        <div class="muted" style="font-size:.76rem">© 2026 Nexuss X Sistems — Todos los derechos reservados</div>
+        <div style="display:flex;gap:14px">
+          <a href="faq.html" style="color:var(--muted);font-size:.76rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">FAQ</a>
+          <a href="contacto.html" style="color:var(--muted);font-size:.76rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Contacto</a>
+          <a href="servicios.html" style="color:var(--muted);font-size:.76rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Servicios</a>
+        </div>
+      </div>
     </footer>
   </main>
 
@@ -411,6 +488,14 @@
         `<div class="calc-line"><span>${l.label}</span><span style="color:${l.price < 0 ? '#65f0b1' : 'var(--ink)'}">${l.price < 0 ? '-' : ''}DOP ${Math.abs(l.price).toLocaleString('es-DO')}</span></div>`
       ).join('');
 
+      // Actualizar WhatsApp con resumen de cotización
+      const waBtn = document.getElementById('waBtn');
+      if (waBtn) {
+        const summary = lines.map(l => `• ${l.label}: DOP ${Math.abs(l.price).toLocaleString('es-DO')}`).join('\n');
+        const waText = `Hola, me interesa una propuesta:\n\n${summary}\n\n*TOTAL ESTIMADO: DOP ${total.toLocaleString('es-DO')}*\n\n¿Podemos hablar?`;
+        waBtn.href = `https://wa.me/18293689630?text=${encodeURIComponent(waText)}`;
+      }
+
       return { lines, total };
     }
 
@@ -479,7 +564,7 @@
         ${lines.map(l => `<tr><td>${l.label}</td><td>${l.price < 0 ? '-' : ''}DOP ${Math.abs(l.price).toLocaleString('es-DO')}</td></tr>`).join('')}
         <tr><td><b>TOTAL ESTIMADO</b></td><td class="total">DOP ${total.toLocaleString('es-DO')}</td></tr>
         </table>
-        <p>📧 Contacto: nexussxsistems@gmail.com<br>💬 WhatsApp: +1 829 368 9630</p>
+        <p>📧 Contacto: renaxitsolutions@gmail.com<br>💬 WhatsApp: +1 829 368 9630</p>
         <p class="footer">Esta cotización es un estimado. El precio final se confirma tras reunión de requerimientos.<br>© 2026 Nexuss X Sistems — Todos los derechos reservados.</p>
         </body></html>
       `);

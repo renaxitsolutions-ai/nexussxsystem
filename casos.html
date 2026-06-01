@@ -2,13 +2,54 @@
 <html lang="es">
 <head>
   <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+  <link rel="apple-touch-icon" href="logo.jpeg" />
   <meta charset="utf-8" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Casos de Éxito — Nexuss X Sistems</title>
   <meta name="description" content="Proyectos reales que transformaron negocios en LATAM. Mira los resultados de nuestros clientes." />
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_LA" />
+  <meta property="og:url" content="https://nexussxsistems.onrender.com/casos.html" />
+  <meta property="og:title" content="Casos de Éxito — Nexuss X Sistems" />
+  <meta property="og:description" content="Proyectos reales que transformaron negocios en LATAM. Mira los resultados de nuestros clientes con desarrollo web, chatbots IA y automatización." />
+  <meta property="og:image" content="https://nexussxsistems.onrender.com/logo.jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://nexussxsistems.onrender.com/casos.html" />
   <link rel="stylesheet" href="nexus.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Casos de Éxito — Nexuss X Sistems",
+    "url": "https://nexussxsistems.onrender.com/casos.html",
+    "description": "Proyectos reales que transformaron negocios en LATAM. Resultados medibles con desarrollo web, chatbots IA y automatización.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Nexuss X Sistems",
+      "url": "https://nexussxsistems.onrender.com",
+      "logo": "https://nexussxsistems.onrender.com/logo.jpeg"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Casos de éxito de clientes",
+      "numberOfItems": 6,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "item": { "@type": "Article", "name": "Tienda Online — Moda LATAM: +320% en ventas", "description": "E-commerce completo con catálogo, carrito y pasarela de pagos que triplicó las ventas en 3 meses.", "author": { "@type": "Organization", "name": "Nexuss X Sistems" } } },
+        { "@type": "ListItem", "position": 2, "item": { "@type": "Article", "name": "Dashboard Empresarial — Empresa Financiera: -80% tiempo en reportes", "description": "Panel de control que reemplazó hojas de cálculo, ahorrando 15 horas semanales.", "author": { "@type": "Organization", "name": "Nexuss X Sistems" } } },
+        { "@type": "ListItem", "position": 3, "item": { "@type": "Article", "name": "Chatbot IA — Clínica Dental: +240% en citas agendadas", "description": "Chatbot que agenda citas automáticamente en WhatsApp, aumentando conversiones en un 240%.", "author": { "@type": "Organization", "name": "Nexuss X Sistems" } } }
+      ]
+    }
+  }
+  </script>
 </head>
 <body data-requires-auth="true">
+  <a class="skip-link" href="#mainContent">Saltar al contenido principal</a>
+  <noscript><div style="background:#ff6b91;color:#fff;text-align:center;padding:10px;font-size:.9rem">⚠️ JavaScript está desactivado. Algunas funciones pueden no estar disponibles.</div></noscript>
   <header>
     <div class="container">
       <nav>
@@ -29,6 +70,7 @@
               <a href="faq.html">FAQ</a>
               <a href="sobre.html">Sobre nosotros</a>
               <a href="trabajos.html">🗂 Portafolio</a>
+              <a href="games.html">🕹 Arcade</a>
             </div>
           </div>
           <div class="nav-dropdown" id="ddPanel">
@@ -51,7 +93,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="mainContent">
     <section class="section">
       <div class="section-head">
         <div>
@@ -366,10 +408,46 @@
       </div>
     </section>
 
-    <footer>
-      <div style="margin-bottom:6px"><span class="gradient-label" style="font-size:1rem">Nexuss X Sistems</span></div>
-      <div class="muted" style="font-size:.82rem">Resultados reales para negocios reales · LATAM</div>
-      <div style="margin-top:8px;color:rgba(255,255,255,0.25);font-size:.78rem">© 2026 Nexuss X Sistems</div>
+    <footer style="padding:40px 0 24px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:24px;margin-bottom:28px">
+        <div>
+          <div style="font-weight:700;font-size:1rem;margin-bottom:10px"><span class="gradient-label">Nexuss X Sistems</span></div>
+          <p class="muted" style="font-size:.82rem;line-height:1.6;margin:0 0 10px">Soluciones digitales de alto impacto para negocios LATAM.</p>
+          <a href="https://wa.me/18293689630" target="_blank" style="color:#25d366;font-size:.82rem;text-decoration:none">💬 WhatsApp</a>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Servicios</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px">
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Desarrollo web</a></li>
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Chatbots con IA</a></li>
+            <li><a href="servicios.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Automatización</a></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Empresa</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px">
+            <li><a href="sobre.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Sobre nosotros</a></li>
+            <li><a href="trabajos.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Portafolio</a></li>
+            <li><a href="blog.html" style="color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;margin-bottom:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em">Contacto</div>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:8px;margin-bottom:12px">
+            <li style="color:var(--muted);font-size:.82rem">📧 ventas@nexusx.system</li>
+            <li style="color:var(--muted);font-size:.82rem">📞 +1 (829) 368-9630</li>
+          </ul>
+          <a href="contacto.html" class="btn primary" style="font-size:.78rem;padding:8px 14px">Solicitar propuesta →</a>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+        <div class="muted" style="font-size:.76rem">© 2026 Nexuss X Sistems — Todos los derechos reservados</div>
+        <div style="display:flex;gap:14px">
+          <a href="faq.html" style="color:var(--muted);font-size:.76rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">FAQ</a>
+          <a href="contacto.html" style="color:var(--muted);font-size:.76rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Contacto</a>
+          <a href="calculadora.html" style="color:var(--muted);font-size:.76rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Calculadora</a>
+        </div>
+      </div>
     </footer>
   </main>
 
