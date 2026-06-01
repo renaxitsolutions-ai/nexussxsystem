@@ -1818,30 +1818,46 @@ function speakLocalVoice() {
   });
 }
 
-/* Main entry point — prioridad: voz de Jarvina (jarvina-voz.mp3) → Web Speech */
+/* Main entry point — prioridad: voz de Jarvina (jarvina-voz.mp3) → Web Speech
+   Manejo correcto de la política de autoplay de Chrome:
+   - Intento inicial puede ser bloqueado por autoplay → no marcar como "hecho"
+   - Al primer clic/tecla del usuario, reintentar el mp3
+   - Solo usar Web Speech si el mp3 falla por un error real (archivo no encontrado, etc.)
+     o si el usuario ya interactuó y Chrome sigue bloqueando */
 function speakJarvis() {
-  let started = false;
+  let done = false, running = false;
 
-  async function run() {
-    if (started) return;
-    started = true;
-    // Cancela cualquier voz activa antes de reproducir
+  async function run(fromInteraction) {
+    if (done || running) return;
+    running = true;
     try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(_){}
     try {
       // Primero: la voz real (jarvina-voz.mp3)
       await speakLocalVoice();
+      done = true;
     } catch(e) {
-      // Fallback: Web Speech API
-      speakWebSpeech();
+      const isAutoplayBlock = e && (
+        e.name === 'NotAllowedError' ||
+        (e.message && /interact|autoplay|gesture/i.test(e.message))
+      );
+      if (isAutoplayBlock && !fromInteraction) {
+        // Chrome bloqueó por no haber interacción — dejar done=false para reintentar
+      } else {
+        // Error real (archivo no existe, codec, etc.) o ya hubo interacción → Web Speech
+        done = true;
+        speakWebSpeech();
+      }
+    } finally {
+      running = false;
     }
   }
 
-  // Try immediately (works without gesture on Edge/Firefox)
-  run();
+  // Intento inicial (funciona directo en Edge/Firefox)
+  run(false);
 
-  // Also fire on first user interaction (Chrome autoplay policy fix — Chrome blocks autoplay)
+  // Retry en primera interacción (Chrome bloquea autoplay hasta que el usuario toca algo)
   ['pointerdown','touchstart','keydown'].forEach(evt =>
-    document.addEventListener(evt, run, { once: true, passive: true })
+    document.addEventListener(evt, () => run(true), { once: true, passive: true })
   );
 }
 
@@ -2532,10 +2548,45 @@ function bindPageJarvis() {
   setTimeout(() => showPageJarvis(desc), 1000);
 }
 
+/* ══════════════════════════════════════════
+   ROBOT JARVIS — elimina fondo blanco via Canvas
+   (versión en nexus.js para evitar bloqueo de CSP
+    que impide scripts inline en el servidor Node)
+   ══════════════════════════════════════════ */
+function removeRobotWhiteBg() {
+  const img = document.getElementById('jarvis-hero-img');
+  if (!img) return;
+  function process() {
+    const W = img.naturalWidth, H = img.naturalHeight;
+    if (!W || !H) return;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    c.style.cssText = 'display:block;margin:0 auto;width:290px;height:330px;border-radius:0;box-shadow:none';
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const id = ctx.getImageData(0, 0, W, H), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i+1], b = d[i+2];
+      const mn = Math.min(r, g, b), mx = Math.max(r, g, b);
+      const sat = mx > 0 ? (mx - mn) / mx : 0;
+      if (mn > 248 && sat < 0.06) {
+        d[i+3] = 0;                                     /* fondo blanco puro → transparente */
+      } else if (mn > 228 && sat < 0.10) {
+        d[i+3] = 255 - Math.round((mn - 228) / 20 * 255); /* borde → desvanece */
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+    img.parentNode.replaceChild(c, img);
+  }
+  if (img.complete && img.naturalWidth > 0) process();
+  else img.addEventListener('load', process);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const lang = getLang();
   applyI18n(lang);
   bindLangToggle();
+  removeRobotWhiteBg();
   bindCinematicIntro();
   requireAuthGate();
   bindNav();
