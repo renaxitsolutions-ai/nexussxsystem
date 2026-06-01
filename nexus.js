@@ -2557,26 +2557,32 @@ function removeRobotWhiteBg() {
   const img = document.getElementById('jarvis-hero-img');
   if (!img) return;
   function process() {
-    const W = img.naturalWidth, H = img.naturalHeight;
-    if (!W || !H) return;
-    const c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    c.style.cssText = 'display:block;margin:0 auto;width:290px;height:330px;border-radius:0;box-shadow:none';
-    const ctx = c.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    const id = ctx.getImageData(0, 0, W, H), d = id.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const r = d[i], g = d[i+1], b = d[i+2];
-      const mn = Math.min(r, g, b), mx = Math.max(r, g, b);
-      const sat = mx > 0 ? (mx - mn) / mx : 0;
-      if (mn > 248 && sat < 0.06) {
-        d[i+3] = 0;                                     /* fondo blanco puro → transparente */
-      } else if (mn > 228 && sat < 0.10) {
-        d[i+3] = 255 - Math.round((mn - 228) / 20 * 255); /* borde → desvanece */
+    try {
+      const W = img.naturalWidth, H = img.naturalHeight;
+      if (!W || !H) return;
+      const c = document.createElement('canvas');
+      c.width = W; c.height = H;
+      c.style.cssText = 'display:block;margin:0 auto;width:290px;height:330px;border-radius:0;box-shadow:none';
+      const ctx = c.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      const id = ctx.getImageData(0, 0, W, H), d = id.data; /* puede lanzar SecurityError en file:// */
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        const mn = Math.min(r, g, b), mx = Math.max(r, g, b);
+        const sat = mx > 0 ? (mx - mn) / mx : 0;
+        if (mn > 248 && sat < 0.06) {
+          d[i+3] = 0;                                      /* fondo blanco puro → transparente */
+        } else if (mn > 228 && sat < 0.10) {
+          d[i+3] = 255 - Math.round((mn - 228) / 20 * 255); /* borde → desvanece */
+        }
       }
+      ctx.putImageData(id, 0, 0);
+      img.parentNode.replaceChild(c, img);
+    } catch(e) {
+      /* SecurityError (file://, CORP header, etc.) — ignorar silenciosamente.
+         La intro y el resto de la página deben funcionar igual. */
     }
-    ctx.putImageData(id, 0, 0);
-    img.parentNode.replaceChild(c, img);
   }
   if (img.complete && img.naturalWidth > 0) process();
   else img.addEventListener('load', process);
