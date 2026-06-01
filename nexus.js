@@ -2776,19 +2776,30 @@ function bindPageJarvis() {
   const desc = PAGE_DESCRIPTIONS[page];
   if (!desc) return;
 
-  // On index.html: wait for cinematic intro to finish before showing page description
+  // On index.html: wait for cinematic intro to be CREATED, then wait for it to be REMOVED
   if (page === 'index' || page === '' || page === '/') {
-    const check = setInterval(() => {
-      if (!document.getElementById('nxs-intro')) {
-        clearInterval(check);
-        setTimeout(() => showPageJarvis(desc), 900);
+    let introSeen = false;
+    // First: wait for the intro element to appear (created ~2350ms after load)
+    const waitForIntro = setInterval(() => {
+      if (document.getElementById('nxs-intro')) {
+        introSeen = true;
+        clearInterval(waitForIntro);
+        // Now wait for it to be removed (user skips or it finishes)
+        const waitForEnd = setInterval(() => {
+          if (!document.getElementById('nxs-intro')) {
+            clearInterval(waitForEnd);
+            setTimeout(() => showPageJarvis(desc), 900);
+          }
+        }, 200);
       }
-    }, 200);
-    // Fallback if intro never appeared
+    }, 100);
+    // Fallback: if intro never appeared after 3s, show banner anyway
     setTimeout(() => {
-      clearInterval(check);
-      if (!document.getElementById('nxs-page-jarvis')) showPageJarvis(desc);
-    }, 15000);
+      if (!introSeen) {
+        clearInterval(waitForIntro);
+        if (!document.getElementById('nxs-page-jarvis')) showPageJarvis(desc);
+      }
+    }, 3000);
     return;
   }
 
